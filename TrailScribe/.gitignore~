@@ -12,9 +12,6 @@
 bin/
 gen/
 
-# Tiles
-*.tif
-
 # Gradle files
 .gradle/
 build/
