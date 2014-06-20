@@ -25,6 +25,8 @@ import android.view.Window;
 import android.widget.Toast;
 import android.widget.ZoomControls;
 
+// Inspired by nutiteq demo: https://github.com/nutiteq/hellomap3d/blob/master/AdvancedMap3D/src/main/java/com/nutiteq/advancedmap/activity/RasterFileMapActivity.java
+
 public class MapsView extends Activity {
 	 private MapView mapView;
 
@@ -36,15 +38,15 @@ public class MapsView extends Activity {
 	        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 	        setContentView(R.layout.maps_view);
-
+	        
+	        // 1. Get the MapView from the Layout xml - mandatory
+	        mapView = (MapView) findViewById(R.id.mapView);
+	        
 	        // enable logging for troubleshooting - optional
 	        Log.enableAll();
 	        Log.setTag("gdal");
 
-	        // 1. Get the MapView from the Layout xml - mandatory
-	        mapView = (MapView) findViewById(R.id.mapView);
-
-	        // Optional, but very useful: restore map state during device rotation,
+	        // Restore map state during device rotation,
 	        // it is saved in onRetainNonConfigurationInstance() below
 	        Components retainObject = (Components) getLastNonConfigurationInstance();
 	        if (retainObject != null) {
@@ -54,15 +56,19 @@ public class MapsView extends Activity {
 	        } else {
 	            // 2. create and set MapView components - mandatory
 	            Components components = new Components();
+	            
 	            // set stereo view: works if you rotate to landscape and device has HTC 3D or LG Real3D
 	            mapView.setComponents(components);
 	        }
 
-	        String file = Environment.getExternalStorageDirectory().getPath() + "/trailscribe/samplemap1_wgs84_compressed.tif";
-	        
+	        loadMap();
+	    }
+
+		private void loadMap() {
+			String mapFilePath = Environment.getExternalStorageDirectory().getPath() + "/trailscribe/samplemap1_wgs84_compressed.tif";
 
 	        try {
-	            GdalMapLayer gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, 9, file, mapView, true);
+	            GdalMapLayer gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, 9, mapFilePath, mapView, true);
 	            gdalLayer.setShowAlways(true);
 	            mapView.getLayers().setBaseLayer(gdalLayer);
 	            //mapView.getLayers().addLayer(gdalLayer);
@@ -93,55 +99,74 @@ public class MapsView extends Activity {
 	            mapView.setTilt(90.0f);
 
 	            // Activate some mapview options to make it smoother - optional
-	            mapView.getOptions().setPreloading(false);
-	            mapView.getOptions().setSeamlessHorizontalPan(true);
-	            mapView.getOptions().setTileFading(false);
-	            mapView.getOptions().setKineticPanning(true);
-	            mapView.getOptions().setDoubleClickZoomIn(true);
-	            mapView.getOptions().setDualClickZoomOut(true);
+	            configureMapView();
 
-////	            // set sky bitmap - optional, default - white
-	            mapView.getOptions().setSkyDrawMode(Options.DRAW_BITMAP);
-	            mapView.getOptions().setSkyOffset(4.86f);
-	            mapView.getOptions().setSkyBitmap(
-	                    UnscaledBitmapLoader.decodeResource(getResources(),
-	                            R.drawable.sky_small));
-
+	            // set sky bitmap - optional, default - white
+	            setSkyBitMap();
+	            
 	            // Map background, visible if no map tiles loaded - optional, default - white
-	            mapView.getOptions().setBackgroundPlaneDrawMode(Options.DRAW_BITMAP);
-	            mapView.getOptions().setBackgroundPlaneBitmap(
-	                    UnscaledBitmapLoader.decodeResource(getResources(),
-	                            R.drawable.background_plane));
-	            mapView.getOptions().setClearColor(Color.WHITE);
+	            setMapBackground();
 
 	            // configure texture caching - optional, suggested
-	            mapView.getOptions().setTextureMemoryCacheSize(20 * 1024 * 1024);
-	            mapView.getOptions().setCompressedMemoryCacheSize(8 * 1024 * 1024);
+	            configureTextureCaching();
 
-	            // define online map persistent caching - optional, suggested. Default - no caching
-	            // mapView.getOptions().setPersistentCachePath(this.getDatabasePath("mapcache").getPath());
 	            // set persistent raster cache limit to 100MB
 	            mapView.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
 
 	            // 4. zoom buttons using Android widgets - optional
-	            // get the zoomcontrols that was defined in main.xml
-	            ZoomControls zoomControls = (ZoomControls) findViewById(R.id.zoomcontrols);
-	            // set zoomcontrols listeners to enable zooming
-	            zoomControls.setOnZoomInClickListener(new View.OnClickListener() {
-	                public void onClick(final View v) {
-	                    mapView.zoomIn();
-	                }
-	            });
-	            zoomControls.setOnZoomOutClickListener(new View.OnClickListener() {
-	                public void onClick(final View v) {
-	                    mapView.zoomOut();
-	                }
-	            });
+	            setZoomControls();
 
 	        } catch (IOException e) {
 	            Toast.makeText(this, "ERROR "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 	        }
-	    }
+		}
+
+		private void configureMapView() {
+			mapView.getOptions().setPreloading(false);
+			mapView.getOptions().setSeamlessHorizontalPan(true);
+			mapView.getOptions().setTileFading(false);
+			mapView.getOptions().setKineticPanning(true);
+			mapView.getOptions().setDoubleClickZoomIn(true);
+			mapView.getOptions().setDualClickZoomOut(true);
+		}
+
+		private void setZoomControls() {
+			// get the zoomcontrols that was defined in main.xml
+            ZoomControls zoomControls = (ZoomControls) findViewById(R.id.zoomcontrols);
+            // set zoomcontrols listeners to enable zooming
+            zoomControls.setOnZoomInClickListener(new View.OnClickListener() {
+                public void onClick(final View v) {
+                    mapView.zoomIn();
+                }
+            });
+            zoomControls.setOnZoomOutClickListener(new View.OnClickListener() {
+                public void onClick(final View v) {
+                    mapView.zoomOut();
+                }
+            });
+			
+		}
+
+		private void configureTextureCaching() {
+			mapView.getOptions().setTextureMemoryCacheSize(20 * 1024 * 1024);
+			mapView.getOptions().setCompressedMemoryCacheSize(8 * 1024 * 1024);
+		}
+
+		private void setMapBackground() {
+			mapView.getOptions().setBackgroundPlaneDrawMode(Options.DRAW_BITMAP);
+			mapView.getOptions().setBackgroundPlaneBitmap(
+			        UnscaledBitmapLoader.decodeResource(getResources(),
+			                R.drawable.background_plane));
+			mapView.getOptions().setClearColor(Color.WHITE);
+		}
+
+		private void setSkyBitMap() {
+			mapView.getOptions().setSkyDrawMode(Options.DRAW_BITMAP);
+			mapView.getOptions().setSkyOffset(4.86f);
+			mapView.getOptions().setSkyBitmap(
+			        UnscaledBitmapLoader.decodeResource(getResources(),
+			                R.drawable.sky_small));
+		}
 	    
 	    @Override
 	    protected void onStart() {
