@@ -46,39 +46,19 @@ public class MapsActivity extends Activity {
 	        // TODO: Set it at application level
 	        Log.enableAll();
 	        Log.setTag("gdal");
-
+	        
+	        //Create controller
+	        mController = new MapsController();
 	        loadMap();
 	    }
 
 		private void loadMap() {
 			restoreMapState();
 			
-			String mapFilePath = Environment.getExternalStorageDirectory().getPath() + "/trailscribe/samplemap1_wgs84_compressed.tif";
-
 	        try {
-	            GdalMapLayer gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, 9, mapFilePath, mapView, true);
-	            gdalLayer.setShowAlways(true);
-	            mapView.getLayers().setBaseLayer(gdalLayer);
-	            Map<Envelope, GdalDatasetInfo> dataSets = gdalLayer.getDatasets();
-	            if(!dataSets.isEmpty()){
-	                GdalDatasetInfo firstDataSet = (GdalDatasetInfo) dataSets.values().toArray()[0];
-
-	                MapPos centerPoint = new MapPos((firstDataSet.envelope.maxX+firstDataSet.envelope.minX)/2,
-	                        (firstDataSet.envelope.maxY+firstDataSet.envelope.minY)/2);
-
-
-	                Log.debug("found extent "+firstDataSet.envelope+", zoom "+firstDataSet.bestZoom+", centerPoint "+centerPoint);
-
-	                mapView.setFocusPoint(centerPoint);
-	                mapView.setZoom((float) firstDataSet.bestZoom);
-	            }else{
-	                Log.debug("no dataset info");
-	                Toast.makeText(this, "No dataset info", Toast.LENGTH_LONG).show();
-
-	                mapView.setFocusPoint(new MapPos(0,0));
-	                mapView.setZoom(1.0f);
-
-	            }
+	        	GdalMapLayer mapLayer = mController.getMap(mapView);
+	            mapView.getLayers().setBaseLayer(mapLayer);
+	            setMapDataSets(mapLayer);
 
 	            // Activate some mapview options to make it smoother - optional
 	            configureMapView();
@@ -98,10 +78,32 @@ public class MapsActivity extends Activity {
 	            // 4. zoom buttons using Android widgets - optional
 	            setZoomControls();
 	            
-
 	        } catch (IOException e) {
 	            Toast.makeText(this, "ERROR "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 	        }
+		}
+
+		private void setMapDataSets(GdalMapLayer mapLayer) {
+			Map<Envelope, GdalDatasetInfo> dataSets = mapLayer.getDatasets();
+			if(!dataSets.isEmpty()){
+			    GdalDatasetInfo firstDataSet = (GdalDatasetInfo) dataSets.values().toArray()[0];
+
+			    MapPos centerPoint = new MapPos((firstDataSet.envelope.maxX+firstDataSet.envelope.minX)/2,
+			            (firstDataSet.envelope.maxY+firstDataSet.envelope.minY)/2);
+
+
+			    Log.debug("found extent "+firstDataSet.envelope+", zoom "+firstDataSet.bestZoom+", centerPoint "+centerPoint);
+
+			    mapView.setFocusPoint(centerPoint);
+			    mapView.setZoom((float) firstDataSet.bestZoom);
+			}else{
+			    Log.debug("no dataset info");
+			    Toast.makeText(this, "No dataset info", Toast.LENGTH_LONG).show();
+
+			    mapView.setFocusPoint(new MapPos(0,0));
+			    mapView.setZoom(1.0f);
+
+			}
 		}
 		
 		private void restoreMapState() {
