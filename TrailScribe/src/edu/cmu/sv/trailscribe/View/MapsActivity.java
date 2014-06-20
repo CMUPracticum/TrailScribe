@@ -28,7 +28,7 @@ import android.widget.ZoomControls;
 
 // Inspired by nutiteq demo: https://github.com/nutiteq/hellomap3d/blob/master/AdvancedMap3D/src/main/java/com/nutiteq/advancedmap/activity/RasterFileMapActivity.java
 
-public class MapsView extends Activity {
+public class MapsActivity extends Activity {
 	 private MapView mapView;
 	 private MapsController mController;
 

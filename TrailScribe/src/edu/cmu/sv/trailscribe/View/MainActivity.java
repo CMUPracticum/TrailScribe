@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.Button;
 
 
-public class MainView extends Activity {
+public class MainActivity extends Activity {
 	private Button mStartButton;
 	
 	@Override
@@ -18,7 +18,7 @@ public class MainView extends Activity {
 	}
 	
 	public void openMap(View view) {
-		Intent intent = new Intent(this, MapsView.class);
+		Intent intent = new Intent(this, MapsActivity.class);
 		startActivity(intent);
 	}
 }
