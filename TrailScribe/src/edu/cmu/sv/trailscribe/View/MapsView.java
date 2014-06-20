@@ -9,14 +9,21 @@ import com.nutiteq.components.Components;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
+import com.nutiteq.geometry.Marker;
 import com.nutiteq.layers.raster.GdalDatasetInfo;
 import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.log.Log;
 import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.style.MarkerStyle;
+import com.nutiteq.ui.DefaultLabel;
+import com.nutiteq.ui.Label;
 import com.nutiteq.utils.UnscaledBitmapLoader;
+import com.nutiteq.vectorlayers.MarkerLayer;
 
 import edu.cmu.sv.trailscribe.R;
+import edu.cmu.sv.trailscribe.Controller.MapsController;
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,6 +36,7 @@ import android.widget.ZoomControls;
 
 public class MapsView extends Activity {
 	 private MapView mapView;
+	 private MapsController mController;
 
 	    @Override
 	    public void onCreate(Bundle savedInstanceState) {
@@ -38,8 +46,6 @@ public class MapsView extends Activity {
 	        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 	        setContentView(R.layout.maps_view);
-	        
-	        // 1. Get the MapView from the Layout xml - mandatory
 	        mapView = (MapView) findViewById(R.id.mapView);
 	        
 	        // enable logging for troubleshooting - optional
@@ -71,7 +77,6 @@ public class MapsView extends Activity {
 	            GdalMapLayer gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, 9, mapFilePath, mapView, true);
 	            gdalLayer.setShowAlways(true);
 	            mapView.getLayers().setBaseLayer(gdalLayer);
-	            //mapView.getLayers().addLayer(gdalLayer);
 	            Map<Envelope, GdalDatasetInfo> dataSets = gdalLayer.getDatasets();
 	            if(!dataSets.isEmpty()){
 	                GdalDatasetInfo firstDataSet = (GdalDatasetInfo) dataSets.values().toArray()[0];
@@ -115,12 +120,33 @@ public class MapsView extends Activity {
 
 	            // 4. zoom buttons using Android widgets - optional
 	            setZoomControls();
+	            
+		        addClickableMarker(gdalLayer);
+
 
 	        } catch (IOException e) {
 	            Toast.makeText(this, "ERROR "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 	        }
 		}
+		
+		private void addClickableMarker(GdalMapLayer gdalLayer) {
+			
+            // define marker style (image, size, color)
+            Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(getResources(), R.drawable.olmarker);
+            MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker).setSize(0.5f).setColor(Color.WHITE).build();
+            // define label what is shown when you click on marker
+            Label markerLabel = new DefaultLabel("San Francisco", "Here is a marker");
 
+            // define location of the marker, it must be converted to base map coordinate system
+            MapPos markerLocation = gdalLayer.getProjection().fromWgs84(-122.06816f, 37.40686f);
+
+            // create layer and add object to the layer, finally add layer to the map. 
+            // All overlay layers must be same projection as base layer, so we reuse it
+            MarkerLayer markerLayer = new MarkerLayer(gdalLayer.getProjection());
+            markerLayer.add(new Marker(markerLocation, markerLabel, markerStyle, markerLayer));
+            mapView.getLayers().addLayer(markerLayer);
+			
+		}
 		private void configureMapView() {
 			mapView.getOptions().setPreloading(false);
 			mapView.getOptions().setSeamlessHorizontalPan(true);
