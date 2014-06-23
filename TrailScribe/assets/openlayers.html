@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>TrailScribe OpenLayers Demo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="./assets/css/style.mobile.css" type="text/css">
+
+  <!-- OpenLayers Javascript -->
+  <script src="./assets/js/OpenLayers.js"></script>
+  
+  <!-- OpenLayers Mobile Javascript -->
+  <!--<script src="./assets/js/OpenLayers.mobile.js"></script>-->
+
+  <!-- Isil: Map initiation for mobile device with TMS overlay -->
+  <script src="mobile.js"></script>
+
+  <style>
+  html, body {
+      margin  : 0;
+      padding : 0;
+      height  : 100%;
+      width   : 100%;
+  }
+  @media only screen and (max-width: 600px) {
+      html, body {
+          height  : 117%;
+      }
+  }
+  #map {
+      width    : 100%;
+      position : relative;
+      height   : 100%;
+  }
+  .olControlAttribution {
+      position      : absolute;
+      font-size     : 10px;
+      bottom        : 0 !important;
+      right         : 0 !important;
+      background    : rgba(0,0,0,0.1);
+      font-family   : Arial;
+      padding       : 2px 4px;
+      border-radius : 5px 0 0 0;
+  }
+  #title, #tags, #shortdesc {
+      display: none;
+  }
+  </style>
+
+    </head>
+    <body style="height: 100%;">
+      <div id="title"><h1>TrailScribe OpenLayers Demo</h1></div>
+      </div>
+      <div id="map" class="olMap"></div>
+      <script>
+        init();
+      </script>
+    </body>
+</html>
