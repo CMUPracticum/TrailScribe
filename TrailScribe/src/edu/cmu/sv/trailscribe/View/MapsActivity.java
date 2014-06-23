@@ -25,6 +25,7 @@ public class MapsActivity extends Activity{
 		mWebView.setWebChromeClient(new WebChromeClient());
 		mWebView.getSettings().setUseWideViewPort(false);
 		mWebView.setWebViewClient(new WebViewClient());
+		mController = new MapsController();
 		mWebView.loadUrl(mController.getURL());
 	}
 }
