@@ -1,12 +1,24 @@
+//
+// Map and layers setup
+//
 
+// Map and map properties initialization
 var map;
 var mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
 var mapMinZoom = 11;
 var mapMaxZoom = 15;
-var emptyTileURL = "http://www.maptiler.org/img/none.png";
+var emptyTileURL = "./assets/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
-var tmsoverlay;
+// TMS Overlay init
+var tmsOverlay;
+
+// Vector Layer
+var vectorLayer;
+
+//
+// /End of map and layers setup
+//
 
 // Get rid of address bar on iphone/ipod
 var fixSize = function() {
@@ -35,36 +47,137 @@ function init() {
                 }),
                 new OpenLayers.Control.Zoom()
             ],
-            projection: "EPSG:900913",
-            displayProjection: new OpenLayers.Projection("EPSG:4326"),
-            numZoomLevels: 16,
-            borderRadius:1
+            projection: "EPSG:900913", // web mercator
+            displayProjection: new OpenLayers.Projection("EPSG:4326"), // spherical mercator
+            numZoomLevels: 16
         };
     
     // Create map
     map = new OpenLayers.Map(options);
 
     // Create TMS Overlay 
-    tmsoverlay = new OpenLayers.Layer.TMS("TMS Overlay", "",
+    tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "",
     {
         serviceVersion: '.',
         layername: 'tiles',
         alpha: true,
         type: 'png',
         isBaseLayer: true, 
-        borderRadius:1,
         getURL: getURL
     });
 
     // Add TMS overlay
-    map.addLayers([tmsoverlay]);
+    map.addLayers([tmsOverlay]);
+
+    // Add popup events to layer
+    tmsOverlay.events.on({
+        'featureselected': onFeatureSelect,
+        'featureunselected': onFeatureUnselect
+    });
+    selectControl = new OpenLayers.Control.SelectFeature(tmsOverlay);
 
     // Zoom to extent
     map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
-    map.zoomTo(13);
+    map.zoomTo(13);    
 
     // Show mouse position-coordinate relation
     map.addControls([new OpenLayers.Control.MousePosition()]);
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    // Geometry layer
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    // Allow testing of specific renderers via "?renderer=Canvas", etc
+    var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+    renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+
+    // Layer style
+    // We want opaque external graphics and non-opaque internal graphics
+    var layer_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+    layer_style.fillOpacity = 0.4;
+    layer_style.graphicOpacity = 1;
+    layer_style.strokeWidth = 1.5;
+
+    // Blue style
+    var style_blue = OpenLayers.Util.extend({}, layer_style);
+    style_blue.strokeColor = "blue";
+    style_blue.fillColor = "blue";
+
+    // Line style
+    var style_line = OpenLayers.Util.extend({}, layer_style);
+    style_line.strokeColor = "red";
+    style_line.strokeWidth = 2;
+
+    
+    // Mark style
+    var style_mark = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
+
+    // if graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
+    style_mark.graphicWidth = 21;
+    style_mark.graphicHeight = 25;
+    style_mark.graphicXOffset = -(style_mark.graphicWidth/2);
+    style_mark.graphicYOffset = -style_mark.graphicHeight;
+    style_mark.externalGraphic = "./assets/img/marker.png";
+    style_mark.fillOpacity = 1;
+    style_mark.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
+
+    // Initialize vector layer
+    vectorLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+                style: layer_style,
+                renderers: renderer
+            });
+
+    // Create point features
+    var point = new OpenLayers.Geometry.Point(-122.04451, 37.41800);    
+    point = point.transform(map.displayProjection, map.projection);    
+    var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark);
+    var point2 = new OpenLayers.Geometry.Point(-122.07451, 37.41800);
+    point2 = point2.transform(map.displayProjection, map.projection);
+    var pointFeature2 = new OpenLayers.Feature.Vector(point2, null);
+    var point3 = new OpenLayers.Geometry.Point(-122.10451, 37.39800);
+    point3 = point3.transform(map.displayProjection, map.projection);
+    var pointFeature3 = new OpenLayers.Feature.Vector(point3, null, style_blue);
+
+    // Create a line feature from a list of points
+    var tmpPoint = new OpenLayers.Geometry.Point(-122.05451, 37.40800);
+
+    pointList = [];
+    pointList.push(point);
+    pointList.push(point2);
+    pointList.push(point3);
+
+    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), null, style_line);
+
+    // Create a polygon feature from a linear ring of points
+    var pointList = [];
+    for(var p = 0; p < 6; ++p) {
+        var a = p * (2 * Math.PI) / 7;
+        var r = (Math.random(1) + 1) / 100;        
+        var newPoint = new OpenLayers.Geometry.Point(tmpPoint.x + (r * Math.cos(a)),
+                                                     tmpPoint.y + (r * Math.sin(a)));
+
+        pointList.push(newPoint.transform(map.displayProjection, map.projection));
+    }
+    pointList.push(pointList[0]);
+    var linearRing = new OpenLayers.Geometry.LinearRing(pointList);
+    var polygonFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Polygon([linearRing]));
+
+    // Add vector layer to map
+    map.addLayer(vectorLayer);
+    // Add features to vector layer
+    vectorLayer.addFeatures([pointFeature, pointFeature2, pointFeature3, lineFeature, polygonFeature]);
+
+    // Add vector layer interaction
+    // Register events
+    vectorLayer.events.register("featureselected", vectorLayer, selected);    
+    //vectorLayer.events.register("featureselected", vectorLayer, onFeatureSelect);
+    //vectorLayer.events.register("featureunselected", vectorLayer, onFeatureUnselect);
+    
+
+    var control = new OpenLayers.Control.SelectFeature(vectorLayer);
+    map.addControl(control);
+    control.activate();
+
 }
 
 function getURL(bounds) {
@@ -83,5 +196,36 @@ function getURL(bounds) {
         return url + path;
     } else {
         return emptyTileURL;
+    }
+}
+
+// Temporary. Delete this later.
+function selected (evt) {
+    alert(evt.feature.id + " selected on " + this.name);
+}
+
+function onPopupClose(evt) {
+    // 'this' is the popup.
+    selectControl.unselect(this.feature);
+}
+function onFeatureSelect(evt) {
+    feature = evt.feature;
+    popup = new OpenLayers.Popup.FramedCloud("featurePopup",
+                             feature.geometry.getBounds().getCenterLonLat(),
+                             new OpenLayers.Size(100,100),
+                             "<h2>"+feature.attributes.title + "</h2>" +
+                             feature.attributes.description,
+                             null, true, onPopupClose);
+    feature.popup = popup;
+    popup.feature = feature;
+    map.addPopup(popup);
+}
+function onFeatureUnselect(evt) {
+    feature = evt.feature;
+    if (feature.popup) {
+        popup.feature = null;
+        map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
     }
 }
