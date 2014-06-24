@@ -34,7 +34,6 @@ setTimeout(fixSize, 700);
 setTimeout(fixSize, 1500);
 
 function init() {
-
     var options = {
             div: "map",
             theme: null,
@@ -128,23 +127,20 @@ function init() {
             });
 
     // Create point features
-    var point = new OpenLayers.Geometry.Point(-122.04451, 37.41800);    
-    point = point.transform(map.displayProjection, map.projection);    
-    var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark);
-    var point2 = new OpenLayers.Geometry.Point(-122.07451, 37.41800);
-    point2 = point2.transform(map.displayProjection, map.projection);
-    var pointFeature2 = new OpenLayers.Feature.Vector(point2, null);
-    var point3 = new OpenLayers.Geometry.Point(-122.10451, 37.39800);
-    point3 = point3.transform(map.displayProjection, map.projection);
-    var pointFeature3 = new OpenLayers.Feature.Vector(point3, null, style_blue);
+    var points = android.getData(); 
+	points = JSON.parse(points);
+	var pointList = [];
+	var pointFeatures = [];
+	for(data in points['points']){
+		var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
+	    point = point.transform(map.displayProjection, map.projection);    
+	    var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark);
+	    pointFeatures.push(pointFeature);
+	    pointList.push(point);
+	}
 
     // Create a line feature from a list of points
     var tmpPoint = new OpenLayers.Geometry.Point(-122.05451, 37.40800);
-
-    pointList = [];
-    pointList.push(point);
-    pointList.push(point2);
-    pointList.push(point3);
 
     var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), null, style_line);
 
@@ -164,8 +160,11 @@ function init() {
 
     // Add vector layer to map
     map.addLayer(vectorLayer);
+    
     // Add features to vector layer
-    vectorLayer.addFeatures([pointFeature, pointFeature2, pointFeature3, lineFeature, polygonFeature]);
+    pointFeatures.push(lineFeature);
+    pointFeatures.push(polygonFeature);
+    vectorLayer.addFeatures(pointFeatures);
 
     // Add vector layer interaction
     // Register events
