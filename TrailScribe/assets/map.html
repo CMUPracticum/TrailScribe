@@ -6,13 +6,25 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="./assets/css/style.mobile.css" type="text/css">
+  <link rel="stylesheet" href="./lib/openlayers/theme/default/style.mobile.tidy.css" type="text/css">
+
+  <!-- CSS classes from the OpenLayers theme to support mobile popups -->
+  <link rel="stylesheet" href="./lib/openlayers/theme/default/popup-mobile.css" type="text/css">
+
+  <!--<link rel="stylesheet" href="./lib/openlayers/theme/default/style.tidy.css" type="text/css">-->
 
   <!-- OpenLayers Javascript -->
-  <script src="./assets/js/OpenLayers.js"></script>
+  <!--<script src="./lib/openlayers/OpenLayers.js"></script>-->
   
   <!-- OpenLayers Mobile Javascript -->
-  <!--<script src="./assets/js/OpenLayers.mobile.js"></script>-->
+  <script src="./lib/openlayers/OpenLayers.mobile.js"></script>
+
+  <!-- OpenLayers Extra library functinality to support TMS overlay and popups in mobile view -->
+  <script src="./lib/openlayers/lib/Layer/TMS.js"></script>
+  <script src="./lib/openlayers/lib/Popup/Popup.js"></script>
+  <script src="./lib/openlayers/lib/Popup/Anchored.js"></script>
+  <script src="./lib/openlayers/lib/Popup/Framed.js"></script>
+  <script src="./lib/openlayers/lib/Popup/FramedCloud.js"></script>
 
   <!-- Isil: Map initiation for mobile device with TMS overlay -->
   <script src="mobile.js"></script>
