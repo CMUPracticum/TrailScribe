@@ -1,7 +1,7 @@
 package edu.cmu.sv.trailscribe.Controller;
 
 public class MapsController {
-	private static final String URL = "file:///android_asset/openlayers.html";
+	private static final String URL = "file:///android_asset/map.html";
 
 	public String getURL() {
 		return URL;

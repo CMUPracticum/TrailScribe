@@ -7,7 +7,7 @@ var map;
 var mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
 var mapMinZoom = 11;
 var mapMaxZoom = 15;
-var emptyTileURL = "./assets/img/none.png";
+var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
 // TMS Overlay init
@@ -80,7 +80,7 @@ function init() {
     map.zoomTo(13);    
 
     // Show mouse position-coordinate relation
-    map.addControls([new OpenLayers.Control.MousePosition()]);
+    //map.addControls([new OpenLayers.Control.MousePosition()]);
 
     /////////////////////////////////////////////////////////////////////////////////////////
     // Geometry layer
@@ -116,7 +116,7 @@ function init() {
     style_mark.graphicHeight = 25;
     style_mark.graphicXOffset = -(style_mark.graphicWidth/2);
     style_mark.graphicYOffset = -style_mark.graphicHeight;
-    style_mark.externalGraphic = "./assets/img/marker.png";
+    style_mark.externalGraphic = "./lib/openlayers/img/marker.png";
     style_mark.fillOpacity = 1;
     style_mark.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
 
@@ -167,16 +167,13 @@ function init() {
     vectorLayer.addFeatures(pointFeatures);
 
     // Add vector layer interaction
-    // Register events
-    vectorLayer.events.register("featureselected", vectorLayer, selected);    
-    //vectorLayer.events.register("featureselected", vectorLayer, onFeatureSelect);
-    //vectorLayer.events.register("featureunselected", vectorLayer, onFeatureUnselect);
-    
+    // Register events    
+    vectorLayer.events.register("featureselected", vectorLayer, onFeatureSelect);
+    vectorLayer.events.register("featureunselected", vectorLayer, onFeatureUnselect);
 
     var control = new OpenLayers.Control.SelectFeature(vectorLayer);
     map.addControl(control);
     control.activate();
-
 }
 
 function getURL(bounds) {
@@ -198,23 +195,21 @@ function getURL(bounds) {
     }
 }
 
-// Temporary. Delete this later.
-function selected (evt) {
-    alert(evt.feature.id + " selected on " + this.name);
-}
-
 function onPopupClose(evt) {
     // 'this' is the popup.
     selectControl.unselect(this.feature);
 }
 function onFeatureSelect(evt) {
     feature = evt.feature;
-    popup = new OpenLayers.Popup.FramedCloud("featurePopup",
-                             feature.geometry.getBounds().getCenterLonLat(),
-                             new OpenLayers.Size(100,100),
-                             "<h2>"+feature.attributes.title + "</h2>" +
-                             feature.attributes.description,
-                             null, true, onPopupClose);
+
+    popup = new OpenLayers.Popup.FramedCloud("pop",
+          feature.geometry.getBounds().getCenterLonLat(),
+          null,
+          '<div class="markerContent">Example popup.</div>',
+          null,
+          true,
+          onPopupClose);
+
     feature.popup = popup;
     popup.feature = feature;
     map.addPopup(popup);
