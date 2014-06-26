@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+    
+    <include
+        android:id="@+id/mapsview_action_bar"
+        layout="@layout/component_action">
+    </include>
+    
+    <WebView 
+        tools:context="edu.cmu.sv.trailscribe.View.MapsActivity"
+    	android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10pt"
+        android:layout_marginBottom="10pt"
+        android:layout_below="@+id/mapsview_action_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:id="@+id/mapsview_webview" />
+    
+    <!-- floating buttons -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="128px"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:layout_alignLeft="@+id/mapsview_webview"
+        android:layout_alignRight="@+id/mapsview_webview"
+        android:background="@color/panel" >
+        <Button
+            android:layout_width="128px"
+            android:layout_height="128px"
+            android:text="another map layer"/>
+        <Button
+            android:layout_width="128px"
+            android:layout_height="128px"
+            android:text="another map layer"/>
+        <Button
+            android:layout_width="128px"
+            android:layout_height="128px"
+            android:text="another map layer"/>
+        <Button
+            android:layout_width="128px"
+            android:layout_height="128px"
+            android:text="routes"/>
+        <Button
+            android:layout_width="128px"
+            android:layout_height="128px"
+            android:text="pins"/>
+    </LinearLayout>
+</RelativeLayout>

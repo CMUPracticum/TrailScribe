@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main_view);
+		setContentView(R.layout.activity_main);
 	}
 	
 	public void openMap(View view) {

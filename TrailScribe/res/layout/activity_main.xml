@@ -1,0 +1,20 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:windowNoTitle="true" >
+
+    <include
+        android:id="@+id/mainview_action_bar"
+        layout="@layout/component_action" />
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mainview_action_bar"
+        android:text="@string/button_maps"
+        android:onClick="openMap"/>
+    
+</RelativeLayout>	
