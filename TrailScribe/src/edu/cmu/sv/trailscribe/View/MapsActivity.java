@@ -3,17 +3,15 @@ package edu.cmu.sv.trailscribe.View;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.cmu.sv.trailscribe.R;
-import edu.cmu.sv.trailscribe.Controller.MapsController;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.EditText;
+import edu.cmu.sv.trailscribe.R;
+import edu.cmu.sv.trailscribe.Controller.MapsController;
 
 
 public class MapsActivity extends Activity{
@@ -24,8 +22,8 @@ public class MapsActivity extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.maps_view);
-		mWebView = (WebView) findViewById(R.id.webview); 
+		setContentView(R.layout.activity_maps);
+		mWebView = (WebView) findViewById(R.id.mapsview_webview); 
 		mWebView.getSettings().setJavaScriptEnabled(true);
 		mWebView.addJavascriptInterface(this, "android");
 		mWebView.setWebChromeClient(new WebChromeClient());
