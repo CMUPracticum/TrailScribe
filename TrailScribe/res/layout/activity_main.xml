@@ -23,20 +23,16 @@
     
 	<GridView
 		android:id="@+id/main_buttongrid"
-		android:layout_width="fill_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/main_userstatus"
 		android:layout_alignParentLeft="true"
-        android:layout_marginTop="8px"
+        android:layout_marginTop="32px"
 		android:numColumns="2"
+		android:gravity="center_horizontal"
 		android:horizontalSpacing="32px"
 		android:verticalSpacing="32px"
 		android:background="@color/transparent" >
 	</GridView>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/button_maps"
-        android:onClick="openMap"/>
 </RelativeLayout>	
