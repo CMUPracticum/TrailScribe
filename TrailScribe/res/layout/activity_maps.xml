@@ -13,7 +13,7 @@
     </include>
     
     <WebView 
-        tools:context="edu.cmu.sv.trailscribe.View.MapsActivity"
+        tools:context="edu.cmu.sv.trailscribe.view.MapsActivity"
     	android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_marginTop="10px"

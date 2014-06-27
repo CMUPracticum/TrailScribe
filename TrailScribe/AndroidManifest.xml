@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="edu.cmu.sv.trailscribe.View.MainActivity"
+            android:name="edu.cmu.sv.trailscribe.view.MainActivity"
             android:screenOrientation="portrait"
             android:label="@string/app_name" >
             <intent-filter>
@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.cmu.sv.trailscribe.View.MapsActivity"
+            android:name="edu.cmu.sv.trailscribe.view.MapsActivity"
             android:screenOrientation="portrait">
         </activity>
     </application>

@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.View;
+package edu.cmu.sv.trailscribe.view;
 
 import java.util.ArrayList;
 import java.util.HashMap;

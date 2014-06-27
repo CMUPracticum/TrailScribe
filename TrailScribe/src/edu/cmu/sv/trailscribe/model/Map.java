@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.Model;
+package edu.cmu.sv.trailscribe.model;
 
 public class Map {
 	private int mId;

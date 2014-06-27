@@ -3,7 +3,7 @@ package edu.cmu.sv.trailscribe.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.cmu.sv.trailscribe.Model.Map;
+import edu.cmu.sv.trailscribe.model.Map;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

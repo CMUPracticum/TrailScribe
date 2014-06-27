@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.Model;
+package edu.cmu.sv.trailscribe.model;
 
 import java.io.BufferedReader;
 import java.io.IOException;

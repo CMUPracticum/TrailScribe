@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.View;
+package edu.cmu.sv.trailscribe.view;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +11,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import edu.cmu.sv.trailscribe.R;
-import edu.cmu.sv.trailscribe.Controller.MapsController;
+import edu.cmu.sv.trailscribe.controller.MapsController;
 
 
 public class MapsActivity extends Activity{
@@ -28,7 +28,7 @@ public class MapsActivity extends Activity{
 		mWebView.addJavascriptInterface(this, "android");
 		mWebView.setWebChromeClient(new WebChromeClient());
 		mWebView.getSettings().setUseWideViewPort(false);
-		mWebView.setWebViewClient(new WebViewClient());//{
+		mWebView.setWebViewClient(new WebViewClient());
 
 		mController = new MapsController();
 		mWebView.loadUrl(mController.getURL());

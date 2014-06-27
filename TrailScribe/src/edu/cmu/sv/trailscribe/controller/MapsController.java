@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.Controller;
+package edu.cmu.sv.trailscribe.controller;
 
 public class MapsController {
 	private static final String URL = "file:///android_asset/map.html";
