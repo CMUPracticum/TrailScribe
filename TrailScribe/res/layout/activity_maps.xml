@@ -36,22 +36,18 @@
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="another map layer"/>
+            android:text="Objective"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="another map layer"/>
+            android:text="Samples"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="another map layer"/>
+            android:text="Points of Interest"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="routes"/>
-        <Button
-            android:layout_width="192px"
-            android:layout_height="192px"
-            android:text="pins"/>
+            android:text="Routes"/>
     </LinearLayout>
 </RelativeLayout>
