@@ -58,9 +58,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-		
 		Log.d(MSG_TAG, "onItemClick: " + position + " is clicked");
-		Toast.makeText(getApplicationContext(), "onItemClick", Toast.LENGTH_SHORT).show();
 		
 		Intent intent;
 		switch (position) {
