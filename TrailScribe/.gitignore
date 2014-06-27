@@ -14,7 +14,7 @@ gen/
 
 # Tiles
 *.tif
-TrailScribe/assets/tiles/*
+assets/tiles/*
 
 # Local configuration file (sdk path, etc)
 local.properties
