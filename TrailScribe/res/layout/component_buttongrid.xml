@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="256px"
+    android:layout_height="256px"
+    android:background="@color/panel"
+    android:clickable="true" >
+       
+    <TextView
+        android:id="@+id/buttongrid_title"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:textSize="12pt"
+        android:textColor="@color/black"
+        android:background="@color/transparent"
+        android:text="@string/default_title" />
+
+    <TextView
+        android:id="@+id/buttongrid_text"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_above="@+id/buttongrid_bar"
+        android:layout_alignParentLeft="true"
+        android:textSize="10pt"
+        android:textColor="@color/black"
+        android:background="@color/transparent"
+        android:text="@string/default_description" />
+
+    <View
+        android:id="@+id/buttongrid_bar"
+		android:layout_width="fill_parent"
+		android:layout_height="16px"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+		android:background="@color/gray"/>
+</RelativeLayout>

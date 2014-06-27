@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="trailscribe_blue">#FF0000FF</color>
-    <color name="panel">#00000000</color>
+    <color name="panel">#AFFFFFFF</color>
     
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="gray">#FF666666</color>
+    
+    <color name="transparent">#00FFFFFF</color>
 </resources>

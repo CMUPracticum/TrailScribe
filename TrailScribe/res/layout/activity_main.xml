@@ -3,18 +3,40 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:windowNoTitle="true" >
 
     <include
-        android:id="@+id/mainview_action_bar"
-        layout="@layout/component_action" />
+        android:id="@+id/main_titlebar"
+        android:layout_width="match_parent"
+        android:layout_height="128px"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        layout="@layout/component_titlebar" />
     
+    <include
+        android:id="@+id/main_userstatus"
+        android:layout_width="match_parent"
+        android:layout_height="128px"
+        android:layout_below="@id/main_titlebar"
+        android:layout_alignParentLeft="true"
+        layout="@layout/component_userstatus" />
+    
+	<GridView
+		android:id="@+id/main_buttongrid"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/main_userstatus"
+		android:layout_alignParentLeft="true"
+        android:layout_marginTop="8px"
+		android:numColumns="2"
+		android:horizontalSpacing="32px"
+		android:verticalSpacing="32px"
+		android:background="@color/transparent" >
+	</GridView>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/mainview_action_bar"
         android:text="@string/button_maps"
         android:onClick="openMap"/>
-    
 </RelativeLayout>	

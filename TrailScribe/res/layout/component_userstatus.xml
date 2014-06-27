@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/component_userstatus"
+    android:layout_width="match_parent"
+    android:layout_height="128px"
+    android:background="@color/white" >
+    
+    <TextView
+        android:id="@+id/userstatus_text"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:textSize="10pt"
+        android:textColor="@color/black"
+        android:background="@color/transparent"
+        android:text="@string/default_description" />        
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_launcher"
+        android:contentDescription="icon of the user" />
+    
+</RelativeLayout>

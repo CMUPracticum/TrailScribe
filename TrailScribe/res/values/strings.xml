@@ -4,5 +4,7 @@
     <string name="app_name">TrailScribe</string>
     <string name="button_maps">Maps</string>
     <string name="action_settings">Settings</string>
+    <string name="default_title">Title</string>
+    <string name="default_description">Description</string>
 
 </resources>

@@ -8,17 +8,17 @@
     android:orientation="vertical">
     
     <include
-        android:id="@+id/mapsview_action_bar"
-        layout="@layout/component_action">
+        android:id="@+id/mapsview_titlebar"
+        layout="@layout/component_titlebar">
     </include>
     
     <WebView 
         tools:context="edu.cmu.sv.trailscribe.View.MapsActivity"
     	android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_marginTop="10pt"
-        android:layout_marginBottom="10pt"
-        android:layout_below="@+id/mapsview_action_bar"
+        android:layout_marginTop="10px"
+        android:layout_marginBottom="10px"
+        android:layout_below="@+id/mapsview_titlebar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:id="@+id/mapsview_webview" />
@@ -26,32 +26,32 @@
     <!-- floating buttons -->
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="128px"
+        android:layout_width="192px"
         android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true"
         android:gravity="center_vertical"
-        android:layout_alignLeft="@+id/mapsview_webview"
-        android:layout_alignRight="@+id/mapsview_webview"
+        android:layout_alignTop="@+id/mapsview_webview"
+        android:layout_alignBottom="@+id/mapsview_webview"
+        android:layout_alignParentLeft="true"
         android:background="@color/panel" >
         <Button
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="192px"
+            android:layout_height="192px"
             android:text="another map layer"/>
         <Button
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="192px"
+            android:layout_height="192px"
             android:text="another map layer"/>
         <Button
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="192px"
+            android:layout_height="192px"
             android:text="another map layer"/>
         <Button
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="192px"
+            android:layout_height="192px"
             android:text="routes"/>
         <Button
-            android:layout_width="128px"
-            android:layout_height="128px"
+            android:layout_width="192px"
+            android:layout_height="192px"
             android:text="pins"/>
     </LinearLayout>
 </RelativeLayout>
