@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -14,15 +15,34 @@ import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
 
 
-public class MapsActivity extends Activity{
+public class MapsActivity extends Activity {
+	public static final ActivityTheme ACTIVITY_THEME = 
+			new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
+	
 	private WebView mWebView;
 	private MapsController mController;
 
-	@SuppressLint({ "SetJavaScriptEnabled", "JavascriptInterface" })
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setView();
+	}
+	
+	private void setView() {
 		setContentView(R.layout.activity_maps);
+		
+		setTitleBar();
+		setMap();
+	}
+	
+//	FIXME: Bad design, the code should be reusable
+	private void setTitleBar() {
+		View titleBar = (View) findViewById(R.id.mapsview_titlebar);
+		titleBar.setBackgroundColor(getResources().getColor(ACTIVITY_THEME.getActivityColor()));
+	}
+	
+	@SuppressLint("SetJavaScriptEnabled")
+	private void setMap() {
 		mWebView = (WebView) findViewById(R.id.mapsview_webview); 
 		mWebView.getSettings().setJavaScriptEnabled(true);
 		mWebView.addJavascriptInterface(this, "android");

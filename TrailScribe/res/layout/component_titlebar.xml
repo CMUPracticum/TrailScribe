@@ -3,7 +3,7 @@
     android:id="@+id/component_action_bar"
     android:layout_width="match_parent"
     android:layout_height="128px"
-    android:background="@color/trailscribe_blue" >
+    android:background="@color/transparent" >
     
 	<ImageView
         android:id="@+id/actionbar_logo"
