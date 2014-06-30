@@ -6,5 +6,8 @@
     <string name="action_settings">Settings</string>
     <string name="default_title">Title</string>
     <string name="default_description">Description</string>
+    
+    <string name="map_display_points_of_interest">Show Points of Interest</string>
+    <string name="map_hide_points_of_interest">Hide Points of Interest</string>
 
 </resources>

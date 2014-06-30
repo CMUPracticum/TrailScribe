@@ -34,6 +34,11 @@
         android:layout_alignParentLeft="true"
         android:background="@color/panel" >
         <Button
+            android:id="@+id/mapsview_points_of_interest"
+            android:layout_width="192px"
+            android:layout_height="192px"
+            android:text="@string/map_display_points_of_interest"/>
+        <Button
             android:layout_width="192px"
             android:layout_height="192px"
             android:text="Objective"/>
@@ -41,10 +46,6 @@
             android:layout_width="192px"
             android:layout_height="192px"
             android:text="Samples"/>
-        <Button
-            android:layout_width="192px"
-            android:layout_height="192px"
-            android:text="Points of Interest"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
