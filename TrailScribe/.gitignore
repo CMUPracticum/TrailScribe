@@ -31,3 +31,8 @@ proguard/
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Emacs dev environment files
+prj.el
+build.xml
+proguard-project.txt
