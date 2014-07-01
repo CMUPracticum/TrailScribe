@@ -13,8 +13,17 @@ OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 // TMS Overlay init
 var tmsOverlay;
 
-// Vector Layer
-var vectorLayer;
+// Map Layers
+var pointLayer;
+
+// Render
+var renderer;
+
+// Styles
+var layer_style;
+var style_blue;
+var style_line;
+var style_mark;
 
 //
 // /End of map and layers setup
@@ -87,29 +96,29 @@ function init() {
     /////////////////////////////////////////////////////////////////////////////////////////
 
     // Allow testing of specific renderers via "?renderer=Canvas", etc
-    var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+    renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
     renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
 
     // Layer style
     // We want opaque external graphics and non-opaque internal graphics
-    var layer_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+    layer_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
     layer_style.fillOpacity = 0.4;
     layer_style.graphicOpacity = 1;
     layer_style.strokeWidth = 1.5;
 
     // Blue style
-    var style_blue = OpenLayers.Util.extend({}, layer_style);
+    style_blue = OpenLayers.Util.extend({}, layer_style);
     style_blue.strokeColor = "blue";
     style_blue.fillColor = "blue";
 
     // Line style
-    var style_line = OpenLayers.Util.extend({}, layer_style);
+    style_line = OpenLayers.Util.extend({}, layer_style);
     style_line.strokeColor = "red";
     style_line.strokeWidth = 2;
 
     
     // Mark style
-    var style_mark = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
+    style_mark = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
 
     // if graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
     style_mark.graphicWidth = 21;
@@ -120,6 +129,8 @@ function init() {
     style_mark.fillOpacity = 1;
     style_mark.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
 
+/**
+    // Displaying points, lines, and polygons
     // Initialize vector layer
     vectorLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
                 style: layer_style,
@@ -174,6 +185,7 @@ function init() {
     var control = new OpenLayers.Control.SelectFeature(vectorLayer);
     map.addControl(control);
     control.activate();
+**/
 }
 
 function getURL(bounds) {
@@ -221,5 +233,49 @@ function onFeatureUnselect(evt) {
         map.removePopup(feature.popup);
         feature.popup.destroy();
         feature.popup = null;
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+// Functions to communicate with Java
+/////////////////////////////////////////////////////////////////////////////////////////
+function displayPointsOfInterest(msg) {
+    if (msg == "display") {
+        // Initialize vector layer
+        pointLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+                    style: layer_style,
+                    renderers: renderer
+                });
+
+        // Create point features
+        var points = android.getData(); 
+	    points = JSON.parse(points);
+	    var pointList = [];
+	    var pointFeatures = [];
+	    for(data in points['points']){
+		    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
+	        point = point.transform(map.displayProjection, map.projection);    
+	        var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark);
+	        pointFeatures.push(pointFeature);
+	        pointList.push(point);
+	    }
+
+        // Add vector layer to map
+        map.addLayer(pointLayer);
+        
+        // Add features to vector layer
+        pointLayer.addFeatures(pointFeatures);
+
+        // Add vector layer interaction
+        // Register events    
+        pointLayer.events.register("featureselected", pointLayer, onFeatureSelect);
+        pointLayer.events.register("featureunselected", pointLayer, onFeatureUnselect);
+
+        var control = new OpenLayers.Control.SelectFeature(pointLayer);
+        map.addControl(control);
+        control.activate();
+    } else if (msg == "hide") {
+        pointLayer.setVisibility(false);
+    } else {
+        return;
     }
 }

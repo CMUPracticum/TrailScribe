@@ -21,9 +21,9 @@ import edu.cmu.sv.trailscribe.R;
 
 
 public class MainActivity extends Activity implements OnItemClickListener {
-	private static final String MSG_TAG = "MainActivity";
 	public static final ActivityTheme ACTIVITY_THEME = 
 			new ActivityTheme("MainActivity", "Main page", R.color.blue);
+	private static final String MSG_TAG = "MainActivity";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
