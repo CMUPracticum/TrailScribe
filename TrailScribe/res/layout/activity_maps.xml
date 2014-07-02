@@ -34,21 +34,22 @@
         android:layout_alignParentLeft="true"
         android:background="@color/panel" >
         <Button
-            android:id="@+id/mapsview_points_of_interest"
+            android:id="@+id/mapsview_samples"
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="@string/map_display_points_of_interest"/>
+            android:text="@string/map_display_samples"/>
+        <Button
+            android:id="@+id/mapsview_current_location"
+            android:layout_width="192px"
+            android:layout_height="192px"
+            android:text="@string/map_display_current_location"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="Objective"/>
+            android:text="Position History"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="Samples"/>
-        <Button
-            android:layout_width="192px"
-            android:layout_height="192px"
-            android:text="Routes"/>
+            android:text="KML"/>
     </LinearLayout>
 </RelativeLayout>
