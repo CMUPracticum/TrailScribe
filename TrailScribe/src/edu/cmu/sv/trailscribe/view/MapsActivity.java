@@ -49,6 +49,7 @@ public class MapsActivity extends Activity implements
 	private WebView mWebView;
 	private Button mSamplesButton;
 	private Button mCurrentLocationButton;
+	private Button mPositionHistoryButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,9 +89,11 @@ public class MapsActivity extends Activity implements
 	private void setListener() {
 		mSamplesButton = (Button) findViewById(R.id.mapsview_samples);
 		mCurrentLocationButton = (Button) findViewById(R.id.mapsview_current_location);
+		mPositionHistoryButton = (Button) findViewById(R.id.mapsview_position_history);
 		
 		mSamplesButton.setOnClickListener(this);
 		mCurrentLocationButton.setOnClickListener(this);
+		mPositionHistoryButton.setOnClickListener(this);
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
@@ -151,6 +154,23 @@ public class MapsActivity extends Activity implements
 		return mapPoints.toString();
 	}
 	
+	@JavascriptInterface
+	public String getPositionHistory() {
+	// TODO: Import actual position history
+		JSONObject mapPoints = null;
+		try {
+			// TODO: Change the points
+			mapPoints = new JSONObject("{'points':[{'x':'-122.049841', 'y':'37.402865'},"
+					+ "{'x':'-122.051258', 'y':'37.406001'}, "
+					+ "{'x':'-122.053918', 'y':'37.411183'},"
+					+ "{'x':'-122.053768', 'y':'37.413296'},"
+					+ "{'x':'-122.053883', 'y':'37.416132'}]}'");
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return mapPoints.toString();
+	}
+	
 	@Override
 	public void onClick(View v) {
 		String state;
@@ -190,7 +210,21 @@ public class MapsActivity extends Activity implements
 				message = MessageToWebview.HideCurrentLocation;
 			}
 			break;
-			default:
+		case R.id.mapsview_position_history:
+			state = mPositionHistoryButton.getText().toString();
+			willDisplay = (state.equals(getResources().getString(R.string.map_display_position_history)));
+			
+			Toast.makeText(getApplicationContext(), 
+					"Position history is hard-coded currently", Toast.LENGTH_SHORT).show();
+			if (willDisplay) {
+				mPositionHistoryButton.setText(R.string.map_hide_position_history);
+				message = MessageToWebview.DisplayPositionHistory;				
+			} else {
+				mPositionHistoryButton.setText(R.string.map_display_position_history);
+				message = MessageToWebview.HidePositionHistory;
+			}
+			break;
+		default:
 				Toast.makeText(getApplicationContext(), 
 						"Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
 				return;
@@ -251,7 +285,9 @@ public class MapsActivity extends Activity implements
 		DisplaySamples("DisplaySamples"),
 		HideSamples("HideSamples"),
 		DisplayCurrentLocation("DisplayCurrentLocation"),
-		HideCurrentLocation("HideCurrentLocation");
+		HideCurrentLocation("HideCurrentLocation"),
+		DisplayPositionHistory("DisplayPositionHistory"),
+		HidePositionHistory("HidePositionHistory");
 		
 		private final String message;
 		MessageToWebview(String message) {

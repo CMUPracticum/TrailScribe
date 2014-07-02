@@ -44,9 +44,10 @@
             android:layout_height="192px"
             android:text="@string/map_display_current_location"/>
         <Button
+            android:id="@+id/mapsview_position_history"
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="Position History"/>
+            android:text="@string/map_display_position_history"/>
         <Button
             android:layout_width="192px"
             android:layout_height="192px"
