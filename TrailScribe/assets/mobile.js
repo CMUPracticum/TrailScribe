@@ -14,7 +14,8 @@ OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 var tmsOverlay;
 
 // Map Layers
-var pointLayer;
+var sampleLayer;
+var currentLocationLayer;
 
 // Render
 var renderer;
@@ -23,7 +24,8 @@ var renderer;
 var layer_style;
 var style_blue;
 var style_line;
-var style_mark;
+var style_mark_blue;
+var style_mark_green;
 
 //
 // /End of map and layers setup
@@ -118,16 +120,25 @@ function init() {
 
     
     // Mark style
-    style_mark = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
+    style_mark_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
+    style_mark_green = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);   
 
     // if graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
-    style_mark.graphicWidth = 21;
-    style_mark.graphicHeight = 25;
-    style_mark.graphicXOffset = -(style_mark.graphicWidth/2);
-    style_mark.graphicYOffset = -style_mark.graphicHeight;
-    style_mark.externalGraphic = "./lib/openlayers/img/marker.png";
-    style_mark.fillOpacity = 1;
-    style_mark.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
+    style_mark_blue.graphicWidth = 21;
+    style_mark_blue.graphicHeight = 25;
+    style_mark_blue.graphicXOffset = -(style_mark_blue.graphicWidth/2);
+    style_mark_blue.graphicYOffset = -style_mark_blue.graphicHeight;
+    style_mark_blue.externalGraphic = "./lib/openlayers/img/marker.png";
+    style_mark_blue.fillOpacity = 1;
+    style_mark_blue.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
+
+    style_mark_green.graphicWidth = 21;
+    style_mark_green.graphicHeight = 25;
+    style_mark_green.graphicXOffset = -(style_mark_blue.graphicWidth/2);
+    style_mark_green.graphicYOffset = -style_mark_blue.graphicHeight;
+    style_mark_green.externalGraphic = "./lib/openlayers/img/marker-green.png";
+    style_mark_green.fillOpacity = 1;
+    style_mark_green.title = "this is a test tooltip";
 
 /**
     // Displaying points, lines, and polygons
@@ -145,7 +156,7 @@ function init() {
 	for(data in points['points']){
 		var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
 	    point = point.transform(map.displayProjection, map.projection);    
-	    var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark);
+	    var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark_blue);
 	    pointFeatures.push(pointFeature);
 	    pointList.push(point);
 	}
@@ -235,47 +246,87 @@ function onFeatureUnselect(evt) {
         feature.popup = null;
     }
 }
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Functions to communicate with Java
 /////////////////////////////////////////////////////////////////////////////////////////
-function displayPointsOfInterest(msg) {
-    if (msg == "display") {
-        // Initialize vector layer
-        pointLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
-                    style: layer_style,
-                    renderers: renderer
-                });
+function setLayers(msg) {
+    switch (msg) {
+        case "DisplaySamples":
+            sampleLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+                style: layer_style,
+                renderers: renderer
+            });
 
-        // Create point features
-        var points = android.getData(); 
-	    points = JSON.parse(points);
-	    var pointList = [];
-	    var pointFeatures = [];
-	    for(data in points['points']){
-		    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
-	        point = point.transform(map.displayProjection, map.projection);    
-	        var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark);
-	        pointFeatures.push(pointFeature);
-	        pointList.push(point);
-	    }
+            var pointFeatures = getPointsFromJava(msg);
+            displayPoints(pointFeatures, sampleLayer);
+            break;
 
-        // Add vector layer to map
-        map.addLayer(pointLayer);
-        
-        // Add features to vector layer
-        pointLayer.addFeatures(pointFeatures);
+        case "HideSamples":
+            hideLayer(sampleLayer);
+            break;
 
-        // Add vector layer interaction
-        // Register events    
-        pointLayer.events.register("featureselected", pointLayer, onFeatureSelect);
-        pointLayer.events.register("featureunselected", pointLayer, onFeatureUnselect);
+        case "DisplayCurrentLocation":
+            currentLocationLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+                style: layer_style,
+                renderers: renderer
+            });
 
-        var control = new OpenLayers.Control.SelectFeature(pointLayer);
-        map.addControl(control);
-        control.activate();
-    } else if (msg == "hide") {
-        pointLayer.setVisibility(false);
-    } else {
-        return;
+            var pointFeatures = getPointsFromJava(msg);
+            displayPoints(pointFeatures, currentLocationLayer);
+            break;
+
+        case "HideCurrentLocation":
+            hideLayer(currentLocationLayer);
+            break;
+        default:
+            break;
     }
+}
+
+function hideLayer(layer) {
+    layer.setVisibility(false);
+}
+
+function displayPoints(pointFeatures, layer) {
+    map.addLayer(layer);
+    layer.addFeatures(pointFeatures);
+
+    layer.events.register("featureselected", layer, onFeatureSelect);
+    layer.events.register("featureunselected", layer, onFeatureUnselect);
+
+    var control = new OpenLayers.Control.SelectFeature(layer);
+    map.addControl(control);
+    control.activate();
+}
+
+function getPointsFromJava(msg) {
+    var points;
+    var mark_style;
+
+    switch (msg) {
+        case "DisplaySamples":
+            points = android.getSamples();
+            mark_style = style_mark_blue;
+            break;
+        case "DisplayCurrentLocation":
+            points = android.getCurrentLocation();
+            mark_style = style_mark_green;
+            break;
+        default:
+            return;
+    }
+
+    points = JSON.parse(points);
+    var pointList = [];
+    var pointFeatures = [];
+    for(data in points['points']){
+	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
+        point = point.transform(map.displayProjection, map.projection);    
+        var pointFeature = new OpenLayers.Feature.Vector(point, null, mark_style);
+        pointFeatures.push(pointFeature);
+        pointList.push(point);
+    }
+
+    return pointFeatures;
 }
