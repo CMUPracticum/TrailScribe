@@ -54,7 +54,8 @@ public class BackendFacade extends AsyncTask <String, Void, String>{
 			   return new String();
 			}
 		}
-		return new String(stringBuffer.toString());
+		String response = stringBuffer.toString();
+		return response;
 	}
 	
 	@Override
