@@ -1,21 +1,26 @@
-package edu.cmu.sv.trailscribe.controller;
-
-import android.content.Context;
-import android.util.Log;
+package edu.cmu.sv.trailscribe.view;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
-public class LocationManager {
-	private static final String MSG_TAG = "LocationManager";
+import android.app.Application;
+import android.content.Context;
+import android.util.Log;
+
+public class TrailScribeApplication extends Application {
+	private static final String MSG_TAG = "TrailScribeApplication";
 	
 	private Context mContext;
-	
-	public LocationManager(Context context) {
-		this.mContext = context;
+
+	public TrailScribeApplication() {
 	}
 	
-//	FIXME: Check only when the application is started
+	@Override
+	public void onCreate() {
+		this.mContext = getApplicationContext();
+		isPlayServicesAvailable();
+	}
+	
 	public boolean isPlayServicesAvailable() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
         
@@ -27,5 +32,5 @@ public class LocationManager {
         Log.e(MSG_TAG, GooglePlayServicesUtil.getErrorString(resultCode));
         return false;
 	}
-
+	
 }

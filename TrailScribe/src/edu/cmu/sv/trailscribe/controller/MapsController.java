@@ -6,5 +6,4 @@ public class MapsController {
 	public String getURL() {
 		return URL;
 	}
-
 }

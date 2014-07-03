@@ -16,6 +16,7 @@ var tmsOverlay;
 // Map Layers
 var sampleLayer;
 var currentLocationLayer;
+var positionHistoryLayer;
 
 // Render
 var renderer;
@@ -26,6 +27,7 @@ var style_blue;
 var style_line;
 var style_mark_blue;
 var style_mark_green;
+var style_mark_gold;
 
 //
 // /End of map and layers setup
@@ -121,7 +123,8 @@ function init() {
     
     // Mark style
     style_mark_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
-    style_mark_green = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);   
+    style_mark_green = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
+    style_mark_gold = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']); 
 
     // if graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
     style_mark_blue.graphicWidth = 21;
@@ -139,6 +142,14 @@ function init() {
     style_mark_green.externalGraphic = "./lib/openlayers/img/marker-green.png";
     style_mark_green.fillOpacity = 1;
     style_mark_green.title = "this is a test tooltip";
+    
+    style_mark_gold.graphicWidth = 21;
+    style_mark_gold.graphicHeight = 25;
+    style_mark_gold.graphicXOffset = -(style_mark_gold.graphicWidth/2);
+    style_mark_gold.graphicYOffset = -style_mark_gold.graphicHeight;
+    style_mark_gold.externalGraphic = "./lib/openlayers/img/marker-gold.png";
+    style_mark_gold.fillOpacity = 1;
+    style_mark_gold.title = "this is a test tooltip"; // TODO: change this
 
 /**
     // Displaying points, lines, and polygons
@@ -279,13 +290,28 @@ function setLayers(msg) {
         case "HideCurrentLocation":
             hideLayer(currentLocationLayer);
             break;
+            
+		case "DisplayPositionHistory":
+			positionHistoryLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+				style: layer_style,
+				renderers: renderer
+			});
+			
+			var pointFeatures = getPointsFromJava(msg);
+			displayPoints(pointFeatures, positionHistoryLayer);
+			break;
+			
+		case "HidePositionHistory":
+			hideLayer(positionHistoryLayer);
+			break;
+            
         default:
             break;
     }
 }
 
 function hideLayer(layer) {
-    layer.setVisibility(false);
+    map.removeLayer(layer);
 }
 
 function displayPoints(pointFeatures, layer) {
@@ -313,6 +339,10 @@ function getPointsFromJava(msg) {
             points = android.getCurrentLocation();
             mark_style = style_mark_green;
             break;
+		case "DisplayPositionHistory":
+			points = android.getPositionHistory();
+			mark_style = style_mark_gold;
+			break;        
         default:
             return;
     }
