@@ -3,7 +3,6 @@ package edu.cmu.sv.trailscribe.view;
 import java.util.Arrays;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,28 +19,23 @@ import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 
 
-public class MainActivity extends Activity implements OnItemClickListener {
-	public static final ActivityTheme ACTIVITY_THEME = 
-			new ActivityTheme("MainActivity", "Main page", R.color.blue);
-	private static final String MSG_TAG = "MainActivity";
+public class MainActivity extends BaseActivity implements OnItemClickListener {
+
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MainActivity", "Main page", R.color.blue);
+	public static String MSG_TAG = "Main page";
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setView();
 	}
 	
 	private void setView() {
 		setContentView(R.layout.activity_main);
 		
-		setTitleBar();
+		setTitleBar(R.id.main_titlebar, ACTIVITY_THEME.getActivityColor());
 		setGrid();
-	}
-	
-//	FIXME: Bad design, the code should be reusable
-	private void setTitleBar() {
-		View titleBar = (View) findViewById(R.id.main_titlebar);
-		titleBar.setBackgroundColor(getResources().getColor(ACTIVITY_THEME.getActivityColor()));
 	}
 	
 	private void setGrid() {

@@ -8,7 +8,7 @@
     android:orientation="vertical">
     
     <include
-        android:id="@+id/mapsview_titlebar"
+        android:id="@+id/maps_titlebar"
         layout="@layout/component_titlebar">
     </include>
     
@@ -18,10 +18,10 @@
         android:layout_height="fill_parent"
         android:layout_marginTop="10px"
         android:layout_marginBottom="10px"
-        android:layout_below="@+id/mapsview_titlebar"
+        android:layout_below="@+id/maps_titlebar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:id="@+id/mapsview_webview" />
+        android:id="@+id/maps_webview" />
     
     <!-- floating buttons -->
     <LinearLayout
@@ -29,22 +29,22 @@
         android:layout_width="192px"
         android:layout_height="fill_parent"
         android:gravity="center_vertical"
-        android:layout_alignTop="@+id/mapsview_webview"
-        android:layout_alignBottom="@+id/mapsview_webview"
+        android:layout_alignTop="@+id/maps_webview"
+        android:layout_alignBottom="@+id/maps_webview"
         android:layout_alignParentLeft="true"
         android:background="@color/panel" >
         <Button
-            android:id="@+id/mapsview_samples"
+            android:id="@+id/maps_samples"
             android:layout_width="192px"
             android:layout_height="192px"
             android:text="@string/map_display_samples"/>
         <Button
-            android:id="@+id/mapsview_current_location"
+            android:id="@+id/maps_current_location"
             android:layout_width="192px"
             android:layout_height="192px"
             android:text="@string/map_display_current_location"/>
         <Button
-            android:id="@+id/mapsview_position_history"
+            android:id="@+id/maps_position_history"
             android:layout_width="192px"
             android:layout_height="192px"
             android:text="@string/map_display_position_history"/>

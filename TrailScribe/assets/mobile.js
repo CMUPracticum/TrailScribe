@@ -311,7 +311,7 @@ function setLayers(msg) {
 }
 
 function hideLayer(layer) {
-    layer.setVisibility(false);
+    map.removeLayer(layer);
 }
 
 function displayPoints(pointFeatures, layer) {
