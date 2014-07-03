@@ -18,7 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 
-
 public class MainActivity extends BaseActivity implements OnItemClickListener {
 
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MainActivity", "Main page", R.color.blue);
@@ -27,7 +26,6 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setView();
 	}
 	
@@ -45,7 +43,7 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 		ActivityTheme[] options = new ActivityTheme[]{
 				new ActivityTheme("Expeditions", "Description", R.color.blue),
 				MapsActivity.ACTIVITY_THEME,
-				new ActivityTheme("Sync Center", "Description", R.color.red),
+				SynchronizationCenterActivity.ACTIVITY_THEME,
 				new ActivityTheme("Settings", "Description", R.color.gray)
 		};
 		
@@ -64,6 +62,9 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 		switch (position) {
 		case 1:
 			intent = new Intent(this, MapsActivity.class);
+			break;
+		case 2:
+			intent = new Intent(this, SynchronizationCenterActivity.class);
 			break;
 			default:
 				Toast.makeText(getApplicationContext(), "Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
