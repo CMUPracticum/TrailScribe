@@ -1,6 +1,12 @@
+# Builds
+build
+
 # Built application files
 *.apk
 *.ap_
+
+# Keystores
+TrailScribeKeystore
 
 # Files for the Dalvik VM
 *.dex
