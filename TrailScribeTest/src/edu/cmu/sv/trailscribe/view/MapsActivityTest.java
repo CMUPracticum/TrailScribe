@@ -154,7 +154,7 @@ class ResultContainer<T> {
     private T result;
 
     public ResultContainer() {
-        // nothing
+        this.result = null;
     }
 
     public ResultContainer(T initial) {
