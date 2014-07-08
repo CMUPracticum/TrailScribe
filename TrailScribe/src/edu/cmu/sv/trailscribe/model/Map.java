@@ -1,6 +1,5 @@
 package edu.cmu.sv.trailscribe.model;
 
-import java.util.Date;
 
 public class Map {
 	private int mId;
