@@ -18,6 +18,7 @@ import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
 
 
+@SuppressLint("NewApi")
 public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
@@ -65,6 +66,11 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		mWebView.setWebChromeClient(new WebChromeClient());
 		mWebView.getSettings().setUseWideViewPort(false);
 		mWebView.setWebViewClient(new WebViewClient());
+		
+		// Setting to give OpenLayers access to local KML files
+		// Sets whether JavaScript running in the context of a file scheme URL should be allowed to 
+		// access content from any origin.
+		mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
 
 		mController = new MapsController();
 		mWebView.loadUrl(mController.getURL());
