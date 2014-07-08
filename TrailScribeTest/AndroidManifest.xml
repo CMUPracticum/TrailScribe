@@ -3,7 +3,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="edu.cmu.sv.trailscribe.tests"
           android:versionCode="1"
-          android:versionName="1.0">
+          android:versionName="1.0"
+          android:sharedUserId="edu.cmu.sv.trailscribe">
+
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/>
 
     <uses-sdk
         android:minSdkVersion="14"
