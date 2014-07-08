@@ -62,16 +62,15 @@ public class BaseActivity extends Activity implements
 
 	@Override
 	public void onConnected(Bundle bundle) {
-		Log.d(MSG_TAG, "Application is connected to Google Play services");
-
-		try {
-			mLocation = mLocationClient.getLastLocation();
-			if (mLocation == null) {
-				Log.e(MSG_TAG, "Null last location");
-			}
-		} catch (Exception e) {
-			Log.e(MSG_TAG, e.getMessage());
-		}
+            if (mLocationClient.isConnected()) {
+                Log.d(MSG_TAG, "Application is connected to Google Play services");
+                mLocation = mLocationClient.getLastLocation();
+                if (mLocation == null) {
+                    Log.e(MSG_TAG, "Null last location");
+                }
+            } else {
+                Log.e(MSG_TAG, "onConnect called but client is not connected");
+            }
 	}
 
 	@Override
