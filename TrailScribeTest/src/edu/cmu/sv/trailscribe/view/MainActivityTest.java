@@ -2,7 +2,10 @@ package edu.cmu.sv.trailscribe;
 
 import android.test.ActivityInstrumentationTestCase2;
 import edu.cmu.sv.trailscribe.view.MainActivity;
+import edu.cmu.sv.trailscribe.view.MapsActivity;
 import android.widget.GridView;
+import android.app.Instrumentation.ActivityMonitor;
+import android.app.Instrumentation;
 
 /**
  * This is a simple framework for a test of an Application.  See
@@ -16,6 +19,8 @@ import android.widget.GridView;
  */
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     private static final int GRIDVIEW_ELEMENTS = 4;
+    private static final String LOG_TAG = "MainActivityTest";
+    private static final long IDLE_SYNC_TIMEOUT = 10L;
 
     private MainActivity tMainActivity;
     private GridView tGridView;
@@ -41,5 +46,18 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         final int expected = GRIDVIEW_ELEMENTS;
         final int actual = tGridView.getAdapter().getCount();
         assertEquals(expected, actual);
+    }
+
+    public void testButton_mapsActivity() throws InterruptedException, Throwable {
+        final ActivityMonitor monitor = getInstrumentation().addMonitor(MapsActivity.class.getName(), null, false);
+        runTestOnUiThread(new Runnable() {
+                public void run() {
+                    tGridView.performItemClick(tGridView.getAdapter().getView(1, null, null),
+                                               1, tGridView.getAdapter().getItemId(1));
+                }
+            });
+        final MapsActivity activity = (MapsActivity) monitor.waitForActivityWithTimeout(1000L);
+        assertNotNull("Maps activity not started", activity);
+        activity.finish();
     }
 }

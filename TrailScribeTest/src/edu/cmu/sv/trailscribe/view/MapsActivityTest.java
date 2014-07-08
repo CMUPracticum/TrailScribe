@@ -24,14 +24,14 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import android.os.Bundle;
 import android.os.SystemClock;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationListener;
 
 public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActivity> {
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";
     private static final boolean JAVASCRIPT_ENABLED = true;
     private static final String LOG_TAG = "MapsActivityTest";
     private static final long PAGE_LOAD_TIMEOUT = 50L;
+    private static final long GENERAL_AWAIT_TIMEOUT = 10L;
+    private static final long IDLE_SYNC_TIMEOUT = 10L;
     private static final String SAMPLE_POINT_LOCATIONS = "\"[{\\\"x\\\":-13585932.705423407,\\\"y\\\":4497531.859545275},{\\\"x\\\":-13589272.29014674,\\\"y\\\":4497531.859545275},{\\\"x\\\":-13592611.874870075,\\\"y\\\":4494729.00634739}]\"";
     private static final String CURRENT_LOCATION_JSON = "\"[{\\\"x\\\":-13590658.885723868,\\\"y\\\":4491810.069464362}]\"";
     private static final String POSITION_HISTORY = "\"[{\\\"x\\\":-13586526.149628745,\\\"y\\\":4495410.731525376},{\\\"x\\\":-13586683.889347177,\\\"y\\\":4495850.197979055},{\\\"x\\\":-13586979.999192646,\\\"y\\\":4496576.422973805},{\\\"x\\\":-13586963.301269028,\\\"y\\\":4496872.561169761},{\\\"x\\\":-13586976.103010466,\\\"y\\\":4497270.041372993}]\"";
@@ -50,16 +50,39 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     private Button tCurrentLocationButton;
     private Button tPositionHistoryButton;
 
+    private class ResultContainer<T> {
+        private T result;
+
+        public ResultContainer() {
+            result = null;
+        }
+
+        public ResultContainer(T initial) {
+            result = initial;
+        }
+
+        public T getResult() {
+            return result;
+        }
+
+        public void setResult(T value) {
+            result = value;
+        }
+    }
+
     public MapsActivityTest() {
         super("edu.cmu.sv.trailscribe", MapsActivity.class);
     }
 
     @Override
     protected void setUp() throws Exception {
+        Log.d(LOG_TAG, "Started setup");
         super.setUp();
+        Log.d(LOG_TAG, "In MapsActivityTest setup");
 
         // find all UI elements
         tMapsActivity = getActivity();
+        Log.d(LOG_TAG, "Found main activity");
         tWebView = (WebView) tMapsActivity
             .findViewById(R.id.maps_webview);
         tSamplesButton = (Button) tMapsActivity
@@ -68,6 +91,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
             .findViewById(R.id.maps_current_location);
         tPositionHistoryButton = (Button) tMapsActivity
             .findViewById(R.id.maps_position_history);
+
+        Log.d(LOG_TAG, "Found UI elements");
 
         // set a web chrome client with more debug info
         tMapsActivity.runOnUiThread(new Runnable() {
@@ -99,9 +124,10 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                 }
             };
         tLocationClient.registerConnectionCallbacks(listener);
-        locationDone.await();
+        assertTrue(locationDone.await(GENERAL_AWAIT_TIMEOUT, TimeUnit.SECONDS));
         tLocationClient.setMockMode(true);
         tLocationClient.unregisterConnectionCallbacks(listener);
+        Log.d(LOG_TAG, "Finished setup");
     }
 
     private Location createLocation(final double lat, final double lng, final float accuracy) {
@@ -115,17 +141,25 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         return newLocation;
     }
 
-    private boolean waitForWebView() {
+    private boolean waitForWebView() throws InterruptedException {
         // wait for the webview to finish loading
+        // Why sleep for 3 seconds?
+        // Because otherwise things break
+        Thread.sleep(3000);
         final CountDownLatch webviewDone = new CountDownLatch(1);
         tMapsActivity.runOnUiThread(new Runnable() {
                 public void run() {
-                    if (tWebView.getProgress() == 100) {
+                    final String url = tWebView.getUrl();
+                    Log.d(LOG_TAG, "Page currently at " + url);
+                    if (tWebView.getProgress() == 100 && url.equals(WEBVIEW_URL)) {
                         webviewDone.countDown();
                     } else {
                         tWebView.setWebViewClient(new WebViewClient() {
                                 public void onPageFinished(WebView view, String url) {
-                                    webviewDone.countDown();
+                                    Log.d(LOG_TAG, "Finished loading " + url);
+                                    if (url.equals(WEBVIEW_URL)) {
+                                        webviewDone.countDown();
+                                    }
                                 }
                             });
                     }
@@ -167,7 +201,17 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                 }
             });
         Log.d(LOG_TAG, "Waiting for result");
-        done.await();
+        assertTrue("JS execution timed out", done.await(GENERAL_AWAIT_TIMEOUT, TimeUnit.SECONDS));
+    }
+
+    private void waitForIdleTimeout() throws InterruptedException {
+        final CountDownLatch done = new CountDownLatch(1);
+        getInstrumentation().waitForIdle(new Runnable() {
+                public void run() {
+                    done.countDown();
+                }
+            });
+        assertTrue("Idle sync took too long", done.await(IDLE_SYNC_TIMEOUT, TimeUnit.SECONDS));
     }
 
     public void testPreconditions() throws InterruptedException {
@@ -197,6 +241,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         // make sure the page has finished loading
         Log.d(LOG_TAG, "Waiting for page to load");
         assertTrue("Page timed out while loading", waitForWebView());
+        waitForIdleTimeout();
         Log.d(LOG_TAG, "Reading js test from assets");
         final String js = readResource("js/samplesButtonTest.js");
         final String expected = SAMPLE_POINT_LOCATIONS;
@@ -208,6 +253,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                     tSamplesButton.performClick();
                 }
             });
+        // wait for sync to avoid race condition
+        waitForIdleTimeout();
 
         Log.d(LOG_TAG, "Running JS");
         runJsOnUiThread(container, js);
@@ -221,14 +268,13 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         final Location testLocation = createLocation(LOC_LAT, LOC_LNG, LOC_ACCURACY);
         Log.d(LOG_TAG, "Setting mock location");
         tLocationClient.setMockLocation(testLocation);
-        // horrible horrible hack to avoid race condition
-        // no using a locationrequest doesn't fix this
-        // The only way to fix this seems to be to not use MapsActivity as a locationlistener
-        // however, this would avoid testing part of the code
-        Thread.sleep(100);
+        Thread.sleep(1000);
+        // Wait for idle sync to avoid race condition
+        waitForIdleTimeout();
         // make sure the page has finished loading
         Log.d(LOG_TAG, "Waiting for page to load");
         assertTrue("Page timed out while loading", waitForWebView());
+        waitForIdleTimeout();
         Log.d(LOG_TAG, "Reading js test from assets");
         final String js = readResource("js/currentLocationTest.js");
         final String expected = CURRENT_LOCATION_JSON;
@@ -240,6 +286,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                     tCurrentLocationButton.performClick();
                 }
             });
+        // wait for sync to avoid race condition
+        waitForIdleTimeout();
 
         Log.d(LOG_TAG, "Running JS");
         runJsOnUiThread(container, js);
@@ -252,6 +300,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         // make sure the page has finished loading
         Log.d(LOG_TAG, "Waiting for page to load");
         assertTrue("Page timed out while loading", waitForWebView());
+        waitForIdleTimeout();
         Log.d(LOG_TAG, "Reading js test from assets");
         final String js = readResource("js/positionHistoryTest.js");
         final String expected = POSITION_HISTORY;
@@ -264,6 +313,9 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                 }
             });
 
+        // wait for sync to avoid race condition
+        waitForIdleTimeout();
+
         Log.d(LOG_TAG, "Running JS");
         runJsOnUiThread(container, js);
         final String actual = container.getResult();
@@ -271,24 +323,4 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                      expected, actual);
     }
 
-}
-
-class ResultContainer<T> {
-    private T result;
-
-    public ResultContainer() {
-        result = null;
-    }
-
-    public ResultContainer(T initial) {
-        result = initial;
-    }
-
-    public T getResult() {
-        return result;
-    }
-
-    public void setResult(T value) {
-        result = value;
-    }
 }
