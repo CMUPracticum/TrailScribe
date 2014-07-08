@@ -34,6 +34,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     private static final long PAGE_LOAD_TIMEOUT = 50L;
     private static final String SAMPLE_POINT_LOCATIONS = "\"[{\\\"x\\\":-13585932.705423407,\\\"y\\\":4497531.859545275},{\\\"x\\\":-13589272.29014674,\\\"y\\\":4497531.859545275},{\\\"x\\\":-13592611.874870075,\\\"y\\\":4494729.00634739}]\"";
     private static final String CURRENT_LOCATION_JSON = "\"[{\\\"x\\\":-13590658.885723868,\\\"y\\\":4491810.069464362}]\"";
+    private static final String POSITION_HISTORY = "\"[{\\\"x\\\":-13586526.149628745,\\\"y\\\":4495410.731525376},{\\\"x\\\":-13586683.889347177,\\\"y\\\":4495850.197979055},{\\\"x\\\":-13586979.999192646,\\\"y\\\":4496576.422973805},{\\\"x\\\":-13586963.301269028,\\\"y\\\":4496872.561169761},{\\\"x\\\":-13586976.103010466,\\\"y\\\":4497270.041372993}]\"";
     private static final String LOC_PROVIDER = "flp";
     private static final double LOC_LAT = 37.377166;
     private static final double LOC_LNG = -122.086966;
@@ -103,7 +104,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         tLocationClient.unregisterConnectionCallbacks(listener);
     }
 
-    private Location createLocation(double lat, double lng, float accuracy) {
+    private Location createLocation(final double lat, final double lng, final float accuracy) {
         // Create new location
         final Location newLocation = new Location(LOC_PROVIDER);
         newLocation.setLatitude(lat);
@@ -138,7 +139,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         }
     }
 
-    private String readResource(String fname) throws UnsupportedEncodingException, IOException {
+    private String readResource(final String fname) throws UnsupportedEncodingException, IOException {
         final StringBuilder buf = new StringBuilder();
         final InputStream file = getInstrumentation().getContext().getAssets().open(fname);
         final BufferedReader in = new BufferedReader(new InputStreamReader(file, "UTF-8"));
@@ -148,8 +149,25 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         }
         in.close();
 
-        final String output = buf.toString();
-        return output;
+        return buf.toString();
+    }
+
+    private void runJsOnUiThread(final ResultContainer container, final String js) throws Throwable {
+        final CountDownLatch done = new CountDownLatch(1);
+        runTestOnUiThread(new Runnable() {
+                public void run() {
+                    tWebView.evaluateJavascript(js, new ValueCallback<String>() {
+                            public void onReceiveValue(String value) {
+                                Log.d(LOG_TAG, "Value received: " + value);
+                                container.setResult(value);
+                                done.countDown();
+                            }
+                        });
+                    Log.d(LOG_TAG, "JS started");
+                }
+            });
+        Log.d(LOG_TAG, "Waiting for result");
+        done.await();
     }
 
     public void testPreconditions() throws InterruptedException {
@@ -179,10 +197,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         // make sure the page has finished loading
         Log.d(LOG_TAG, "Waiting for page to load");
         assertTrue("Page timed out while loading", waitForWebView());
-        Log.d(LOG_TAG, "Page done loading");
         Log.d(LOG_TAG, "Reading js test from assets");
         final String js = readResource("js/samplesButtonTest.js");
-        final CountDownLatch done = new CountDownLatch(1);
         final String expected = SAMPLE_POINT_LOCATIONS;
         final ResultContainer<String> container = new ResultContainer<String>();
 
@@ -194,21 +210,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
             });
 
         Log.d(LOG_TAG, "Running JS");
-        runTestOnUiThread(new Runnable() {
-                public void run() {
-                    tWebView.evaluateJavascript(js, new ValueCallback<String>() {
-                            public void onReceiveValue(String value) {
-                                Log.d(LOG_TAG, "Value received: " + value);
-                                container.setResult(value);
-                                done.countDown();
-                            }
-                        });
-                    Log.d(LOG_TAG, "JS started");
-                }
-            });
-
-        Log.d(LOG_TAG, "Waiting for result");
-        done.await();
+        runJsOnUiThread(container, js);
         final String actual = container.getResult();
         assertEquals("Clicking samples button did not display the correct layer",
                      expected, actual);
@@ -222,10 +224,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         // make sure the page has finished loading
         Log.d(LOG_TAG, "Waiting for page to load");
         assertTrue("Page timed out while loading", waitForWebView());
-        Log.d(LOG_TAG, "Page done loading");
         Log.d(LOG_TAG, "Reading js test from assets");
         final String js = readResource("js/currentLocationTest.js");
-        final CountDownLatch done = new CountDownLatch(1);
         final String expected = CURRENT_LOCATION_JSON;
         final ResultContainer<String> container = new ResultContainer<String>();
 
@@ -237,25 +237,35 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
             });
 
         Log.d(LOG_TAG, "Running JS");
-        runTestOnUiThread(new Runnable() {
-                public void run() {
-                    tWebView.evaluateJavascript(js, new ValueCallback<String>() {
-                            public void onReceiveValue(String value) {
-                                Log.d(LOG_TAG, "Value received: " + value);
-                                container.setResult(value);
-                                done.countDown();
-                            }
-                        });
-                    Log.d(LOG_TAG, "JS started");
-                }
-            });
-
-        Log.d(LOG_TAG, "Waiting for result");
-        done.await();
+        runJsOnUiThread(container, js);
         final String actual = container.getResult();
         assertEquals("Clicking current location button did not display the correct location",
                      expected, actual);
     }
+
+    public void testWebView_positionHistory() throws Exception, Throwable {
+        // make sure the page has finished loading
+        Log.d(LOG_TAG, "Waiting for page to load");
+        assertTrue("Page timed out while loading", waitForWebView());
+        Log.d(LOG_TAG, "Reading js test from assets");
+        final String js = readResource("js/positionHistoryTest.js");
+        final String expected = POSITION_HISTORY;
+        final ResultContainer<String> container = new ResultContainer<String>();
+
+        Log.d(LOG_TAG, "Performing button click");
+        runTestOnUiThread(new Runnable() {
+                public void run() {
+                    tPositionHistoryButton.performClick();
+                }
+            });
+
+        Log.d(LOG_TAG, "Running JS");
+        runJsOnUiThread(container, js);
+        final String actual = container.getResult();
+        assertEquals("Clicking position history button did not display the correct layer",
+                     expected, actual);
+    }
+
 }
 
 class ResultContainer<T> {
