@@ -158,6 +158,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         assertNotNull("Samples button not found", tSamplesButton);
         assertNotNull("Current Location button not found", tCurrentLocationButton);
         assertNotNull("Position History button not found", tPositionHistoryButton);
+        assertTrue("Location is not connected", tLocationClient.isConnected());
     }
 
     @UiThreadTest
