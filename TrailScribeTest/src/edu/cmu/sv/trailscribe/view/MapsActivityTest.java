@@ -221,6 +221,11 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         final Location testLocation = createLocation(LOC_LAT, LOC_LNG, LOC_ACCURACY);
         Log.d(LOG_TAG, "Setting mock location");
         tLocationClient.setMockLocation(testLocation);
+        // horrible horrible hack to avoid race condition
+        // no using a locationrequest doesn't fix this
+        // The only way to fix this seems to be to not use MapsActivity as a locationlistener
+        // however, this would avoid testing part of the code
+        Thread.sleep(100);
         // make sure the page has finished loading
         Log.d(LOG_TAG, "Waiting for page to load");
         assertTrue("Page timed out while loading", waitForWebView());

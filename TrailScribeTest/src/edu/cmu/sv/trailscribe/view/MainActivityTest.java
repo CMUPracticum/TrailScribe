@@ -1,9 +1,7 @@
 package edu.cmu.sv.trailscribe;
 
 import android.test.ActivityInstrumentationTestCase2;
-
 import edu.cmu.sv.trailscribe.view.MainActivity;
-
 import android.widget.GridView;
 
 /**
