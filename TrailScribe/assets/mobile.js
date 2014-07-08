@@ -208,6 +208,23 @@ function init() {
     map.addControl(control);
     control.activate();
 **/
+
+    var kmlOverlay = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
+                projection: map.displayProjection,
+                strategies: [new OpenLayers.Strategy.Fixed()],
+                protocol: new OpenLayers.Protocol.HTTP({
+                    url: "kml/simple.kml",                    
+                    format: new OpenLayers.Format.KML({
+                        extractStyles: true, 
+                        extractAttributes: true,
+                        maxDepth: 2
+                    })
+                })
+            }));
+
+    // Add KML Overlay
+    map.addLayers([kmlOverlay]);
+
 }
 
 function getURL(bounds) {
