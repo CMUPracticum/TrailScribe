@@ -13,8 +13,10 @@ import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.BackendFacade;
 import edu.cmu.sv.trailscribe.model.Map;
 
-public class SynchronizationCenterController extends AsyncTask<String, Void, Void>implements AsyncTaskCompleteListener<String>{
-	private String endpoint = "http://trail-scribe.mlep.net/maps";
+public class SynchronizationCenterController 
+	extends AsyncTask<String, Void, Void> implements AsyncTaskCompleteListener<String>{
+	
+	private final String endpoint = "http://trail-scribe.mlep.net/maps";
 	private AsyncTaskCompleteListener<ArrayList<Map>> mTaskCompletedCallback;
 	
 	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<Map>> callback){
@@ -24,10 +26,17 @@ public class SynchronizationCenterController extends AsyncTask<String, Void, Voi
 	@Override
 	public void onTaskCompleted(String syncResult) {
 		JsonParser jsonParser = new JsonParser();
+		JsonElement jsonElement = jsonParser.parse(syncResult);
+		
+		if (jsonElement.isJsonNull()) {
+//			TODO Show notification when returned result is null
+			return;
+		}
+		
 		JsonArray syncResultJson = (JsonArray)jsonParser.parse(syncResult);
 		ArrayList<Map> maps = new ArrayList<Map>();
 		Map map;
-		for (JsonElement item:syncResultJson){
+		for (JsonElement item:syncResultJson) {
 			String model = item.getAsJsonObject().get("model").getAsString();
 			if(model.equals("map_manager.map")){
 				map = new Map();
