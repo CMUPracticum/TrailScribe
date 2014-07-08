@@ -92,17 +92,20 @@ public class BaseActivity extends Activity implements
 	}
 	
 	private void setLocationClient() {
-		mLocationClient = new LocationClient(this, this, this);
-		
-		try {
-			if (!mApplication.isPlayServicesAvailable()) {
-				Log.e(MSG_TAG, "Google Play service is not available");
-				return;
-			}
-			
-			mLocationClient.connect();
-		} catch (Exception e) {
-			Log.e(MSG_TAG, e.getMessage());
-		}
+            setLocationClient(new LocationClient(this, this, this));
 	}
+
+    // code to allow overiding of location client, needed for testing
+    public void setLocationClient(LocationClient client) {
+        mLocationClient = client;
+        try {
+            if (!mApplication.isPlayServicesAvailable()) {
+                Log.e(MSG_TAG, "Google Play service is not available");
+                return;
+            }
+            mLocationClient.connect();
+        } catch (Exception e) {
+            Log.e(MSG_TAG, e.getMessage());
+        }
+    }
 }
