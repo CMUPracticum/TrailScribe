@@ -15,6 +15,7 @@
     <string name="map_hide_current_location">Hide Current Location</string>
     <string name="map_display_position_history">Show Position History</string>
     <string name="map_hide_position_history">Hide Position History</string>
+    <string name="synchronizing">Synchronizing...</string>
     
 
 </resources>
