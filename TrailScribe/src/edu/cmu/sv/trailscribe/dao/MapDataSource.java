@@ -3,78 +3,81 @@ package edu.cmu.sv.trailscribe.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.cmu.sv.trailscribe.model.Map;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
+import edu.cmu.sv.trailscribe.model.Map;
 
-public class MapDataSource {
-	
-	// Database fields
-	private SQLiteDatabase database;
-	private DBHelper dbHelper;
-	private String[] allColumns = { DBHelper.KEY_ID,
-			DBHelper.NAME, DBHelper.VERSION};
+public class MapDataSource extends DataSource {
+	private String[] allColumns = {
+			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.PROJECTION, 
+			DBHelper.MIN_ZOOM_LEVEL, DBHelper.MAX_ZOOM_LEVEL, 
+			DBHelper.MIN_X, DBHelper.MIN_Y, DBHelper.MAX_X, DBHelper.MAX_Y, 
+			DBHelper.FILENAME, DBHelper.LAST_MODIFIED };
 	
 	public MapDataSource(Context context) {
-		dbHelper = new DBHelper(context);
+		super(context);
+	}
+	
+	public MapDataSource(DBHelper dbHelper) {
+		super(dbHelper);
+		
+//		TODO
+//		Insert seed data
+	}
+	
+	@Override
+	public boolean add(Object data) {
+		if (data.getClass() != Map.class) return false;
+		Map map = (Map) data;
+		
+		ContentValues values = new ContentValues();
+		values.put(DBHelper.KEY_ID, map.getName());
+		values.put(DBHelper.NAME, map.getName());
+		values.put(DBHelper.DESCRIPTION, map.getDescription());
+		values.put(DBHelper.PROJECTION, map.getProjection());
+		values.put(DBHelper.MIN_ZOOM_LEVEL, map.getMinZoomLevel());
+		values.put(DBHelper.MAX_ZOOM_LEVEL, map.getMaxZoomLevel());
+		values.put(DBHelper.MIN_X, map.getMinX());
+		values.put(DBHelper.MIN_Y, map.getMinY());
+		values.put(DBHelper.MAX_X, map.getMaxX());
+		values.put(DBHelper.MAX_Y, map.getMaxY());
+		values.put(DBHelper.FILENAME, map.getFilename());
+		values.put(DBHelper.LAST_MODIFIED, map.getLastModified());
+		
+		return addHelper(DBHelper.TABLE_MAP, values);
 	}
 
-	public void open() throws SQLException {
-		database = dbHelper.getWritableDatabase();
+	@Override
+	public boolean delete(Object data) {
+		if (data.getClass() != Map.class) return false;
+
+		Map map = (Map) data;
+	    deleteHelper(DBHelper.TABLE_MAP, map.getId());
+	    
+		return true;
 	}
 
-	public void close() {
-		dbHelper.close();
-	}
-
-	public boolean createMap(Map map) {
-	    ContentValues values = new ContentValues();
-	    values.put(DBHelper.NAME, map.getName());
-	    values.put(DBHelper.VERSION, map.getVersion());
-	    long insertId = database.insert(DBHelper.TABLE_MAP, null,
-	        values);
-	    if(insertId ==  -1){
-	    	return false;
-	    }
-	    else{
-	    	return true;
-	    }
-	}
-
-	public void deleteMap(Map map) {
-	    long id = map.getId();
-	    System.out.println("Comment deleted with id: " + id);
-	    database.delete(DBHelper.TABLE_MAP, DBHelper.KEY_ID
-	    + " = " + id, null);
-	}
-
-	public List<Map> getAllMaps() {
+	@Override
+	public List<Map> getAll() {
+		open();
+		
 	    List<Map> maps = new ArrayList<Map>();
 	
 	    Cursor cursor = database.query(DBHelper.TABLE_MAP,
 	        allColumns, null, null, null, null, null);
 	    
-	    if(cursor != null){
+	    if (cursor != null) {
 		    cursor.moveToFirst();
 		    while (!cursor.isAfterLast()) {
-		    	Map map = cursorToMap(cursor);
+		    	Map map = (Map) cursorToData(Map.class, cursor);
 		    	maps.add(map);
 		    	cursor.moveToNext();
 		    }
-		    // make sure to close the cursor
 		    cursor.close();
 	    }
+	    
+	    close();
 	    return maps;
-	}
-
-	private Map cursorToMap(Cursor cursor) {
-	    Map map = new Map();
-	    map.setId((int) cursor.getLong(0));
-	    map.setName(cursor.getString(1));
-	    map.setVersion(cursor.getInt(2));
-	    return map;
 	}
 }

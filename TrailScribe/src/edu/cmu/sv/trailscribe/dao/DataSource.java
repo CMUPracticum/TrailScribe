@@ -52,6 +52,7 @@ public abstract class DataSource {
 	public abstract List getAll();
 	@SuppressWarnings("rawtypes")
 	protected Object cursorToData(Class classType, Cursor cursor) {
+//		TODO: implement this method for each kind of data 
 		if (classType == Sample.class) {
 		    return new Sample(
 		    		cursor.getLong(0),
@@ -67,12 +68,22 @@ public abstract class DataSource {
 		    		cursor.getLong(10), 
 		    		cursor.getLong(11));
 		} else if (classType == Map.class) {
-			
+		    return new Map(
+		    		cursor.getLong(0), 
+		    		cursor.getString(1),
+		    		cursor.getString(2), 
+		    		cursor.getString(3), 
+		    		cursor.getInt(4),
+		    		cursor.getInt(5),
+		    		cursor.getDouble(6),
+		    		cursor.getDouble(7),
+		    		cursor.getDouble(8),
+		    		cursor.getDouble(9),
+		    		cursor.getString(10), 
+		    		cursor.getString(11));
 		} else {
 			Log.e(MSG_TAG, "Invalid data type");
 			return null;
 		}
-		
-		return null;
 	}
 }
