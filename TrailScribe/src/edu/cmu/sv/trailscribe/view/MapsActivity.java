@@ -27,7 +27,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
-	
+
 //	Controllers
 	private MapsController mController;
 	
@@ -53,7 +53,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	}
 	
 	private void setListener() {
-		mSamplesButton = (Button) findViewById(R.id.maps_samples);
+	    mSamplesButton = (Button) findViewById(R.id.maps_samples);
 		mCurrentLocationButton = (Button) findViewById(R.id.maps_current_location);
 		mPositionHistoryButton = (Button) findViewById(R.id.maps_position_history);
 		
