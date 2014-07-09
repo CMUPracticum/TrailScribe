@@ -1,5 +1,7 @@
 package edu.cmu.sv.trailscribe.view;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,6 +18,8 @@ import android.widget.Button;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
+import edu.cmu.sv.trailscribe.dao.SampleDataSource;
+import edu.cmu.sv.trailscribe.model.Sample;
 
 
 @SuppressLint("NewApi")
@@ -82,10 +86,27 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	@JavascriptInterface
 	public String getSamples() {
-//		TODO Import actual samples in the future
+		SampleDataSource dataSource = new SampleDataSource(mDBHelper);
+		
+		List<Sample> samples = dataSource.getAll();
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("{'points':[");
+		for (int i = 0; i < samples.size(); i++) {
+			Sample sample = samples.get(i);
+			
+			buffer.append("{'x':'").append(sample.getX()).append("', ");
+			buffer.append("'y':'").append(sample.getY()).append("'}");
+			
+			if (i != samples.size() - 1) {
+				buffer.append(", ");
+			}
+		}
+		buffer.append("]}'");
+		
 		JSONObject mapPoints = null;
 		try {
-			mapPoints = new JSONObject("{'points':[{'x':'-122.04451', 'y':'37.41800'},{'x':'-122.07451', 'y':'37.41800'}, {'x':'-122.10451', 'y':'37.39800'}]}'");
+			mapPoints = new JSONObject(buffer.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} 

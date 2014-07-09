@@ -13,6 +13,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 
 import edu.cmu.sv.trailscribe.R;
+import edu.cmu.sv.trailscribe.dao.DBHelper;
 
 public class BaseActivity extends Activity implements 
 	LocationListener,
@@ -23,16 +24,20 @@ public class BaseActivity extends Activity implements
 	public static String MSG_TAG = "BaseActivity";
 	
 //	Application
-	protected TrailScribeApplication mApplication;
+	protected static TrailScribeApplication mApplication;
+	
+//	Database
+	protected static DBHelper mDBHelper;
 	
 //	Location
-	protected Location mLocation;
-	protected LocationClient mLocationClient;
+	protected static Location mLocation;
+	protected static LocationClient mLocationClient;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mApplication = (TrailScribeApplication) getApplication();
+		mDBHelper = mApplication.getDBHelper();
 		
 		setLocationClient();
 	}
@@ -95,7 +100,7 @@ public class BaseActivity extends Activity implements
 		mLocationClient = new LocationClient(this, this, this);
 		
 		try {
-			if (!mApplication.isPlayServicesAvailable()) {
+			if (!TrailScribeApplication.isPlayServicesAvailable()) {
 				Log.e(MSG_TAG, "Google Play service is not available");
 				return;
 			}
