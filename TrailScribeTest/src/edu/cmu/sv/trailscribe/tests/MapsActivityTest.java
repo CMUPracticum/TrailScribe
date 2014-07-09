@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe;
+package edu.cmu.sv.trailscribe.tests;
 
 import android.test.ActivityInstrumentationTestCase2;
 import edu.cmu.sv.trailscribe.view.MapsActivity;
@@ -24,6 +24,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import android.os.Bundle;
 import android.os.SystemClock;
+import edu.cmu.sv.trailscribe.R;
 
 public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActivity> {
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";

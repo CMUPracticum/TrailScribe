@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe;
+package edu.cmu.sv.trailscribe.tests;
 
 import android.test.ActivityInstrumentationTestCase2;
 import edu.cmu.sv.trailscribe.view.MainActivity;
@@ -6,6 +6,7 @@ import edu.cmu.sv.trailscribe.view.MapsActivity;
 import android.widget.GridView;
 import android.app.Instrumentation.ActivityMonitor;
 import android.app.Instrumentation;
+import edu.cmu.sv.trailscribe.R;
 
 /**
  * This is a simple framework for a test of an Application.  See
