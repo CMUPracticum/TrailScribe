@@ -25,6 +25,7 @@ import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallback
 import android.os.Bundle;
 import android.os.SystemClock;
 import edu.cmu.sv.trailscribe.R;
+import android.util.Base64;
 
 public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActivity> {
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";
