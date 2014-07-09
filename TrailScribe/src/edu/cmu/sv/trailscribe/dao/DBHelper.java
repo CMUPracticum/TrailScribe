@@ -1,6 +1,5 @@
 package edu.cmu.sv.trailscribe.dao;
 
-import edu.cmu.sv.trailscribe.model.Sample;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -44,6 +43,8 @@ public class DBHelper extends SQLiteOpenHelper {
     		+ CUSTOM_FIELD + " TEXT," + LAST_MODIFIED + " TEXT," 
     		+ USER_ID + " INTEGER," + MAP_ID + " INTEGER," + EXPEDITION_ID + " INTEGER" + ")";
     
+    
+    
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
@@ -54,14 +55,6 @@ public class DBHelper extends SQLiteOpenHelper {
 		
         db.execSQL(CREATE_TABLE_MAP);
         db.execSQL(CREATE_TABLE_SAMPLE);
-        
-//		Seed data
-		SampleDataSource sampleDataSource = new SampleDataSource(this);
-		Sample sample = new Sample(
-	    		0, "default name", "default description", "default time",
-	    		-122.04451, 37.41800, 0, "default custom field", "default last modified",
-	    		0, 0, 0);
-		sampleDataSource.add(sample);
 	}
 	
 	@Override

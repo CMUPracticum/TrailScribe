@@ -21,6 +21,13 @@ public class SampleDataSource extends DataSource {
 	
 	public SampleDataSource(DBHelper dbHelper) {
 		super(dbHelper);
+		
+//		Seed data
+		Sample sample = new Sample(
+	    		0, "default name", "default description", "default time",
+	    		-122.04451, 37.41800, 0, "default custom field", "default last modified",
+	    		0, 0, 0);
+		add(sample);
 	}
 
 	@Override
