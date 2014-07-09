@@ -7,7 +7,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import edu.cmu.sv.trailscribe.model.LocationHistory;
-import edu.cmu.sv.trailscribe.model.Sample;
 
 public class LocationHistoryDataSource extends DataSource {
 	private String[] allColumns = {
@@ -25,19 +24,19 @@ public class LocationHistoryDataSource extends DataSource {
 		// TODO: Store current location in database
 		// Seed data
 		LocationHistory locationHistory1 = new LocationHistory(
-				0, "default time", -122.051258, 37.406001, 0, 0, 0, 0);
+				100, "default time", -122.051258, 37.406001, 0, 0, 0, 0);
 		add(locationHistory1);
 		
 		LocationHistory locationHistory2 = new LocationHistory(
-				0, "default time", -122.053918, 37.411183, 0, 0, 0, 0);
+				101, "default time", -122.053918, 37.411183, 0, 0, 0, 0);
 		add(locationHistory2);
 		
 		LocationHistory locationHistory3 = new LocationHistory(
-				0, "default time", -122.053768, 37.413296, 0, 0, 0, 0);
+				102, "default time", -122.053768, 37.413296, 0, 0, 0, 0);
 		add(locationHistory3);
 		
 		LocationHistory locationHistory4 = new LocationHistory(
-				0, "default time", -122.053883, 37.416132, 0, 0, 0, 0);
+				103, "default time", -122.053883, 37.416132, 0, 0, 0, 0);
 		add(locationHistory4);
 	}
 	
