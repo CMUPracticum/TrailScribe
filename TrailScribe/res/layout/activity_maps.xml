@@ -7,18 +7,13 @@
     android:layout_gravity="center"
     android:orientation="vertical">
     
-    <include
-        android:id="@+id/maps_titlebar"
-        layout="@layout/component_titlebar">
-    </include>
-    
     <WebView 
         tools:context="edu.cmu.sv.trailscribe.view.MapsActivity"
     	android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_marginTop="10px"
         android:layout_marginBottom="10px"
-        android:layout_below="@+id/maps_titlebar"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:id="@+id/maps_webview" />

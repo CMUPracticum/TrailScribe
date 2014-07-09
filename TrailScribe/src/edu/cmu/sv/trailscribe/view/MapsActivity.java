@@ -47,7 +47,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	private void setView() {
 		setContentView(R.layout.activity_maps);
 
-		setTitleBar(R.id.maps_titlebar, ACTIVITY_THEME.getActivityColor());
 		setMap();
 		setListener();
 	}
