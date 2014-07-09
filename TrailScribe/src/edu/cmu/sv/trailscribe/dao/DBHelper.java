@@ -16,6 +16,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	// Tables Names
     public static final String TABLE_MAP = "map";
     public static final String TABLE_SAMPLE = "sample";
+    public static final String TABLE_LOCATION_HISTORY = "location_history";
     
     // Common column names
     public static final String KEY_ID = "id";
@@ -43,7 +44,10 @@ public class DBHelper extends SQLiteOpenHelper {
     		+ CUSTOM_FIELD + " TEXT," + LAST_MODIFIED + " TEXT," 
     		+ USER_ID + " INTEGER," + MAP_ID + " INTEGER," + EXPEDITION_ID + " INTEGER" + ")";
     
-    
+    private static final String CREATE_TABLE_LOCATION_HISTORY = "CREATE TABLE " + TABLE_LOCATION_HISTORY
+    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY," + TIME + " TEXT,"
+    		+ X + " DOUBLE, " + Y + " DOUBLE, " + Z + " DOUBLE, "
+    		+ USER_ID + " INTEGER," + MAP_ID + " INTEGER," + EXPEDITION_ID + " INTEGER" + ")";
     
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -55,6 +59,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		
         db.execSQL(CREATE_TABLE_MAP);
         db.execSQL(CREATE_TABLE_SAMPLE);
+        db.execSQL(CREATE_TABLE_LOCATION_HISTORY);
 	}
 	
 	@Override
@@ -69,6 +74,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		// on upgrade drop older tables
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SAMPLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATION_HISTORY);
         
         // create new tables
         onCreate(db);

@@ -2,6 +2,7 @@ package edu.cmu.sv.trailscribe.dao;
 
 import java.util.List;
 
+import edu.cmu.sv.trailscribe.model.LocationHistory;
 import edu.cmu.sv.trailscribe.model.Map;
 import edu.cmu.sv.trailscribe.model.Sample;
 import android.content.ContentValues;
@@ -68,6 +69,16 @@ public abstract class DataSource {
 		    		cursor.getLong(11));
 		} else if (classType == Map.class) {
 			
+		} else if (classType == LocationHistory.class) {
+			return new LocationHistory(
+					cursor.getLong(0),
+					cursor.getString(1),
+					cursor.getDouble(2),
+					cursor.getDouble(3),
+					cursor.getDouble(4),
+					cursor.getLong(5),
+					cursor.getLong(6),
+					cursor.getLong(7));
 		} else {
 			Log.e(MSG_TAG, "Invalid data type");
 			return null;

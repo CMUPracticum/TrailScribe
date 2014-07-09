@@ -18,7 +18,9 @@ import android.widget.Button;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
+import edu.cmu.sv.trailscribe.dao.LocationHistoryDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
+import edu.cmu.sv.trailscribe.model.LocationHistory;
 import edu.cmu.sv.trailscribe.model.Sample;
 
 
@@ -126,19 +128,31 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		}
 		
 		return mapPoints.toString();
-	}
+	}	
 	
 	@JavascriptInterface
 	public String getPositionHistory() {
-	// TODO: Import actual position history
+		LocationHistoryDataSource dataSource = new LocationHistoryDataSource(mDBHelper);
+		
+		List<LocationHistory> locationHistories = dataSource.getAll();
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("{points':[");
+		for (int i = 0; i < locationHistories.size(); i++) {
+			LocationHistory locationHistory = locationHistories.get(i);
+			
+			buffer.append("{'x':'").append(locationHistory.getX()).append("',");
+			buffer.append("'y':'").append(locationHistory.getY()).append("'}");
+			
+			if (i != locationHistories.size() - 1) {
+				buffer.append(", ");
+			}
+		}
+		buffer.append("]}'");
+		
 		JSONObject mapPoints = null;
 		try {
-			// TODO: Change the points
-			mapPoints = new JSONObject("{'points':[{'x':'-122.049841', 'y':'37.402865'},"
-					+ "{'x':'-122.051258', 'y':'37.406001'}, "
-					+ "{'x':'-122.053918', 'y':'37.411183'},"
-					+ "{'x':'-122.053768', 'y':'37.413296'},"
-					+ "{'x':'-122.053883', 'y':'37.416132'}]}'");
+			mapPoints = new JSONObject(buffer.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
