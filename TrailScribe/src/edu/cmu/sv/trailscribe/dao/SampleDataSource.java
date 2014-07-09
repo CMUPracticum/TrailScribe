@@ -22,6 +22,7 @@ public class SampleDataSource extends DataSource {
 	public SampleDataSource(DBHelper dbHelper) {
 		super(dbHelper);
 		
+//		TODO: Remove when feature to add samples is implemented
 //		Seed data
 		Sample sample = new Sample(
 	    		0, "default name", "default description", "default time",

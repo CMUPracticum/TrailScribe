@@ -2,23 +2,39 @@ package edu.cmu.sv.trailscribe.model;
 
 
 public class Map {
-	private int mId;
+
+	private long mId;
 	private String mName;
-	private String mModel;
-	private int mMaxZoomLevel;
+	private String mDescription;
+	private String mProjection;
 	private int mMinZoomLevel;
+	private int mMaxZoomLevel;
 	private double mMinX;
 	private double mMaxY; 
 	private double mMaxX;
 	private double mMinY;
 	private String mFilename; 
-	private String mProjection;
 	private String mLastModified; 
-
 			
-	//If last updated is used, then it is not needed.
-	private int mVersion;
-
+	public Map(
+			long id, String name, String description, String projection, 
+			int minZoomLevel, int maxZoomLevel, 
+			double minX, double minY, double maxX, double maxY, 
+			String filename, String lastModified) {
+		mId = id;
+		mName = name;
+		mDescription = description;
+		mProjection = projection;
+		mMinZoomLevel = minZoomLevel;
+		mMaxZoomLevel = maxZoomLevel;
+		mMinX = minX;
+		mMinY = minY;
+		mMaxX = maxX;
+		mMinY = minY;
+		mFilename = filename;
+		mLastModified = lastModified;
+	}
+	
 	public String getName() {
 		return mName;
 	}
@@ -27,28 +43,12 @@ public class Map {
 		this.mName = name;
 	}
 	
-	public int getId() {
+	public long getId() {
 		return mId;
 	}
 
-	public void setId(int mId) {
+	public void setId(long mId) {
 		this.mId = mId;
-	}
-
-	public int getVersion() {
-		return mVersion;
-	}
-
-	public void setVersion(int mVersion) {
-		this.mVersion = mVersion;
-	}
-
-	public String getModel() {
-		return mModel;
-	}
-
-	public void setModel(String mModel) {
-		this.mModel = mModel;
 	}
 
 	public int getMaxZoomLevel() {
@@ -121,5 +121,13 @@ public class Map {
 
 	public void setLastModified(String mLastModified) {
 		this.mLastModified = mLastModified;
+	}
+	
+	public String getDescription() {
+		return mDescription;
+	}
+
+	public void setDescription(String mDescription) {
+		this.mDescription = mDescription;
 	}
 }
