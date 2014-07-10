@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.Sample;
 
 public class MapDataSource extends DataSource {
 	private String[] allColumns = {
@@ -70,7 +71,7 @@ public class MapDataSource extends DataSource {
 	    if (cursor != null) {
 		    cursor.moveToFirst();
 		    while (!cursor.isAfterLast()) {
-		    	Map map = (Map) cursorToData(Map.class, cursor);
+		    	Map map = (Map) cursorToData(cursor);
 		    	maps.add(map);
 		    	cursor.moveToNext();
 		    }
@@ -80,4 +81,21 @@ public class MapDataSource extends DataSource {
 	    close();
 	    return maps;
 	}
+	
+    @Override
+    protected Object cursorToData(Cursor cursor) {
+        return new Sample(
+                cursor.getLong(0),
+                cursor.getString(1), 
+                cursor.getString(2), 
+                cursor.getString(3), 
+                cursor.getDouble(4), 
+                cursor.getDouble(5), 
+                cursor.getDouble(6),
+                cursor.getString(7),
+                cursor.getString(8),
+                cursor.getLong(9),
+                cursor.getLong(10), 
+                cursor.getLong(11));
+    }
 }

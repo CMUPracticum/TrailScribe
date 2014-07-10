@@ -75,7 +75,7 @@ public class SampleDataSource extends DataSource {
 	    if (cursor != null) {
 		    cursor.moveToFirst();
 		    while (!cursor.isAfterLast()) {
-		    	Sample sample = (Sample) cursorToData(Sample.class, cursor);
+		    	Sample sample = (Sample) cursorToData(cursor);
 		    	samples.add(sample);
 		    	cursor.moveToNext();
 		    }
@@ -84,5 +84,22 @@ public class SampleDataSource extends DataSource {
 	    
 	    close();
 	    return samples;
+	}
+	
+	@Override
+	protected Object cursorToData(Cursor cursor) {
+	    return new Sample(
+                cursor.getLong(0),
+                cursor.getString(1), 
+                cursor.getString(2), 
+                cursor.getString(3), 
+                cursor.getDouble(4), 
+                cursor.getDouble(5), 
+                cursor.getDouble(6),
+                cursor.getString(7),
+                cursor.getString(8),
+                cursor.getLong(9),
+                cursor.getLong(10), 
+                cursor.getLong(11));
 	}
 }

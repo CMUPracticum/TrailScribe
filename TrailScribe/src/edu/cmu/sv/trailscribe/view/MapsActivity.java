@@ -18,9 +18,8 @@ import android.widget.Button;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
-import edu.cmu.sv.trailscribe.dao.LocationHistoryDataSource;
+import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
-import edu.cmu.sv.trailscribe.model.LocationHistory;
 import edu.cmu.sv.trailscribe.model.Sample;
 
 
@@ -131,19 +130,19 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	@JavascriptInterface
 	public String getPositionHistory() {
-		LocationHistoryDataSource dataSource = new LocationHistoryDataSource(mDBHelper);
+		LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 		
-		List<LocationHistory> locationHistories = dataSource.getAll();
+		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();
 		
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("{points':[");
-		for (int i = 0; i < locationHistories.size(); i++) {
-			LocationHistory locationHistory = locationHistories.get(i);
+		buffer.append("{'points':[");
+		for (int i = 0; i < locations.size(); i++) {
+		    edu.cmu.sv.trailscribe.model.Location locationHistory = locations.get(i);
 			
 			buffer.append("{'x':'").append(locationHistory.getX()).append("',");
 			buffer.append("'y':'").append(locationHistory.getY()).append("'}");
 			
-			if (i != locationHistories.size() - 1) {
+			if (i != locations.size() - 1) {
 				buffer.append(", ");
 			}
 		}
@@ -184,7 +183,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 			willDisplay = (state.equals(getResources().getString(R.string.map_display_current_location)));
 			
 			if (willDisplay) {
-				if (!mLocationClient.isConnected() || mLocation == null) {
+				if (mLocation == null) {
 					Toast.makeText(getApplicationContext(), 
 							"Current location is not available", Toast.LENGTH_SHORT).show();
 					return;
@@ -223,7 +222,8 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	@Override
 	public void onLocationChanged(Location location) {
 		mLocation = location;
-		
+
+//		TODO: Add location to database
 //		TODO: Verify if map layer changes whenever the location has changed
 		Toast.makeText(getApplicationContext(), 
 				"onLocationChanged: (" + mLocation.getLatitude() + "," + mLocation.getLongitude() + ")", Toast.LENGTH_SHORT).show();

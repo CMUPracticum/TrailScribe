@@ -1,6 +1,6 @@
 package edu.cmu.sv.trailscribe.model;
 
-public class LocationHistory {
+public class Location {
 	private long id;
 	private String time;	
 	private double x;
@@ -10,7 +10,7 @@ public class LocationHistory {
 	private long mapId;
 	private long expeditionId;
 	
-	public LocationHistory(
+	public Location(
 			long id, String time, double x, double y, double z,
 			long userId, long mapId, long expeditionId) {
 		this.id = id;
