@@ -39,7 +39,7 @@ public class SynchronizationCenterController
 		for (JsonElement item:syncResultJson) {
 			String model = item.getAsJsonObject().get("model").getAsString();
 			if(model.equals("map_manager.map")){
-				map = new Map();
+				map = new Map(0, model, model, model, 0, 0, 0, 0, 0, 0, model, model);
 				JsonObject mapsJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
 				map.setMinX(mapsJsonArray.get("min_x").getAsDouble());
 				map.setMaxZoomLevel(mapsJsonArray.get("max_zoom_level").getAsInt());

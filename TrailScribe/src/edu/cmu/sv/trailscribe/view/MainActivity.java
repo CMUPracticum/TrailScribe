@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,8 +55,6 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 	
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-		Log.d(MSG_TAG, "onItemClick: " + position + " is clicked");
-		
 		Intent intent;
 		switch (position) {
 		case 1:
