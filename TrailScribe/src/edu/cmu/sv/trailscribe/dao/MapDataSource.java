@@ -33,7 +33,6 @@ public class MapDataSource extends DataSource {
 		Map map = (Map) data;
 		
 		ContentValues values = new ContentValues();
-		values.put(DBHelper.KEY_ID, map.getName());
 		values.put(DBHelper.NAME, map.getName());
 		values.put(DBHelper.DESCRIPTION, map.getDescription());
 		values.put(DBHelper.PROJECTION, map.getProjection());

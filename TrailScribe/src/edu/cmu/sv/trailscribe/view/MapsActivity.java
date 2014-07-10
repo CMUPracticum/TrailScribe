@@ -200,8 +200,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 			state = mPositionHistoryButton.getText().toString();
 			willDisplay = (state.equals(getResources().getString(R.string.map_display_position_history)));
 			
-			Toast.makeText(getApplicationContext(), 
-					"Position history is hard-coded currently", Toast.LENGTH_SHORT).show();
 			if (willDisplay) {
 				mPositionHistoryButton.setText(R.string.map_hide_position_history);
 				message = MessageToWebview.DisplayPositionHistory;				
@@ -223,7 +221,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	public void onLocationChanged(Location location) {
 		mLocation = location;
 
-//		TODO: Add location to database
 //		TODO: Verify if map layer changes whenever the location has changed
 		Toast.makeText(getApplicationContext(), 
 				"onLocationChanged: (" + mLocation.getLatitude() + "," + mLocation.getLongitude() + ")", Toast.LENGTH_SHORT).show();
@@ -232,7 +229,9 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		if (shouldisplay) {
 			setLayers(MessageToWebview.DisplayCurrentLocation);
 		}
-	};
+		
+		super.onLocationChanged(location);
+	}
 	
 	private enum MessageToWebview {
 		Default("default"),

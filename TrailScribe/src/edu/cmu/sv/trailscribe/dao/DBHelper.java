@@ -43,7 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
     
     // Create Statements
     private static final String TABLE_MAP_COLUMN_DEFINITION = TABLE_MAP 
-    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY," + NAME + " TEXT," 
+    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME + " TEXT," 
     		+ DESCRIPTION + " TEXT," + PROJECTION + " TEXT," 
     		+ MIN_ZOOM_LEVEL + " INTEGER," + MAX_ZOOM_LEVEL + " INTEGER,"
     		+ MIN_X + " INTEGER, " + MIN_Y + " INTEGER, "
@@ -51,14 +51,14 @@ public class DBHelper extends SQLiteOpenHelper {
     		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + ")";
  
     private static final String TABLE_SAMPLE_COLUMN_DEFINITION = TABLE_SAMPLE 
-    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY," + NAME + " TEXT, "	+ DESCRIPTION + " TEXT, "
-    		+ TIME + " TEXT, "
+    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," 
+            + NAME + " TEXT, "	+ DESCRIPTION + " TEXT, " + TIME + " TEXT, "
     		+ X + " DOUBLE, " + Y + " DOUBLE, " + Z + " DOUBLE, " 
     		+ CUSTOM_FIELD + " TEXT," + LAST_MODIFIED + " TEXT," 
     		+ USER_ID + " INTEGER," + MAP_ID + " INTEGER," + EXPEDITION_ID + " INTEGER" + ")";
     
     private static final String TABLE_LOCATION_COLUMN_DEFINITION = TABLE_LOCATION
-    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY," + TIME + " TEXT,"
+    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + TIME + " TEXT,"
     		+ X + " DOUBLE, " + Y + " DOUBLE, " + Z + " DOUBLE, "
     		+ USER_ID + " INTEGER," + MAP_ID + " INTEGER," + EXPEDITION_ID + " INTEGER" + ")";
     

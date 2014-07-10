@@ -23,7 +23,6 @@ public class SampleDataSource extends DataSource {
 		super(dbHelper);
 		
 //		TODO: Remove when feature to add samples is implemented
-//		Seed data
 		Sample sample = new Sample(
 	    		0, "default name", "default description", "default time",
 	    		-122.04451, 37.41800, 0, "default custom field", "default last modified",
@@ -37,7 +36,6 @@ public class SampleDataSource extends DataSource {
 		Sample sample = (Sample) data;
 		
 	    ContentValues values = new ContentValues();
-	    values.put(DBHelper.KEY_ID, sample.getId());
 	    values.put(DBHelper.NAME, sample.getName());
 	    values.put(DBHelper.DESCRIPTION, sample.getDescription());
 	    values.put(DBHelper.TIME, sample.getTime());

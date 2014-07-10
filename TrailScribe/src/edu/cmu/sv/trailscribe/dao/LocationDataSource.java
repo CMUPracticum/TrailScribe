@@ -20,24 +20,6 @@ public class LocationDataSource extends DataSource {
 	
 	public LocationDataSource(DBHelper dbHelper) {
 		super (dbHelper);
-		
-		// TODO: Store current location in database
-		// Seed data
-		Location location1 = new Location(
-				100, "default time", -122.051258, 37.406001, 0, 0, 0, 0);
-		add(location1);
-		
-		Location location2 = new Location(
-				101, "default time", -122.053918, 37.411183, 0, 0, 0, 0);
-		add(location2);
-		
-		Location location3 = new Location(
-				102, "default time", -122.053768, 37.413296, 0, 0, 0, 0);
-		add(location3);
-		
-		Location location4 = new Location(
-				103, "default time", -122.053883, 37.416132, 0, 0, 0, 0);
-		add(location4);
 	}
 	
 	@Override
@@ -46,7 +28,6 @@ public class LocationDataSource extends DataSource {
 		Location location = (Location) data;
 		
 		ContentValues values = new ContentValues();
-		values.put(DBHelper.KEY_ID, location.getId());
 		values.put(DBHelper.TIME, location.getTime());
 		values.put(DBHelper.X, location.getX());
 		values.put(DBHelper.Y, location.getY());
