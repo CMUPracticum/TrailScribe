@@ -41,7 +41,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	private Button mCurrentLocationButton;
 	private Button mPositionHistoryButton;
 	private Button mKmlButton;
-
 	
 //	States
 	private boolean mIsDisplaySamples = false;
@@ -249,18 +248,16 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
             mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
 			break;
 		case R.id.maps_kml:
-			
 			if (mIsDisplayKML) {
                 message = MessageToWebview.HideKML;
                 mKmlButton.setBackgroundResource(R.drawable.button_kml);
             } else {
                 message = MessageToWebview.DisplayKML;
-                mKmlButton.setBackgroundResource(R.drawable.button_kml);
+                mKmlButton.setBackgroundResource(R.drawable.button_kml_toggle);
             }
           
 			mIsDisplayKML = !mIsDisplayKML;
 			break;		
-
 		default:
 				Toast.makeText(getApplicationContext(), 
 						"Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
