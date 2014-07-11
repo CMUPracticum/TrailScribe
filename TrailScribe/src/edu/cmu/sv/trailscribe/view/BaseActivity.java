@@ -13,6 +13,8 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 
 import edu.cmu.sv.trailscribe.R;
+import edu.cmu.sv.trailscribe.dao.DBHelper;
+import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 
 public class BaseActivity extends Activity implements 
 	LocationListener,
@@ -23,16 +25,20 @@ public class BaseActivity extends Activity implements
 	public static String MSG_TAG = "BaseActivity";
 	
 //	Application
-	protected TrailScribeApplication mApplication;
+	protected static TrailScribeApplication mApplication;
+	
+//	Database
+	protected static DBHelper mDBHelper;
 	
 //	Location
-	protected Location mLocation;
-	protected LocationClient mLocationClient;
+	protected static Location mLocation;
+	protected static LocationClient mLocationClient;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mApplication = (TrailScribeApplication) getApplication();
+		mDBHelper = mApplication.getDBHelper();
 		
 		setLocationClient();
 	}
@@ -63,12 +69,15 @@ public class BaseActivity extends Activity implements
 	@Override
 	public void onConnected(Bundle bundle) {
 		Log.d(MSG_TAG, "Application is connected to Google Play services");
-
+		
 		try {
 			mLocation = mLocationClient.getLastLocation();
 			if (mLocation == null) {
 				Log.e(MSG_TAG, "Null last location");
+				return;
 			}
+			
+			saveLocationToDatabase();
 		} catch (Exception e) {
 			Log.e(MSG_TAG, e.getMessage());
 		}
@@ -83,6 +92,7 @@ public class BaseActivity extends Activity implements
 
 	@Override
 	public void onLocationChanged(Location location) {
+	    saveLocationToDatabase();
 //		Action when location has changed will be decided by the activity 
 	}
 	
@@ -91,11 +101,21 @@ public class BaseActivity extends Activity implements
 		titleBar.setBackgroundColor(getResources().getColor(themeColor));
 	}
 	
+	private void saveLocationToDatabase() {
+	    LocationDataSource dataSource = new LocationDataSource(mDBHelper);
+	    edu.cmu.sv.trailscribe.model.Location loc = 
+	            new edu.cmu.sv.trailscribe.model.Location(
+	                    (int) (Math.random() * Integer.MAX_VALUE), "default time", 
+	                    mLocation.getLongitude(), mLocation.getLatitude(), mLocation.getAltitude(), 
+	                    0, 0, 0);
+        dataSource.add(loc);
+	}
+	
 	private void setLocationClient() {
 		mLocationClient = new LocationClient(this, this, this);
 		
 		try {
-			if (!mApplication.isPlayServicesAvailable()) {
+			if (!TrailScribeApplication.isPlayServicesAvailable()) {
 				Log.e(MSG_TAG, "Google Play service is not available");
 				return;
 			}

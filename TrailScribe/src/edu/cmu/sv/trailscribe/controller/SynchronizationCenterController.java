@@ -16,8 +16,10 @@ import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.BackendFacade;
 import edu.cmu.sv.trailscribe.model.Map;
 
-public class SynchronizationCenterController extends AsyncTask<String, Void, Void>implements AsyncTaskCompleteListener<String>{
-	private String endpoint = "http://trail-scribe.mlep.net/maps";
+public class SynchronizationCenterController 
+	extends AsyncTask<String, Void, Void> implements AsyncTaskCompleteListener<String>{
+	
+	private final String endpoint = "http://trail-scribe.mlep.net/maps";
 	private AsyncTaskCompleteListener<ArrayList<Map>> mTaskCompletedCallback;
 	private Context mContext;
 	
@@ -29,13 +31,20 @@ public class SynchronizationCenterController extends AsyncTask<String, Void, Voi
 	@Override
 	public void onTaskCompleted(String syncResult) {
 		JsonParser jsonParser = new JsonParser();
+		JsonElement jsonElement = jsonParser.parse(syncResult);
+		
+		if (jsonElement.isJsonNull()) {
+//			TODO Show notification when returned result is null
+			return;
+		}
+		
 		JsonArray syncResultJson = (JsonArray)jsonParser.parse(syncResult);
 		ArrayList<Map> maps = new ArrayList<Map>();
 		Map map;
-		for (JsonElement item:syncResultJson){
+		for (JsonElement item:syncResultJson) {
 			String model = item.getAsJsonObject().get("model").getAsString();
 			if(model.equals("sync_center.map")){
-				map = new Map();
+				map = new Map(0, model, model, model, 0, 0, 0, 0, 0, 0, model, model);
 				JsonObject mapsJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
 				map.setMinX(mapsJsonArray.get("min_x").getAsDouble());
 				map.setMaxZoomLevel(mapsJsonArray.get("max_zoom_level").getAsInt());
@@ -49,9 +58,9 @@ public class SynchronizationCenterController extends AsyncTask<String, Void, Voi
 				map.setMinY(mapsJsonArray.get("min_y").getAsDouble());
 				
 				//Persist
-				MapDataSource ds = new MapDataSource(mContext);
-				ds.open();
-				ds.createMap(map);
+//				MapDataSource ds = new MapDataSource(mContext);
+//				ds.open();
+//				ds.createMap(map);
 				maps.add(map);
 			}
 		}

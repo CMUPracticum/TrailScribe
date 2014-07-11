@@ -1,14 +1,7 @@
 package edu.cmu.sv.trailscribe.view;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
 
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
@@ -16,15 +9,8 @@ import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.Decompressor;
 import edu.cmu.sv.trailscribe.model.Downloader;
 import edu.cmu.sv.trailscribe.model.Map;
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -34,22 +20,23 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class SynchronizationCenterActivity extends Activity implements AsyncTaskCompleteListener {
-	  private ListView mListView;
-	  private SynchronizationCenterController mController;
-	  private ArrayList<Map> mMaps;
-	  private Map mCurrentMap;
+public class SynchronizationCenterActivity 
+    extends BaseActivity implements AsyncTaskCompleteListener {
 
-	  private ProgressDialog mSyncProgressDialog;
-	  private ProgressDialog mDownloadProgressDialog;
-	  private ProgressDialog mUnzippingProgressDialog; 
-	  private ArrayAdapter<Map> mAdapter;
+	public static final ActivityTheme ACTIVITY_THEME = 
+            new ActivityTheme("SyncCenter", "Synchronizes TrailScribe", R.color.red);
+    
+		private ListView mListView;
+		private SynchronizationCenterController mController;
+		private ArrayList<Map> mMaps;
+		private Map mCurrentMap;
+		private ProgressDialog mSyncProgressDialog;
+		private ProgressDialog mDownloadProgressDialog;
+		private ProgressDialog mUnzippingProgressDialog; 
+		private ArrayAdapter<Map> mAdapter;
 	  
-	  public static final ActivityTheme ACTIVITY_THEME = 
-				new ActivityTheme("SyncCenter", "Synchronizes TrailScribe", R.color.red);
-	  
-	  @Override
-      protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
           mSyncProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.synchronizing), true, true);
       	  mDownloadProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
@@ -97,7 +84,6 @@ public class SynchronizationCenterActivity extends Activity implements AsyncTask
 				}
 	         }); 
 		}
-		
 		else if(result instanceof Integer){
 			int downloadResult = (Integer) result;
 			if(downloadResult == DownloadManager.STATUS_SUCCESSFUL){
@@ -139,6 +125,5 @@ public class SynchronizationCenterActivity extends Activity implements AsyncTask
 			mAdapter.remove(mCurrentMap);
 			mAdapter.notifyDataSetChanged();
 		}
-		
 	}
 }

@@ -1,27 +1,33 @@
 package edu.cmu.sv.trailscribe.view;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+
+import edu.cmu.sv.trailscribe.dao.DBHelper;
+
 public class TrailScribeApplication extends Application {
 	private static final String MSG_TAG = "TrailScribeApplication";
 	
-	private Context mContext;
+	private static Context mContext;
+	private static DBHelper mDBHelper;
 
 	public TrailScribeApplication() {
+		
 	}
 	
 	@Override
 	public void onCreate() {
-		this.mContext = getApplicationContext();
+		mContext = getApplicationContext();
+		mDBHelper = new DBHelper(mContext);
+		
 		isPlayServicesAvailable();
 	}
 	
-	public boolean isPlayServicesAvailable() {
+	public static boolean isPlayServicesAvailable() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(mContext);
         
         if (resultCode == ConnectionResult.SUCCESS) {
@@ -31,6 +37,10 @@ public class TrailScribeApplication extends Application {
         
         Log.e(MSG_TAG, GooglePlayServicesUtil.getErrorString(resultCode));
         return false;
+	}
+	
+	public DBHelper getDBHelper() {
+		return mDBHelper;
 	}
 	
 }

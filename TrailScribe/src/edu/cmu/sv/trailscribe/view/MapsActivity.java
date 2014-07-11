@@ -1,5 +1,7 @@
 package edu.cmu.sv.trailscribe.view;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,6 +18,9 @@ import android.widget.Button;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
+import edu.cmu.sv.trailscribe.dao.LocationDataSource;
+import edu.cmu.sv.trailscribe.dao.SampleDataSource;
+import edu.cmu.sv.trailscribe.model.Sample;
 
 
 @SuppressLint("NewApi")
@@ -23,7 +28,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
-	
+
 //	Controllers
 	private MapsController mController;
 	
@@ -43,13 +48,12 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	private void setView() {
 		setContentView(R.layout.activity_maps);
 
-		setTitleBar(R.id.maps_titlebar, ACTIVITY_THEME.getActivityColor());
 		setMap();
 		setListener();
 	}
 	
 	private void setListener() {
-		mSamplesButton = (Button) findViewById(R.id.maps_samples);
+	    mSamplesButton = (Button) findViewById(R.id.maps_samples);
 		mCurrentLocationButton = (Button) findViewById(R.id.maps_current_location);
 		mPositionHistoryButton = (Button) findViewById(R.id.maps_position_history);
 		
@@ -82,10 +86,27 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	@JavascriptInterface
 	public String getSamples() {
-//		TODO Import actual samples in the future
+		SampleDataSource dataSource = new SampleDataSource(mDBHelper);
+		
+		List<Sample> samples = dataSource.getAll();
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("{'points':[");
+		for (int i = 0; i < samples.size(); i++) {
+			Sample sample = samples.get(i);
+			
+			buffer.append("{'x':'").append(sample.getX()).append("', ");
+			buffer.append("'y':'").append(sample.getY()).append("'}");
+			
+			if (i != samples.size() - 1) {
+				buffer.append(", ");
+			}
+		}
+		buffer.append("]}'");
+		
 		JSONObject mapPoints = null;
 		try {
-			mapPoints = new JSONObject("{'points':[{'x':'-122.04451', 'y':'37.41800'},{'x':'-122.07451', 'y':'37.41800'}, {'x':'-122.10451', 'y':'37.39800'}]}'");
+			mapPoints = new JSONObject(buffer.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} 
@@ -105,19 +126,31 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		}
 		
 		return mapPoints.toString();
-	}
+	}	
 	
 	@JavascriptInterface
 	public String getPositionHistory() {
-	// TODO: Import actual position history
+		LocationDataSource dataSource = new LocationDataSource(mDBHelper);
+		
+		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("{'points':[");
+		for (int i = 0; i < locations.size(); i++) {
+		    edu.cmu.sv.trailscribe.model.Location locationHistory = locations.get(i);
+			
+			buffer.append("{'x':'").append(locationHistory.getX()).append("',");
+			buffer.append("'y':'").append(locationHistory.getY()).append("'}");
+			
+			if (i != locations.size() - 1) {
+				buffer.append(", ");
+			}
+		}
+		buffer.append("]}'");
+		
 		JSONObject mapPoints = null;
 		try {
-			// TODO: Change the points
-			mapPoints = new JSONObject("{'points':[{'x':'-122.049841', 'y':'37.402865'},"
-					+ "{'x':'-122.051258', 'y':'37.406001'}, "
-					+ "{'x':'-122.053918', 'y':'37.411183'},"
-					+ "{'x':'-122.053768', 'y':'37.413296'},"
-					+ "{'x':'-122.053883', 'y':'37.416132'}]}'");
+			mapPoints = new JSONObject(buffer.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -150,7 +183,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 			willDisplay = (state.equals(getResources().getString(R.string.map_display_current_location)));
 			
 			if (willDisplay) {
-				if (!mLocationClient.isConnected() || mLocation == null) {
+				if (mLocation == null) {
 					Toast.makeText(getApplicationContext(), 
 							"Current location is not available", Toast.LENGTH_SHORT).show();
 					return;
@@ -167,8 +200,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 			state = mPositionHistoryButton.getText().toString();
 			willDisplay = (state.equals(getResources().getString(R.string.map_display_position_history)));
 			
-			Toast.makeText(getApplicationContext(), 
-					"Position history is hard-coded currently", Toast.LENGTH_SHORT).show();
 			if (willDisplay) {
 				mPositionHistoryButton.setText(R.string.map_hide_position_history);
 				message = MessageToWebview.DisplayPositionHistory;				
@@ -189,7 +220,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	@Override
 	public void onLocationChanged(Location location) {
 		mLocation = location;
-		
+
 //		TODO: Verify if map layer changes whenever the location has changed
 		Toast.makeText(getApplicationContext(), 
 				"onLocationChanged: (" + mLocation.getLatitude() + "," + mLocation.getLongitude() + ")", Toast.LENGTH_SHORT).show();
@@ -198,7 +229,9 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		if (shouldisplay) {
 			setLayers(MessageToWebview.DisplayCurrentLocation);
 		}
-	};
+		
+		super.onLocationChanged(location);
+	}
 	
 	private enum MessageToWebview {
 		Default("default"),
