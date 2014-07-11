@@ -31,7 +31,7 @@ public class SynchronizationCenterActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
-          mProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.synchronizing), true, true);
+          mProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.sync_synchronizing), true, true);
           mController = new SynchronizationCenterController(this);
           mController.execute();
       }
@@ -71,5 +71,7 @@ public class SynchronizationCenterActivity
 	            Toast.makeText(getApplicationContext(), "Synchronizing..." , Toast.LENGTH_LONG).show();
 	        }
 	    }); 
+	    
+	    setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 	}
 }
