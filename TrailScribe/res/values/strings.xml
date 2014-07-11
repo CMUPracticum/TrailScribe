@@ -9,13 +9,17 @@
     <string name="default_title">Title</string>
     <string name="default_description">Description</string>
     
+    <string name="map_display_tools">Show Tools</string>
+    <string name="map_hide_tools">Hide Tools</string>
     <string name="map_display_samples">Show Points of Samples</string>
     <string name="map_hide_samples">Hide Points of Samples</string>
     <string name="map_display_current_location">Show Current Location</string>
     <string name="map_hide_current_location">Hide Current Location</string>
     <string name="map_display_position_history">Show Position History</string>
     <string name="map_hide_position_history">Hide Position History</string>
-    <string name="synchronizing">Synchronizing...</string>
+    <string name="map_display_kml">Show KML</string>
+    <string name="map_hide_kml">Hide KML</string>
     
-
+    <string name="synchronizing">Synchronizing...</string>
+	<string name="uncompressing">Uncompressing...</string>
 </resources>

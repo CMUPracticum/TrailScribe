@@ -3,36 +3,31 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:windowNoTitle="true" >
+    android:windowNoTitle="true"
+    android:background="@drawable/background_nasa" >
 
-    <include
-        android:id="@+id/main_titlebar"
-        android:layout_width="match_parent"
-        android:layout_height="128px"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        layout="@layout/component_titlebar" />
-    
+<!--
     <include
         android:id="@+id/main_userstatus"
         android:layout_width="match_parent"
         android:layout_height="128px"
-        android:layout_below="@id/main_titlebar"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         layout="@layout/component_userstatus" />
+-->
     
 	<GridView
 		android:id="@+id/main_buttongrid"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/main_userstatus"
+		android:layout_height="fill_parent"
 		android:layout_alignParentLeft="true"
         android:layout_marginTop="32px"
+        android:gravity="center"
+        android:layout_gravity="center"
 		android:numColumns="2"
-		android:gravity="center_horizontal"
 		android:horizontalSpacing="32px"
-		android:verticalSpacing="32px"
-		android:background="@color/transparent" >
+		android:verticalSpacing="32px" >
 	</GridView>
+	<!-- android:layout_below="@id/main_userstatus" -->
 
 </RelativeLayout>	

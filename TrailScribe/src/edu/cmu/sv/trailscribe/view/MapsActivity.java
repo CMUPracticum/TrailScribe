@@ -8,6 +8,9 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.JavascriptInterface;
@@ -37,6 +40,13 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	private Button mSamplesButton;
 	private Button mCurrentLocationButton;
 	private Button mPositionHistoryButton;
+	private Button mKMLButton;
+	
+//	States
+	private boolean mIsDisplaySamples = false;
+	private boolean mIsDisplayCurrentLocation = false;
+	private boolean mIsDisplayPositionHistory = false;
+	private boolean mIsDisplayKML = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,17 +59,56 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		setContentView(R.layout.activity_maps);
 
 		setMap();
+		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 		setListener();
+	}
+	
+	@Override
+	protected void setActionBar(String color) {
+	    super.setActionBar(color);
+	    
+	    mActionBar.setIcon(R.drawable.button_settings);
+	    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_layout);
+	    
+	    mDrawerToggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, 
+                R.drawable.icon_trailscribe, R.string.map_display_tools, R.string.map_hide_tools) {
+
+            public void onDrawerClosed(View view) {
+                mActionBar.setIcon(R.drawable.button_settings);
+                super.onDrawerClosed(view);
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                mActionBar.setIcon(R.drawable.button_settings_toggle);
+                super.onDrawerOpened(drawerView);
+            }
+        };
+
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setHomeButtonEnabled(true);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    if (mDrawerToggle.onOptionsItemSelected(item)) {
+	        return true;
+	    }
+
+	    return super.onOptionsItemSelected(item);
 	}
 	
 	private void setListener() {
 	    mSamplesButton = (Button) findViewById(R.id.maps_samples);
 		mCurrentLocationButton = (Button) findViewById(R.id.maps_current_location);
 		mPositionHistoryButton = (Button) findViewById(R.id.maps_position_history);
+		mKMLButton = (Button) findViewById(R.id.maps_kml);
 		
 		mSamplesButton.setOnClickListener(this);
 		mCurrentLocationButton.setOnClickListener(this);
 		mPositionHistoryButton.setOnClickListener(this);
+		mKMLButton.setOnClickListener(this);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
@@ -159,55 +208,49 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	@Override
 	public void onClick(View v) {
-		String state;
-		boolean willDisplay;
 		MessageToWebview message = MessageToWebview.Default;
 		
 		switch (v.getId()) {
 		case R.id.maps_samples:
-			state = mSamplesButton.getText().toString();
-			willDisplay = (state.equals(getResources().getString(R.string.map_display_samples)));
-			
-			Toast.makeText(getApplicationContext(), 
-					"Sample locations are hard-coded currently", Toast.LENGTH_SHORT).show();
-			if (willDisplay) {
-				mSamplesButton.setText(R.string.map_hide_samples);
-				message = MessageToWebview.DisplaySamples;
-			} else {
-				mSamplesButton.setText(R.string.map_display_samples);
-				message = MessageToWebview.HideSamples;
-			}
+//		    Hide samples if they are currently displayed 
+		    if (mIsDisplaySamples) {
+		        message = MessageToWebview.HideSamples;
+		        mSamplesButton.setBackgroundResource(R.drawable.button_samples);
+		    } else {
+		        message = MessageToWebview.DisplaySamples;
+		        mSamplesButton.setBackgroundResource(R.drawable.button_samples_toggle);
+		    }
+		    
+		    mIsDisplaySamples = !mIsDisplaySamples;
 			break;
 		case R.id.maps_current_location:
-			state = mCurrentLocationButton.getText().toString();
-			willDisplay = (state.equals(getResources().getString(R.string.map_display_current_location)));
-			
-			if (willDisplay) {
-				if (mLocation == null) {
-					Toast.makeText(getApplicationContext(), 
-							"Current location is not available", Toast.LENGTH_SHORT).show();
-					return;
-				}
-				
-				mCurrentLocationButton.setText(R.string.map_hide_current_location);
-				message = MessageToWebview.DisplayCurrentLocation;
-			} else {
-				mCurrentLocationButton.setText(R.string.map_display_current_location);
-				message = MessageToWebview.HideCurrentLocation;
-			}
+//          Hide current location if it is currently displayed 
+		    if (mIsDisplayCurrentLocation) {
+		        message = MessageToWebview.HideCurrentLocation;
+		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location);
+		    } else {
+		        message = MessageToWebview.DisplayCurrentLocation;
+		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location_toggle);
+		    }
+          
+		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
 			break;
 		case R.id.maps_position_history:
-			state = mPositionHistoryButton.getText().toString();
-			willDisplay = (state.equals(getResources().getString(R.string.map_display_position_history)));
-			
-			if (willDisplay) {
-				mPositionHistoryButton.setText(R.string.map_hide_position_history);
-				message = MessageToWebview.DisplayPositionHistory;				
-			} else {
-				mPositionHistoryButton.setText(R.string.map_display_position_history);
-				message = MessageToWebview.HidePositionHistory;
-			}
+//          Hide location history if it is currently displayed
+            if (mIsDisplayPositionHistory) {
+                message = MessageToWebview.HidePositionHistory;
+                mPositionHistoryButton.setBackgroundResource(R.drawable.button_position_history);
+            } else {
+                message = MessageToWebview.HidePositionHistory;
+                mPositionHistoryButton.setBackgroundResource(R.drawable.button_position_history_toggle);
+            }
+          
+            mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
 			break;
+		case R.id.maps_kml:
+		    Toast.makeText(getApplicationContext(), 
+                    "Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
+		    return;
 		default:
 				Toast.makeText(getApplicationContext(), 
 						"Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
