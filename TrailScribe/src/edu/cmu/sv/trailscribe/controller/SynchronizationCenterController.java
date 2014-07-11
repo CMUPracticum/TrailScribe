@@ -2,13 +2,16 @@ package edu.cmu.sv.trailscribe.controller;
 
 import java.util.ArrayList;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.BackendFacade;
 import edu.cmu.sv.trailscribe.model.Map;
@@ -16,9 +19,11 @@ import edu.cmu.sv.trailscribe.model.Map;
 public class SynchronizationCenterController extends AsyncTask<String, Void, Void>implements AsyncTaskCompleteListener<String>{
 	private String endpoint = "http://trail-scribe.mlep.net/maps";
 	private AsyncTaskCompleteListener<ArrayList<Map>> mTaskCompletedCallback;
+	private Context mContext;
 	
-	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<Map>> callback){
+	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<Map>> callback, Context context){
 		this.mTaskCompletedCallback = callback;
+		mContext = context;
 	}
 	
 	@Override
@@ -29,7 +34,7 @@ public class SynchronizationCenterController extends AsyncTask<String, Void, Voi
 		Map map;
 		for (JsonElement item:syncResultJson){
 			String model = item.getAsJsonObject().get("model").getAsString();
-			if(model.equals("map_manager.map")){
+			if(model.equals("sync_center.map")){
 				map = new Map();
 				JsonObject mapsJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
 				map.setMinX(mapsJsonArray.get("min_x").getAsDouble());
@@ -43,6 +48,10 @@ public class SynchronizationCenterController extends AsyncTask<String, Void, Voi
 				map.setMaxX(mapsJsonArray.get("max_x").getAsDouble());
 				map.setMinY(mapsJsonArray.get("min_y").getAsDouble());
 				
+				//Persist
+				MapDataSource ds = new MapDataSource(mContext);
+				ds.open();
+				ds.createMap(map);
 				maps.add(map);
 			}
 		}

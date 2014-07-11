@@ -123,4 +123,9 @@ public class Map {
 	public void setLastModified(String mLastModified) {
 		this.mLastModified = mLastModified;
 	}
+	
+	@Override
+	public String toString(){
+		return this.getName();
+	}
 }
