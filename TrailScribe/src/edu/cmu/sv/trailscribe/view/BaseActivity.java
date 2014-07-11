@@ -25,18 +25,18 @@ public class BaseActivity extends Activity implements
 	GooglePlayServicesClient.ConnectionCallbacks,
 	GooglePlayServicesClient.OnConnectionFailedListener {
 	
-	public final static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Default", "default", R.color.blue);
-	public final static String MSG_TAG = "BaseActivity";
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Default", "default", R.color.blue);
+	public static String MSG_TAG = "BaseActivity";
 	
 //	Application
-	protected TrailScribeApplication mApplication;
+	protected static TrailScribeApplication mApplication;
 	
 //	Database
-	protected DBHelper mDBHelper;
+	protected static DBHelper mDBHelper;
 	
 //	Location
-	protected Location mLocation;
-	protected LocationClient mLocationClient;
+	protected static Location mLocation;
+	protected static LocationClient mLocationClient;
 	
 //	View
     protected DrawerLayout mDrawerLayout;
@@ -77,17 +77,19 @@ public class BaseActivity extends Activity implements
 
 	@Override
 	public void onConnected(Bundle bundle) {
-            if (mLocationClient.isConnected()) {
-                Log.d(MSG_TAG, "Application is connected to Google Play services");
-                mLocation = mLocationClient.getLastLocation();
-                if (mLocation == null) {
-                    Log.e(MSG_TAG, "Null last location");
-                } else {
-                    saveLocationToDatabase();
-                }
-            } else {
-                Log.e(MSG_TAG, "onConnect called but client is not connected");
-            }
+		Log.d(MSG_TAG, "Application is connected to Google Play services");
+		
+		try {
+			mLocation = mLocationClient.getLastLocation();
+			if (mLocation == null) {
+				Log.e(MSG_TAG, "Null last location");
+				return;
+			}
+			
+			saveLocationToDatabase();
+		} catch (Exception e) {
+			Log.e(MSG_TAG, e.getMessage());
+		}
 	}
 
 	@Override
@@ -136,7 +138,6 @@ public class BaseActivity extends Activity implements
     public void setDBHelper(DBHelper helper) {
         mDBHelper = helper;
     }
-
 	
 	protected void setActionBar(String color) {
 	    mActionBar = getActionBar();
