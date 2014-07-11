@@ -25,7 +25,11 @@ import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallback
 import android.os.Bundle;
 import android.os.SystemClock;
 import edu.cmu.sv.trailscribe.R;
-import android.util.Base64;
+import android.test.RenamingDelegatingContext;
+import edu.cmu.sv.trailscribe.dao.DBHelper;
+import android.view.LayoutInflater;
+import android.content.Context;
+import android.content.ContextWrapper;
 
 public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActivity> {
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";
@@ -41,12 +45,15 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     private static final double LOC_LAT = 37.377166;
     private static final double LOC_LNG = -122.086966;
     private static final float LOC_ACCURACY = 3.0f;
+    private static final String TEST_FILE_PREFIX = "test_";
 
     private LocationClient tLocationClient;
 
     private MapsActivity tMapsActivity;
     private WebView tWebView;
     private MapsController tMapsController;
+
+    private DBHelper tHelper;
 
     private Button tSamplesButton;
     private Button tCurrentLocationButton;
@@ -78,9 +85,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
 
     @Override
     protected void setUp() throws Exception {
-        Log.d(LOG_TAG, "Started setup");
         super.setUp();
-        Log.d(LOG_TAG, "In MapsActivityTest setup");
 
         // find all UI elements
         tMapsActivity = getActivity();
@@ -93,8 +98,6 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
             .findViewById(R.id.maps_current_location);
         tPositionHistoryButton = (Button) tMapsActivity
             .findViewById(R.id.maps_position_history);
-
-        Log.d(LOG_TAG, "Found UI elements");
 
         // set a web chrome client with more debug info
         tMapsActivity.runOnUiThread(new Runnable() {
@@ -129,7 +132,12 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         assertTrue(locationDone.await(GENERAL_AWAIT_TIMEOUT, TimeUnit.SECONDS));
         tLocationClient.setMockMode(true);
         tLocationClient.unregisterConnectionCallbacks(listener);
-        Log.d(LOG_TAG, "Finished setup");
+
+        // setup database
+        final RenamingDelegatingContext context = new RenamingDelegatingContext(getInstrumentation().getTargetContext().getApplicationContext(), TEST_FILE_PREFIX);
+        tHelper = new DBHelper(context);
+        tMapsActivity.setDBHelper(tHelper);
+
     }
 
     private Location createLocation(final double lat, final double lng, final float accuracy) {
