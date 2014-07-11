@@ -1,10 +1,14 @@
 package edu.cmu.sv.trailscribe.view;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,6 +37,11 @@ public class BaseActivity extends Activity implements
 //	Location
 	protected static Location mLocation;
 	protected static LocationClient mLocationClient;
+	
+//	View
+    protected DrawerLayout mDrawerLayout;
+    protected ActionBar mActionBar;
+    protected ActionBarDrawerToggle mDrawerToggle;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -96,11 +105,6 @@ public class BaseActivity extends Activity implements
 //		Action when location has changed will be decided by the activity 
 	}
 	
-	protected void setTitleBar(int viewId, int themeColor) {
-		View titleBar = (View) findViewById(viewId);
-		titleBar.setBackgroundColor(getResources().getColor(themeColor));
-	}
-	
 	private void saveLocationToDatabase() {
 	    LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 	    edu.cmu.sv.trailscribe.model.Location loc = 
@@ -124,5 +128,13 @@ public class BaseActivity extends Activity implements
 		} catch (Exception e) {
 			Log.e(MSG_TAG, e.getMessage());
 		}
+	}
+	
+	protected void setActionBar(String color) {
+	    mActionBar = getActionBar();
+        mActionBar.setTitle("");
+        mActionBar.setIcon(R.drawable.icon_trailscribe);
+        
+        mActionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor(color)));
 	}
 }

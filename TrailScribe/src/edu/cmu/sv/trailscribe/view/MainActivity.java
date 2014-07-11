@@ -31,8 +31,8 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 	private void setView() {
 		setContentView(R.layout.activity_main);
 		
-		setTitleBar(R.id.main_titlebar, ACTIVITY_THEME.getActivityColor());
 		setGrid();
+		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 	}
 	
 	private void setGrid() {
