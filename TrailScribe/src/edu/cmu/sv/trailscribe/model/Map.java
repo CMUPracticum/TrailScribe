@@ -123,6 +123,11 @@ public class Map {
 		this.mLastModified = mLastModified;
 	}
 	
+	@Override
+	public String toString(){
+		return this.getName();
+	}
+	
 	public String getDescription() {
 		return mDescription;
 	}

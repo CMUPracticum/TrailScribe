@@ -25,6 +25,7 @@ var renderer;
 var layer_style;
 var style_blue;
 var style_line;
+var style_fat_line;
 var style_mark_blue;
 var style_mark_green;
 var style_mark_gold;
@@ -119,7 +120,10 @@ function init() {
     style_line = OpenLayers.Util.extend({}, layer_style);
     style_line.strokeColor = "red";
     style_line.strokeWidth = 2;
-
+    
+    style_fat_line = OpenLayers.Util.extend({}, layer_style);
+    style_fat_line.strokeColor = "yellow";
+    style_fat_line.strokeWidth = 5;
     
     // Mark style
     style_mark_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
@@ -314,8 +318,8 @@ function setLayers(msg) {
 				renderers: renderer
 			});
 			
-			var pointFeatures = getPointsFromJava(msg);
-			displayPoints(pointFeatures, positionHistoryLayer);
+			var lineFeature = getLinesFromJava(msg);
+			displayPoints(lineFeature, positionHistoryLayer);
 			break;
 			
 		case "HidePositionHistory":
@@ -356,10 +360,10 @@ function getPointsFromJava(msg) {
             points = android.getCurrentLocation();
             mark_style = style_mark_green;
             break;
-		case "DisplayPositionHistory":
-			points = android.getPositionHistory();
-			mark_style = style_mark_gold;
-			break;        
+//		case "DisplayPositionHistory":
+//			points = android.getPositionHistory();
+//			mark_style = style_mark_gold;
+//			break;        
         default:
             return;
     }
@@ -376,4 +380,34 @@ function getPointsFromJava(msg) {
     }
 
     return pointFeatures;
+}
+
+function getLinesFromJava(msg) {
+    var points;
+    var line_style;
+
+    switch (msg) {
+		case "DisplayPositionHistory":
+			points = android.getPositionHistory();
+			line_style = style_fat_line;
+			break;        
+        default:
+            return;
+    }
+    
+    points = JSON.parse(points);
+    var pointList = [];
+    var pointFeatures = [];
+    for(data in points['points']){
+	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
+        point = point.transform(map.displayProjection, map.projection);    
+        var pointFeature = new OpenLayers.Feature.Vector(point, null, line_style);
+        pointFeatures.push(pointFeature);
+        pointList.push(point);
+    }
+    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), 
+    null, line_style);
+    pointFeatures.push(lineFeature);
+
+    return lineFeature;
 }

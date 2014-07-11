@@ -20,7 +20,7 @@
     <string name="map_display_kml">Show KML</string>
     <string name="map_hide_kml">Hide KML</string>
     
-    <string name="sync_synchronizing">Synchronizing...</string>
-    
+    <string name="synchronizing">Synchronizing...</string>
+	<string name="uncompressing">Uncompressing...</string>
 
 </resources>
