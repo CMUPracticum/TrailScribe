@@ -116,28 +116,19 @@ public class BaseActivity extends Activity implements
 	}
 	
 	private void setLocationClient() {
-            setLocationClient(new LocationClient(this, this, this));
+		mLocationClient = new LocationClient(this, this, this);
+		
+		try {
+			if (!TrailScribeApplication.isPlayServicesAvailable()) {
+				Log.e(MSG_TAG, "Google Play service is not available");
+				return;
+			}
+			
+			mLocationClient.connect();
+		} catch (Exception e) {
+			Log.e(MSG_TAG, e.getMessage());
+		}
 	}
-
-    // code to allow overiding of location client, needed for testing
-    public void setLocationClient(LocationClient client) {
-        mLocationClient = client;
-        try {
-            if (!TrailScribeApplication.isPlayServicesAvailable()) {
-                Log.e(MSG_TAG, "Google Play service is not available");
-                return;
-            }
-            mLocationClient.connect();
-        } catch (Exception e) {
-            Log.e(MSG_TAG, e.getMessage());
-        }
-    }
-
-    // override the dbhelper so a test database can be used instead of
-    // the default one
-    public void setDBHelper(DBHelper helper) {
-        mDBHelper = helper;
-    }
 	
 	protected void setActionBar(String color) {
 	    mActionBar = getActionBar();
@@ -146,4 +137,11 @@ public class BaseActivity extends Activity implements
         
         mActionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor(color)));
 	}
+
+    // override the dbhelper so a test database can be used instead of
+    // the default one
+    public void setDBHelper(DBHelper helper) {
+        mDBHelper = helper;
+    }
+
 }
