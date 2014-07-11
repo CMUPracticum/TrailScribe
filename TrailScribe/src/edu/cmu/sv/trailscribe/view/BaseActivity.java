@@ -21,18 +21,18 @@ public class BaseActivity extends Activity implements
 	GooglePlayServicesClient.ConnectionCallbacks,
 	GooglePlayServicesClient.OnConnectionFailedListener {
 	
-	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Default", "default", R.color.blue);
-	public static String MSG_TAG = "BaseActivity";
+	public final static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Default", "default", R.color.blue);
+	public final static String MSG_TAG = "BaseActivity";
 	
 //	Application
-	protected static TrailScribeApplication mApplication;
+	protected TrailScribeApplication mApplication;
 	
 //	Database
-	protected static DBHelper mDBHelper;
+	protected DBHelper mDBHelper;
 	
 //	Location
-	protected static Location mLocation;
-	protected static LocationClient mLocationClient;
+	protected Location mLocation;
+	protected LocationClient mLocationClient;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -126,4 +126,11 @@ public class BaseActivity extends Activity implements
             Log.e(MSG_TAG, e.getMessage());
         }
     }
+
+    // override the dbhelper so a test database can be used instead of
+    // the default one
+    public void setDBHelper(DBHelper helper) {
+        mDBHelper = helper;
+    }
+
 }
