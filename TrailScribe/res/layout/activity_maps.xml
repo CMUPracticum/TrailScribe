@@ -44,8 +44,9 @@
             android:layout_height="192px"
             android:text="@string/map_display_position_history"/>
         <Button
+            android:id="@+id/maps_kml"
             android:layout_width="192px"
             android:layout_height="192px"
-            android:text="KML"/>
+            android:text="@string/map_display_kml"/>
     </LinearLayout>
 </RelativeLayout>

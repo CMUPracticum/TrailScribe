@@ -37,6 +37,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	private Button mSamplesButton;
 	private Button mCurrentLocationButton;
 	private Button mPositionHistoryButton;
+	private Button mKmlButton;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,10 +57,12 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	    mSamplesButton = (Button) findViewById(R.id.maps_samples);
 		mCurrentLocationButton = (Button) findViewById(R.id.maps_current_location);
 		mPositionHistoryButton = (Button) findViewById(R.id.maps_position_history);
+		mKmlButton = (Button) findViewById(R.id.maps_kml);
 		
 		mSamplesButton.setOnClickListener(this);
 		mCurrentLocationButton.setOnClickListener(this);
 		mPositionHistoryButton.setOnClickListener(this);
+		mKmlButton.setOnClickListener(this);
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
@@ -208,6 +211,19 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 				message = MessageToWebview.HidePositionHistory;
 			}
 			break;
+		case R.id.maps_kml:
+			state = mKmlButton.getText().toString();
+			willDisplay = (state.equals(getResources().getString(R.string.map_display_kml)));
+			
+			if (willDisplay) {
+				mKmlButton.setText(R.string.map_hide_kml);
+				message = MessageToWebview.DisplayKML;
+			} else {
+				mKmlButton.setText(R.string.map_display_kml);
+				message = MessageToWebview.HideKML;
+			}
+					
+			break;
 		default:
 				Toast.makeText(getApplicationContext(), 
 						"Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
@@ -241,7 +257,9 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		DisplayCurrentLocation("DisplayCurrentLocation"),
 		HideCurrentLocation("HideCurrentLocation"),
 		DisplayPositionHistory("DisplayPositionHistory"),
-		HidePositionHistory("HidePositionHistory");
+		HidePositionHistory("HidePositionHistory"),
+		DisplayKML("DisplayKML"),
+		HideKML("HideKML");
 		
 		private final String message;
 		MessageToWebview(String message) {
