@@ -74,6 +74,7 @@ function init() {
     {
         serviceVersion: '.',
         layername: 'tiles',
+        //layername: '../../sdcard/trailscribe/tiles',
         alpha: true,
         type: 'png',
         isBaseLayer: true, 
@@ -129,24 +130,24 @@ function init() {
     style_mark_gold = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']); 
 
     // if graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
-    style_mark_blue.graphicWidth = 21;
-    style_mark_blue.graphicHeight = 25;
+    style_mark_blue.graphicWidth = 42;
+    style_mark_blue.graphicHeight = 50;
     style_mark_blue.graphicXOffset = -(style_mark_blue.graphicWidth/2);
     style_mark_blue.graphicYOffset = -style_mark_blue.graphicHeight;
     style_mark_blue.externalGraphic = "./lib/openlayers/img/marker.png";
     style_mark_blue.fillOpacity = 1;
     style_mark_blue.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
 
-    style_mark_green.graphicWidth = 21;
-    style_mark_green.graphicHeight = 25;
+    style_mark_green.graphicWidth = 42;
+    style_mark_green.graphicHeight = 50;
     style_mark_green.graphicXOffset = -(style_mark_blue.graphicWidth/2);
     style_mark_green.graphicYOffset = -style_mark_blue.graphicHeight;
     style_mark_green.externalGraphic = "./lib/openlayers/img/marker-green.png";
     style_mark_green.fillOpacity = 1;
     style_mark_green.title = "this is a test tooltip";
     
-    style_mark_gold.graphicWidth = 21;
-    style_mark_gold.graphicHeight = 25;
+    style_mark_gold.graphicWidth = 42;
+    style_mark_gold.graphicHeight = 50;
     style_mark_gold.graphicXOffset = -(style_mark_gold.graphicWidth/2);
     style_mark_gold.graphicYOffset = -style_mark_gold.graphicHeight;
     style_mark_gold.externalGraphic = "./lib/openlayers/img/marker-gold.png";
@@ -220,12 +221,14 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
     
-    var path = this.serviceVersion + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type; 
+    //var path = this.serviceVersion + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+    var path = "file:///sdcard/trailscribe" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
     var url = this.url;
+    
     if (OpenLayers.Util.isArray(url)) {
         url = this.selectUrl(path, url);
     }
-    if (mapBounds.intersectsBounds(bounds) && (z >= mapMinZoom) && (z <= mapMaxZoom)) {
+    if (mapBounds.intersectsBounds(bounds) && (z >= mapMinZoom) && (z <= mapMaxZoom)) {        
         return url + path;
     } else {
         return emptyTileURL;
@@ -259,6 +262,10 @@ function onFeatureUnselect(evt) {
         feature.popup.destroy();
         feature.popup = null;
     }
+}
+
+function getKmlUrl(kmlFile) {    
+    return "file:///sdcard/trailscribe" + "/kml/" + kmlFile + "." + "kml";
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -309,8 +316,8 @@ function setLayers(msg) {
 			break;
         case "DisplayKML":            
             //var kml = getKMLFromJava(msg);            
-            var kml = "test_layer.kml";
-            var kmlFile = "kml/" + kml;
+            var kml = "test_layer"; // TO DO: This is hardcoded. 
+            var kmlFile = kml;
             displayKML(kmlFile);
             break;
         case "HideKML":
@@ -343,7 +350,7 @@ function displayKML(kmlFile) {
             projection: map.displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
-                url: kmlFile,                    
+                url: getKmlUrl(kmlFile),                    
                 format: new OpenLayers.Format.KML({
                     extractStyles: true, 
                     extractAttributes: true,
