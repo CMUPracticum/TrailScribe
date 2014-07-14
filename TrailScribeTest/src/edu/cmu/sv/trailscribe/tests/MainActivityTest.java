@@ -3,6 +3,7 @@ package edu.cmu.sv.trailscribe.tests;
 import android.test.ActivityInstrumentationTestCase2;
 import edu.cmu.sv.trailscribe.view.MainActivity;
 import edu.cmu.sv.trailscribe.view.MapsActivity;
+import edu.cmu.sv.trailscribe.view.SynchronizationCenterActivity;
 import android.widget.GridView;
 import android.app.Instrumentation.ActivityMonitor;
 import android.app.Instrumentation;
@@ -21,7 +22,10 @@ import edu.cmu.sv.trailscribe.R;
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
     private static final int GRIDVIEW_ELEMENTS = 4;
     private static final String LOG_TAG = "MainActivityTest";
-    private static final long IDLE_SYNC_TIMEOUT = 10L;
+    private static final long IDLE_SYNC_TIMEOUT = 10L; // seconds
+    private static final long ACTIVITY_START_TIMEOUT = 1000L; // milliseconds
+    private static final int MAPS_GRID_BUTTON = 1;
+    private static final int SYNC_GRID_BUTTON = 2;
 
     private MainActivity tMainActivity;
     private GridView tGridView;
@@ -53,12 +57,25 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         final ActivityMonitor monitor = getInstrumentation().addMonitor(MapsActivity.class.getName(), null, false);
         runTestOnUiThread(new Runnable() {
                 public void run() {
-                    tGridView.performItemClick(tGridView.getAdapter().getView(1, null, null),
-                                               1, tGridView.getAdapter().getItemId(1));
+                    tGridView.performItemClick(tGridView.getAdapter().getView(MAPS_GRID_BUTTON, null, null),
+                                               MAPS_GRID_BUTTON, tGridView.getAdapter().getItemId(MAPS_GRID_BUTTON));
                 }
             });
-        final MapsActivity activity = (MapsActivity) monitor.waitForActivityWithTimeout(1000L);
+        final MapsActivity activity = (MapsActivity) monitor.waitForActivityWithTimeout(ACTIVITY_START_TIMEOUT);
         assertNotNull("Maps activity not started", activity);
+        activity.finish();
+    }
+
+    public void testButton_syncActivity() throws InterruptedException, Throwable {
+        final ActivityMonitor monitor = getInstrumentation().addMonitor(SynchronizationCenterActivity.class.getName(), null, false);
+        runTestOnUiThread(new Runnable() {
+                public void run() {
+                    tGridView.performItemClick(tGridView.getAdapter().getView(SYNC_GRID_BUTTON, null, null),
+                                               SYNC_GRID_BUTTON, tGridView.getAdapter().getItemId(SYNC_GRID_BUTTON));
+                }
+            });
+        final SynchronizationCenterActivity activity = (SynchronizationCenterActivity) monitor.waitForActivityWithTimeout(ACTIVITY_START_TIMEOUT);
+        assertNotNull("Synchronization center activity not started", activity);
         activity.finish();
     }
 }
