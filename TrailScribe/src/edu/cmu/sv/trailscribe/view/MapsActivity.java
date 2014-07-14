@@ -163,7 +163,13 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	}
 	
 	@JavascriptInterface
-	public String getCurrentLocation() {
+	public String getCurrentLocation() throws Exception {
+	    if (mLocation == null) {
+            Toast.makeText(getApplicationContext(), 
+                    "Current location is not available", Toast.LENGTH_SHORT).show();
+	        throw new Exception("Current location is not available");
+	    }
+	    
 		JSONObject mapPoints = null;
 		
 		try {
