@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.util.Log;
 
 public class SynchronizationCenterActivity 
     extends BaseActivity implements AsyncTaskCompleteListener {
@@ -34,6 +35,7 @@ public class SynchronizationCenterActivity
 		private ProgressDialog mDownloadProgressDialog;
 		private ProgressDialog mUnzippingProgressDialog; 
 		private ArrayAdapter<Map> mAdapter;
+    private static final String LOG_TAG = "SynchronizationCenterActivity";
 	  
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,11 @@ public class SynchronizationCenterActivity
 			mMaps = (ArrayList<Map>) result;
 			
 			if (mSyncProgressDialog != null){
+                            try {
 	            mSyncProgressDialog.dismiss();
+                            } catch (Exception e) {
+                                Log.w(LOG_TAG, "Activity ended before task completed");
+                            }
 			}
 			
 			setContentView(R.layout.activity_sync_center);
