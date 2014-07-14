@@ -17,6 +17,7 @@ var tmsOverlay;
 var sampleLayer;
 var currentLocationLayer;
 var positionHistoryLayer;
+var kmlLayer;
 
 // Render
 var renderer;
@@ -58,11 +59,11 @@ function init() {
                         enableKinetic: true
                     }
                 }),
-                new OpenLayers.Control.Zoom()
+                //new OpenLayers.Control.Zoom()
             ],
             projection: "EPSG:900913", // web mercator
             displayProjection: new OpenLayers.Projection("EPSG:4326"), // spherical mercator
-            numZoomLevels: 16
+            tileSize: new OpenLayers.Size(256, 256)
         };
     
     // Create map
@@ -91,10 +92,7 @@ function init() {
 
     // Zoom to extent
     map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
-    map.zoomTo(13);    
-
-    // Show mouse position-coordinate relation
-    //map.addControls([new OpenLayers.Control.MousePosition()]);
+    map.zoomTo(14);    
 
     /////////////////////////////////////////////////////////////////////////////////////////
     // Geometry layer
@@ -211,23 +209,7 @@ function init() {
     var control = new OpenLayers.Control.SelectFeature(vectorLayer);
     map.addControl(control);
     control.activate();
-**/
-
-    var kmlOverlay = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
-                projection: map.displayProjection,
-                strategies: [new OpenLayers.Strategy.Fixed()],
-                protocol: new OpenLayers.Protocol.HTTP({
-                    url: "kml/simple.kml",                    
-                    format: new OpenLayers.Format.KML({
-                        extractStyles: true, 
-                        extractAttributes: true,
-                        maxDepth: 2
-                    })
-                })
-            }));
-
-    // Add KML Overlay
-    map.addLayers([kmlOverlay]);
+**/    
 
 }
 
@@ -325,7 +307,15 @@ function setLayers(msg) {
 		case "HidePositionHistory":
 			hideLayer(positionHistoryLayer);
 			break;
-            
+        case "DisplayKML":            
+            //var kml = getKMLFromJava(msg);            
+            var kml = "test_layer.kml";
+            var kmlFile = "kml/" + kml;
+            displayKML(kmlFile);
+            break;
+        case "HideKML":
+            hideLayer(kmlLayer);
+            break;
         default:
             break;
     }
@@ -345,6 +335,25 @@ function displayPoints(pointFeatures, layer) {
     var control = new OpenLayers.Control.SelectFeature(layer);
     map.addControl(control);
     control.activate();
+}
+
+function displayKML(kmlFile) {
+
+    kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
+            projection: map.displayProjection,
+            strategies: [new OpenLayers.Strategy.Fixed()],
+            protocol: new OpenLayers.Protocol.HTTP({
+                url: kmlFile,                    
+                format: new OpenLayers.Format.KML({
+                    extractStyles: true, 
+                    extractAttributes: true,
+                    maxDepth: 2
+                })
+            })
+        }));
+
+    // Add KML Overlay
+    map.addLayer(kmlLayer);
 }
 
 function getPointsFromJava(msg) {

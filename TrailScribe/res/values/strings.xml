@@ -16,7 +16,7 @@
     <string name="map_display_current_location">Show Current Location</string>
     <string name="map_hide_current_location">Hide Current Location</string>
     <string name="map_display_position_history">Show Position History</string>
-    <string name="map_hide_position_history">Hide Position History</string>
+    <string name="map_hide_position_history">Hide Position History</string>   
     <string name="map_display_kml">Show KML</string>
     <string name="map_hide_kml">Hide KML</string>
     
