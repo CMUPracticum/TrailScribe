@@ -3,6 +3,7 @@
 //
 
 // Map and map properties initialization
+// TO DO: (Isil) These properties should be set dynamically
 var map;
 var mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
 var mapMinZoom = 11;
@@ -21,15 +22,6 @@ var kmlLayer;
 
 // Render
 var renderer;
-
-// Styles
-var layer_style;
-var style_blue;
-var style_line;
-var style_fat_line;
-var style_mark_blue;
-var style_mark_green;
-var style_mark_gold;
 
 //
 // /End of map and layers setup
@@ -73,8 +65,7 @@ function init() {
     tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "",
     {
         serviceVersion: '.',
-        layername: 'tiles',
-        //layername: '../../sdcard/trailscribe/tiles',
+        layername: 'tiles',        
         alpha: true,
         type: 'png',
         isBaseLayer: true, 
@@ -102,124 +93,6 @@ function init() {
     // Allow testing of specific renderers via "?renderer=Canvas", etc
     renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
     renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
-
-    // Layer style
-    // We want opaque external graphics and non-opaque internal graphics
-    layer_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-    layer_style.fillOpacity = 0.4;
-    layer_style.graphicOpacity = 1;
-    layer_style.strokeWidth = 1.5;
-
-    // Blue style
-    style_blue = OpenLayers.Util.extend({}, layer_style);
-    style_blue.strokeColor = "blue";
-    style_blue.fillColor = "blue";
-
-    // Line style
-    style_line = OpenLayers.Util.extend({}, layer_style);
-    style_line.strokeColor = "red";
-    style_line.strokeWidth = 2;
-    
-    style_fat_line = OpenLayers.Util.extend({}, layer_style);
-    style_fat_line.strokeColor = "yellow";
-    style_fat_line.strokeWidth = 5;
-    
-    // Mark style
-    style_mark_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
-    style_mark_green = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-    style_mark_gold = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']); 
-
-    // if graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
-
-    style_mark_blue.graphicWidth = 42;
-    style_mark_blue.graphicHeight = 50;
-    style_mark_blue.graphicXOffset = -(style_mark_blue.graphicWidth/2);
-    style_mark_blue.graphicYOffset = -style_mark_blue.graphicHeight;
-    style_mark_blue.externalGraphic = "./lib/openlayers/img/location_place.png";
-    style_mark_blue.fillOpacity = 1;
-    style_mark_blue.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
-
-    style_mark_green.graphicWidth = 42;
-    style_mark_green.graphicHeight = 50;
-    style_mark_green.graphicXOffset = -(style_mark_blue.graphicWidth/2);
-    style_mark_green.graphicYOffset = -style_mark_blue.graphicHeight;
-    style_mark_green.externalGraphic = "./lib/openlayers/img/marker-green.png";
-
-    style_mark_green.graphicWidth = 42;
-    style_mark_green.graphicHeight = 50;
-    style_mark_green.graphicXOffset = -(style_mark_green.graphicWidth/2);
-    style_mark_green.graphicYOffset = -(style_mark_green.graphicHeight/2);
-    style_mark_green.externalGraphic = "./lib/openlayers/img/location_found.png";
-
-    style_mark_green.fillOpacity = 1;
-    style_mark_green.title = "this is a test tooltip";
-    
-    style_mark_gold.graphicWidth = 42;
-    style_mark_gold.graphicHeight = 50;
-    style_mark_gold.graphicXOffset = -(style_mark_gold.graphicWidth/2);
-    style_mark_gold.graphicYOffset = -style_mark_gold.graphicHeight;
-    style_mark_gold.externalGraphic = "./lib/openlayers/img/marker-gold.png";
-    style_mark_gold.fillOpacity = 1;
-    style_mark_gold.title = "this is a test tooltip"; // TODO: change this
-
-/**
-    // Displaying points, lines, and polygons
-    // Initialize vector layer
-    vectorLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
-                style: layer_style,
-                renderers: renderer
-            });
-
-    // Create point features
-    var points = android.getData(); 
-	points = JSON.parse(points);
-	var pointList = [];
-	var pointFeatures = [];
-	for(data in points['points']){
-		var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
-	    point = point.transform(map.displayProjection, map.projection);    
-	    var pointFeature = new OpenLayers.Feature.Vector(point, null, style_mark_blue);
-	    pointFeatures.push(pointFeature);
-	    pointList.push(point);
-	}
-
-    // Create a line feature from a list of points
-    var tmpPoint = new OpenLayers.Geometry.Point(-122.05451, 37.40800);
-
-    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), null, style_line);
-
-    // Create a polygon feature from a linear ring of points
-    var pointList = [];
-    for(var p = 0; p < 6; ++p) {
-        var a = p * (2 * Math.PI) / 7;
-        var r = (Math.random(1) + 1) / 100;        
-        var newPoint = new OpenLayers.Geometry.Point(tmpPoint.x + (r * Math.cos(a)),
-                                                     tmpPoint.y + (r * Math.sin(a)));
-
-        pointList.push(newPoint.transform(map.displayProjection, map.projection));
-    }
-    pointList.push(pointList[0]);
-    var linearRing = new OpenLayers.Geometry.LinearRing(pointList);
-    var polygonFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.Polygon([linearRing]));
-
-    // Add vector layer to map
-    map.addLayer(vectorLayer);
-    
-    // Add features to vector layer
-    pointFeatures.push(lineFeature);
-    pointFeatures.push(polygonFeature);
-    vectorLayer.addFeatures(pointFeatures);
-
-    // Add vector layer interaction
-    // Register events    
-    vectorLayer.events.register("featureselected", vectorLayer, onFeatureSelect);
-    vectorLayer.events.register("featureunselected", vectorLayer, onFeatureUnselect);
-
-    var control = new OpenLayers.Control.SelectFeature(vectorLayer);
-    map.addControl(control);
-    control.activate();
-**/    
-
 }
 
 function getURL(bounds) {
@@ -228,8 +101,7 @@ function getURL(bounds) {
     var x = Math.round((bounds.left - this.tileOrigin.lon) / (res * this.tileSize.w));
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
-    
-    //var path = this.serviceVersion + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+        
     var path = "file:///sdcard/trailscribe" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
     var url = this.url;
     
@@ -247,6 +119,7 @@ function onPopupClose(evt) {
     // 'this' is the popup.
     selectControl.unselect(this.feature);
 }
+
 function onFeatureSelect(evt) {
     feature = evt.feature;
 
@@ -262,6 +135,7 @@ function onFeatureSelect(evt) {
     popup.feature = feature;
     map.addPopup(popup);
 }
+
 function onFeatureUnselect(evt) {
     feature = evt.feature;
     if (feature.popup) {
