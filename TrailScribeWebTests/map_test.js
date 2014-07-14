@@ -2,9 +2,6 @@
 
 QUnit.test("Map init", function(assert) {
     assert.notEqual(map, undefined, "Map properly initialized");
-});
-
-QUnit.test("Init layers", function(assert) {
     assert.equal(map.layers.length, 1, "Base layer loaded");
 });
 
