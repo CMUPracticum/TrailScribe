@@ -21,12 +21,14 @@
 		android:layout_width="wrap_content"
 		android:layout_height="fill_parent"
 		android:layout_alignParentLeft="true"
-        android:layout_marginTop="32px"
+        android:layout_marginTop="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:gravity="center"
         android:layout_gravity="center"
 		android:numColumns="2"
-		android:horizontalSpacing="32px"
-		android:verticalSpacing="32px" >
+		android:horizontalSpacing="20dp"
+		android:verticalSpacing="40dp" >
 	</GridView>
 	<!-- android:layout_below="@id/main_userstatus" -->
 

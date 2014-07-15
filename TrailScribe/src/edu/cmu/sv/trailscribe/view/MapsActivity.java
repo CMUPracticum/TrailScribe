@@ -29,7 +29,7 @@ import edu.cmu.sv.trailscribe.model.Sample;
 @SuppressLint("NewApi")
 public class MapsActivity extends BaseActivity implements OnClickListener {
 	
-	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Maps", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
 
 //	Controllers
@@ -163,7 +163,13 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	}
 	
 	@JavascriptInterface
-	public String getCurrentLocation() {
+	public String getCurrentLocation() throws Exception {
+	    if (mLocation == null) {
+            Toast.makeText(getApplicationContext(), 
+                    "Current location is not available", Toast.LENGTH_SHORT).show();
+	        throw new Exception("Current location is not available");
+	    }
+	    
 		JSONObject mapPoints = null;
 		
 		try {
