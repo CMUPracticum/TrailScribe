@@ -1,17 +1,16 @@
 //
 // Map and layers setup
 //
-
 // Map and map properties initialization
-// TO DO: (Isil) These properties should be set dynamically
 var map;
-var mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
-var mapMinZoom = 11;
-var mapMaxZoom = 15;
+var mapBounds;
+var mapMinZoom;
+var mapMaxZoom;
+var mapProjection;
 var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
-// TMS Overlay init
+// Base map
 var tmsOverlay;
 
 // Map Layers
@@ -20,9 +19,8 @@ var currentLocationLayer;
 var positionHistoryLayer;
 var kmlLayer;
 
-// Render
+// Renderer
 var renderer;
-
 //
 // /End of map and layers setup
 //
@@ -40,7 +38,19 @@ var fixSize = function() {
 setTimeout(fixSize, 700);
 setTimeout(fixSize, 1500);
 
+// TO DO: Get these properties from Android interface
+function initMapProperties() {
+
+    mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
+    mapMinZoom = 11;
+    mapMaxZoom = 15;
+    mapProjection = "EPSG:900913"; // Default: Web Mercator
+}
+
 function init() {
+
+    initMapProperties();
+        
     var options = {
             div: "map",
             theme: null,
@@ -50,11 +60,10 @@ function init() {
                     dragPanOptions: {
                         enableKinetic: true
                     }
-                }),
-                //new OpenLayers.Control.Zoom()
+                }),                
             ],
-            projection: "EPSG:900913", // web mercator
-            displayProjection: new OpenLayers.Projection("EPSG:4326"), // spherical mercator
+            projection: mapProjection,
+            displayProjection: new OpenLayers.Projection("EPSG:4326"), // Spherical Mercator
             tileSize: new OpenLayers.Size(256, 256)
         };
     
@@ -73,7 +82,7 @@ function init() {
     });
 
     // Add TMS overlay
-    map.addLayers([tmsOverlay]);
+    map.addLayer(tmsOverlay);
 
     // Add popup events to layer
     tmsOverlay.events.on({
@@ -84,11 +93,7 @@ function init() {
 
     // Zoom to extent
     map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
-    map.zoomTo(14);    
-
-    /////////////////////////////////////////////////////////////////////////////////////////
-    // Geometry layer
-    /////////////////////////////////////////////////////////////////////////////////////////
+    map.zoomTo(14);
 
     // Allow testing of specific renderers via "?renderer=Canvas", etc
     renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
@@ -150,13 +155,13 @@ function getKmlUrl(kmlFile) {
     return "file:///sdcard/trailscribe" + "/kml/" + kmlFile + "." + "kml";
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// Functions to communicate with Java
-/////////////////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------
+// Functions to access Android Interface
+// ----------------------------------------
 function setLayers(msg) {
     switch (msg) {
         case "DisplaySamples":
-            sampleLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+            sampleLayer = new OpenLayers.Layer.Vector("Samples", {
                 style: layer_style,
                 renderers: renderer
             });
@@ -170,7 +175,7 @@ function setLayers(msg) {
             break;
 
         case "DisplayCurrentLocation":
-            currentLocationLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+            currentLocationLayer = new OpenLayers.Layer.Vector("CurrentLocation", {
                 style: layer_style,
                 renderers: renderer
             });
@@ -184,7 +189,7 @@ function setLayers(msg) {
             break;
             
 		case "DisplayPositionHistory":
-			positionHistoryLayer = new OpenLayers.Layer.Vector("Simple Geometry", {
+			positionHistoryLayer = new OpenLayers.Layer.Vector("PositionHistory", {
 				style: layer_style,
 				renderers: renderer
 			});
@@ -196,15 +201,18 @@ function setLayers(msg) {
 		case "HidePositionHistory":
 			hideLayer(positionHistoryLayer);
 			break;
+
         case "DisplayKML":            
             //var kml = getKMLFromJava(msg);            
             var kml = "test_layer"; // TO DO: This is hardcoded. 
             var kmlFile = kml;
             displayKML(kmlFile);
             break;
+
         case "HideKML":
             hideLayer(kmlLayer);
             break;
+
         default:
             break;
     }
@@ -227,7 +235,6 @@ function displayPoints(pointFeatures, layer) {
 }
 
 function displayKML(kmlFile) {
-
     kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
             projection: map.displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
@@ -247,21 +254,17 @@ function displayKML(kmlFile) {
 
 function getPointsFromJava(msg) {
     var points;
-    var mark_style;
+    var marker_style;
 
     switch (msg) {
         case "DisplaySamples":
             points = android.getSamples();
-            mark_style = style_mark_blue;
+            marker_style = marker_red;
             break;
         case "DisplayCurrentLocation":
             points = android.getCurrentLocation();
-            mark_style = style_mark_green;
+            marker_style = style_current_location;;
             break;
-//		case "DisplayPositionHistory":
-//			points = android.getPositionHistory();
-//			mark_style = style_mark_gold;
-//			break;        
         default:
             return;
     }
@@ -272,7 +275,7 @@ function getPointsFromJava(msg) {
     for(data in points['points']){
 	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
         point = point.transform(map.displayProjection, map.projection);    
-        var pointFeature = new OpenLayers.Feature.Vector(point, null, mark_style);
+        var pointFeature = new OpenLayers.Feature.Vector(point, null, marker_style);
         pointFeatures.push(pointFeature);
         pointList.push(point);
     }
@@ -287,7 +290,7 @@ function getLinesFromJava(msg) {
     switch (msg) {
 		case "DisplayPositionHistory":
 			points = android.getPositionHistory();
-			line_style = style_fat_line;
+			line_style = style_line_thick;
 			break;        
         default:
             return;
