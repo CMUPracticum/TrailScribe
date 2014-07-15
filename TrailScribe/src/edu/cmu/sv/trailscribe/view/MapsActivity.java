@@ -276,6 +276,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	@Override
 	public void onLocationChanged(Location location) {
 		mLocation = location;
+                saveLocationToDatabase();
 
 //		TODO: Verify if map layer changes whenever the location has changed
 		Toast.makeText(getApplicationContext(), 
@@ -289,6 +290,17 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		super.onLocationChanged(location);
 	}
 	
+
+    	private void saveLocationToDatabase() {
+	    LocationDataSource dataSource = new LocationDataSource(mDBHelper);
+	    edu.cmu.sv.trailscribe.model.Location loc = 
+	            new edu.cmu.sv.trailscribe.model.Location(
+	                    (int) (Math.random() * Integer.MAX_VALUE), "default time", 
+	                    mLocation.getLongitude(), mLocation.getLatitude(), mLocation.getAltitude(), 
+	                    0, 0, 0);
+        dataSource.add(loc);
+	}
+
 	private enum MessageToWebview {
 		Default("default"),
 		
