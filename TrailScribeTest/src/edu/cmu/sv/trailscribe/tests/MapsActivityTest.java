@@ -19,8 +19,6 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";
     private static final boolean JAVASCRIPT_ENABLED = true;
     private static final String LOG_TAG = "MapsActivityTest";
-    private static final long GENERAL_AWAIT_TIMEOUT = 10L;
-    private static final long IDLE_SYNC_TIMEOUT = 10L;
     private static final String SAMPLES_RESULT = "{\"points\":[{\"y\":\"37.418\",\"x\":\"-122.04451\"},{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"},{\"y\":\"37.418\",\"x\":\"-122.04451\"}]}";
     private static final String CURRENT_LOCATION_RESULT = "{\"points\":[{\"y\":\"3.0\",\"x\":\"3.0\"}]}";
     private static final String POSITION_HISTORY_RESULT = "{\"points\":[{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"}]}";
