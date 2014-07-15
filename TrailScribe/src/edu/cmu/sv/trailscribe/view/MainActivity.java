@@ -91,10 +91,12 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 	       option.updateActivityDescription();
 	       
 	       optionName.setText(option.getActivityName());
+	       optionName.setTextColor(getResources().getColor(option.getActivityColor()));
 	       optionDescription.setText(option.getActivityDescription());
 	       optionBar.setBackgroundColor(getResources().getColor(option.getActivityColor()));
 	       
 	       return convertView;
 	   }
 	}
+	
 }
