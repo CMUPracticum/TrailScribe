@@ -53,7 +53,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(expected, actual);
     }
 
-    public void testButton_mapsActivity() throws InterruptedException, Throwable {
+    public void testButton_mapsActivity() throws Throwable {
         final ActivityMonitor monitor = getInstrumentation().addMonitor(MapsActivity.class.getName(), null, false);
         runTestOnUiThread(new Runnable() {
                 public void run() {
@@ -66,7 +66,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         activity.finish();
     }
 
-    public void testButton_syncActivity() throws InterruptedException, Throwable {
+    public void testButton_syncActivity() throws Throwable {
         final ActivityMonitor monitor = getInstrumentation().addMonitor(SynchronizationCenterActivity.class.getName(), null, false);
         runTestOnUiThread(new Runnable() {
                 public void run() {

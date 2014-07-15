@@ -74,7 +74,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         return newLocation;
     }
 
-    public void testPreconditions() throws InterruptedException {
+    public void testPreconditions() {
         assertNotNull("Maps activity not found", tMapsActivity);
         assertNotNull("WebView not found", tWebView);
         assertNotNull("Samples button not found", tSamplesButton);
@@ -93,7 +93,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                      tWebView.getSettings().getJavaScriptEnabled());
     }
 
-    public void testInterface_positionHistory() throws InterruptedException {
+    public void testInterface_positionHistory() {
         // hijack the onlocation changed event
         tMapsActivity.onLocationChanged(createLocation(1.0, 1.0, 3.0f));
         tMapsActivity.onLocationChanged(createLocation(2.0, 2.0, 3.0f));
@@ -103,13 +103,17 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                      POSITION_HISTORY_RESULT, actual);
     }
 
-    public void testInterface_currentLocation() throws Exception {
+    public void testInterface_currentLocation() {
         // hijack the onlocationchanged event
         tMapsActivity.onLocationChanged(createLocation(3.0, 3.0, 3.0f));
 
-        final String actual = tMapsActivity.getCurrentLocation();
-        assertEquals("Current location returned incorrect result",
-                     CURRENT_LOCATION_RESULT, actual);
+        try {
+            final String actual = tMapsActivity.getCurrentLocation();
+            assertEquals("Current location returned incorrect result",
+                         CURRENT_LOCATION_RESULT, actual);
+        } catch (Exception e) {
+            fail("Failed to get current location");
+        }
     }
 
     public void testInterface_samplePoints() {
