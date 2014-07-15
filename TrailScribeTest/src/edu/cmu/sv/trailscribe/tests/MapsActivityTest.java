@@ -105,7 +105,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
                      POSITION_HISTORY_RESULT, actual);
     }
 
-    public void testInterface_currentLocation() throws InterruptedException {
+    public void testInterface_currentLocation() throws Exception {
         // hijack the onlocationchanged event
         tMapsActivity.onLocationChanged(createLocation(3.0, 3.0, 3.0f));
 
