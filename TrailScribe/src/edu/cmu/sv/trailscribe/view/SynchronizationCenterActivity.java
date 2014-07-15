@@ -35,8 +35,19 @@ public class SynchronizationCenterActivity
 		private ProgressDialog mDownloadProgressDialog;
 		private ProgressDialog mUnzippingProgressDialog; 
 		private ArrayAdapter<Map> mAdapter;
+    private boolean mapsFetched = false;
+    private Runnable mapsFetchedCallback = null;
     private static final String LOG_TAG = "SynchronizationCenterActivity";
 	  
+
+    public void setMapsFetchedCallback(Runnable callback) {
+        mapsFetchedCallback = callback;
+    }
+
+    public boolean areMapsFetched() {
+        return mapsFetched;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
@@ -97,6 +108,11 @@ public class SynchronizationCenterActivity
 	            	new UnzipTask().execute();
 	            }
 		}
+
+                mapsFetched = true;
+                if (mapsFetchedCallback != null) {
+                    mapsFetchedCallback.run();
+                }
 	}
 	
 	private class UnzipTask extends AsyncTask<Void, Integer, Void>{
