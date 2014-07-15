@@ -1,7 +1,17 @@
-//
-// Map and layers setup
-//
-// Map and map properties initialization
+/**
+ * Android OpenLayers interface for project TrailScribe.
+ * All offline mapping functionality on the Android device is realized through this JavaScript.
+ * It communicates to native Java via a simple interface. 
+ */
+
+/**
+ * @requires TrailScribe/assets/lib/openlayers/OpenLayers.mobile.js
+ * @requires TrailScribe/assets/styles.js
+ */
+
+/**
+ * Map and OpenLayers Properties
+ */
 var map;
 var mapBounds;
 var mapMinZoom;
@@ -9,21 +19,6 @@ var mapMaxZoom;
 var mapProjection;
 var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
-
-// Base map
-var tmsOverlay;
-
-// Map Layers
-var sampleLayer;
-var currentLocationLayer;
-var positionHistoryLayer;
-var kmlLayer;
-
-// Renderer
-var renderer;
-//
-// /End of map and layers setup
-//
 
 // Get rid of address bar on iphone/ipod
 var fixSize = function() {
@@ -38,19 +33,55 @@ var fixSize = function() {
 setTimeout(fixSize, 700);
 setTimeout(fixSize, 1500);
 
-// TO DO: Get these properties from Android interface
-function initMapProperties() {
 
+/**
+ * Base Map Layer
+ */
+var tmsOverlay;
+
+/**
+ * Vector and KML Layers
+ */
+var sampleLayer;
+var currentLocationLayer;
+var positionHistoryLayer;
+var kmlLayer;
+
+/**
+ * Map Events
+ */
+var renderer;
+var selectControl;
+var layerListeners;
+
+/**
+ * Function: initMapProperties
+ * Get mapProperties for this map from the Android interface and set them.
+ *
+ * Parameters:
+ * initMapProperties - {JSON String}
+ */
+function initMapProperties(mapProperties) {    
     mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
     mapMinZoom = 11;
     mapMaxZoom = 15;
     mapProjection = "EPSG:900913"; // Default: Web Mercator
 }
 
+/**
+ * Function: init
+ * Entry point to the file where all important map and layer properties
+ * are created and set.
+ *
+ * Parameters:
+ * -
+ */
 function init() {
 
+    // Initialize map properties
     initMapProperties();
-        
+
+    // Set Map options    
     var options = {
             div: "map",
             theme: null,
@@ -70,9 +101,8 @@ function init() {
     // Create map
     map = new OpenLayers.Map(options);
 
-    // Create TMS Overlay 
-    tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "",
-    {
+    // Create TMS Overlay (Base map)
+    tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "", {
         serviceVersion: '.',
         layername: 'tiles',        
         alpha: true,
@@ -84,22 +114,62 @@ function init() {
     // Add TMS overlay
     map.addLayer(tmsOverlay);
 
-    // Add popup events to layer
-    tmsOverlay.events.on({
+    // Add popup events to base layer
+    layerListeners = {
         'featureselected': onFeatureSelect,
         'featureunselected': onFeatureUnselect
-    });
-    selectControl = new OpenLayers.Control.SelectFeature(tmsOverlay);
-
-    // Zoom to extent
-    map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
-    map.zoomTo(14);
+    };
 
     // Allow testing of specific renderers via "?renderer=Canvas", etc
     renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
     renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+
+    // Layer for displaying samples
+    sampleLayer = new OpenLayers.Layer.Vector("Samples", {
+                style: layer_style,
+                renderers: renderer                
+            });
+
+    // Layer for displaying the current location of the user
+    currentLocationLayer = new OpenLayers.Layer.Vector("CurrentLocation", {
+                style: layer_style,
+                renderers: renderer                
+            });
+
+    // Layer for displaying the position history of the user
+    positionHistoryLayer = new OpenLayers.Layer.Vector("PositionHistory", {
+                style: layer_style,
+                renderers: renderer                
+            });
+
+    // Register layers for event listeners
+    sampleLayer.events.on(layerListeners);
+    currentLocationLayer.events.on(layerListeners);
+    positionHistoryLayer.events.on(layerListeners);
+
+    // Add layers to map
+    map.addLayers([sampleLayer, currentLocationLayer, positionHistoryLayer]);
+
+    // Add this control to all vector layers on the map
+    selectControl = new OpenLayers.Control.SelectFeature(
+                [sampleLayer, currentLocationLayer, positionHistoryLayer]
+            );
+    map.addControl(selectControl);
+    selectControl.activate();
+
+    // Zoom to extent
+    map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
+    map.zoomTo(14);
 }
 
+/**
+ * Function: getURL
+ * This function gets the correct tiles (for the TMS Overlay) to display on the map
+ * from the device.
+ *
+ * Parameters:
+ * bounds - {OpenLayers.Bounds}
+ */
 function getURL(bounds) {
     bounds = this.adjustBounds(bounds);
     var res = this.getServerResolution();
@@ -120,11 +190,25 @@ function getURL(bounds) {
     }
 }
 
+/**
+ * Function: onPopupClose
+ * Mark this vector feature as unselected
+ *
+ * Parameters:
+ * evt - {OpenLayers.Event}
+ */
 function onPopupClose(evt) {
     // 'this' is the popup.
     selectControl.unselect(this.feature);
 }
 
+/**
+ * Function: onFeatureSelect
+ * Select a feature that was clicked and show a popup on map.
+ *
+ * Parameters:
+ * evt - {OpenLayers.Event}
+ */
 function onFeatureSelect(evt) {
     feature = evt.feature;
 
@@ -141,6 +225,13 @@ function onFeatureSelect(evt) {
     map.addPopup(popup);
 }
 
+/**
+ * Function: onFeatureUnselect
+ * Unselect a feature that was selected and remove popup from map.
+ *
+ * Parameters:
+ * evt - {OpenLayers.Event}
+ */
 function onFeatureUnselect(evt) {
     feature = evt.feature;
     if (feature.popup) {
@@ -151,107 +242,121 @@ function onFeatureUnselect(evt) {
     }
 }
 
-function getKmlUrl(kmlFile) {    
-    return "file:///sdcard/trailscribe" + "/kml/" + kmlFile + "." + "kml";
+/**
+ * Function: getKmlUrl
+ * Given a kml file name, find the location on device for the kml file.
+ * 
+ * Return url example:
+ * file:///sdcard/trailscribe/kml/sample_kml.kml
+ *
+ * Parameters:
+ * kml - {String}
+ */
+function getKmlUrl(kml) {    
+    return "file:///sdcard/trailscribe" + "/kml/" + kml + "." + "kml";
 }
 
-// ----------------------------------------
-// Functions to access Android Interface
-// ----------------------------------------
+/**
+ * Functions to Access Android Interface
+ */
+
+/**
+ * Function: setLayers
+ * When the user toggles one of the menu items, 
+ * a message is passed to this method, which in turn calls 
+ * the appropriate Android/Java function to get the correct set of vector geometry.
+ *
+ * Parameters:
+ * msg - {String}
+ */
 function setLayers(msg) {
     switch (msg) {
-        case "DisplaySamples":
-            sampleLayer = new OpenLayers.Layer.Vector("Samples", {
-                style: layer_style,
-                renderers: renderer
-            });
-
-            var pointFeatures = getPointsFromJava(msg);
-            displayPoints(pointFeatures, sampleLayer);
+        case "DisplaySamples":            
+            sampleLayer.addFeatures(getPointsFromJava(msg));
             break;
-
-        case "HideSamples":
+        case "HideSamples":            
             hideLayer(sampleLayer);
             break;
-
-        case "DisplayCurrentLocation":
-            currentLocationLayer = new OpenLayers.Layer.Vector("CurrentLocation", {
-                style: layer_style,
-                renderers: renderer
-            });
-
-            var pointFeatures = getPointsFromJava(msg);
-            displayPoints(pointFeatures, currentLocationLayer);
+        case "DisplayCurrentLocation":            
+            currentLocationLayer.addFeatures(getPointsFromJava(msg));            
             break;
-
-        case "HideCurrentLocation":
-            hideLayer(currentLocationLayer);
-            break;
-            
-		case "DisplayPositionHistory":
-			positionHistoryLayer = new OpenLayers.Layer.Vector("PositionHistory", {
-				style: layer_style,
-				renderers: renderer
-			});
-			
-			var lineFeature = getLinesFromJava(msg);
-			displayPoints(lineFeature, positionHistoryLayer);
+        case "HideCurrentLocation":            
+            hideLayer(currentLocationLayer);            
+            break;            
+		case "DisplayPositionHistory":			
+            positionHistoryLayer.addFeatures(getLinesFromJava(msg));            
+			break;			
+		case "HidePositionHistory":			
+            hideLayer(positionHistoryLayer);
 			break;
-			
-		case "HidePositionHistory":
-			hideLayer(positionHistoryLayer);
-			break;
-
         case "DisplayKML":            
-            //var kml = getKMLFromJava(msg);            
-            var kml = "test_layer"; // TO DO: This is hardcoded. 
-            var kmlFile = kml;
-            displayKML(kmlFile);
+            displayKML("test_layer"); // TO DO: This is hardcoded. 
             break;
-
         case "HideKML":
-            hideLayer(kmlLayer);
+            map.removeLayer(kmlLayer);            
             break;
-
         default:
             break;
     }
 }
 
+/**
+ * Function: hideLayer
+ * Given a layer, remove all popups if there are any
+ * features with open popups on this layer. Finally, 
+ * remove all vector features from this layer.
+ *
+ * Parameters:
+ * layer - {OpenLayers.Layer.Vector}
+ */
 function hideLayer(layer) {
-    map.removeLayer(layer);
+    // If a feature on this layer has an open popup, close that first
+    for (var i = 0; i < layer.features.length; i++) {
+        if (layer.features[i].popup) {
+            popup.feature = null;
+            map.removePopup(layer.features[i].popup);
+            layer.features[i].popup.destroy();
+            layer.features[i].popup = null;
+        }
+    }
+    // Remove all features from this layer
+    layer.removeAllFeatures();
 }
 
-function displayPoints(pointFeatures, layer) {
-    map.addLayer(layer);
-    layer.addFeatures(pointFeatures);
-
-    layer.events.register("featureselected", layer, onFeatureSelect);
-    layer.events.register("featureunselected", layer, onFeatureUnselect);
-
-    var control = new OpenLayers.Control.SelectFeature(layer);
-    map.addControl(control);
-    control.activate();
-}
-
-function displayKML(kmlFile) {
+/**
+ * Function: displayKML
+ * Given a kml file name, display the KML overlay with that file.
+ *
+ * Parameters:
+ * kml - {String}
+ */
+function displayKML(kml) {
     kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
             projection: map.displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
-                url: getKmlUrl(kmlFile),                    
+                url: getKmlUrl(kml),                    
                 format: new OpenLayers.Format.KML({
                     extractStyles: true, 
                     extractAttributes: true,
                     maxDepth: 2
                 })
-            })
+            }),
+            eventListeners: layerListeners
         }));
 
     // Add KML Overlay
     map.addLayer(kmlLayer);
 }
 
+/**
+ * Function: getPointsFromJava
+ * Given a message, summon the correct Android/Java method 
+ * to get a list of vector points. 
+ *
+ * Parameters:
+ * msg - {String}
+ */
 function getPointsFromJava(msg) {
     var points;
     var marker_style;
@@ -283,6 +388,14 @@ function getPointsFromJava(msg) {
     return pointFeatures;
 }
 
+/**
+ * Function: getLinesFromJava
+ * Given a message, summon the correct Android/Java method
+ * to get a list of vector lines. 
+ *
+ * Parameters:
+ * msg - {String}
+ */
 function getLinesFromJava(msg) {
     var points;
     var line_style;

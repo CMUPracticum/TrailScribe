@@ -1,5 +1,10 @@
+/**
+ * OpenLayers.Style settings for all map elements.
+ */
 
-// Layer Styles
+/**
+ * Layer Styles
+ */
 var layer_style;
 
 // We want opaque external graphics and non-opaque internal graphics
@@ -8,7 +13,9 @@ layer_style.fillOpacity = 0.4;
 layer_style.graphicOpacity = 1;
 layer_style.strokeWidth = 1.5;
 
-// Vector Point and Marker Styles
+/** 
+ * Vector Point and Marker Styles
+ */
 var style_blue;
 var style_line;
 var style_line_thick;
