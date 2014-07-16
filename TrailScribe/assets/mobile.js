@@ -360,6 +360,7 @@ function displayKML(kml) {
 function getPointsFromJava(msg) {
     var points;
     var marker_style;
+    var azimuth = -1;
 
     switch (msg) {
         case "DisplaySamples":
@@ -368,7 +369,15 @@ function getPointsFromJava(msg) {
             break;
         case "DisplayCurrentLocation":
             points = android.getCurrentLocation();
-            marker_style = style_current_location;;
+            marker_style = style_current_location;
+            
+            var orientation = android.getOrientation();
+            orientation = JSON.parse(orientation);
+
+            for (data in orientation['orientation']) {
+                azimuth = orientation['orientation'][data].azimuth;
+            }
+
             break;
         default:
             return;
@@ -379,8 +388,13 @@ function getPointsFromJava(msg) {
     var pointFeatures = [];
     for(data in points['points']){
 	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
-        point = point.transform(map.displayProjection, map.projection);    
+        point = point.transform(map.displayProjection, map.projection);
         var pointFeature = new OpenLayers.Feature.Vector(point, null, marker_style);
+
+        if (msg == "DisplayCurrentLocation") {
+            pointFeature.style.rotation = azimuth;
+        }
+
         pointFeatures.push(pointFeature);
         pointList.push(point);
     }

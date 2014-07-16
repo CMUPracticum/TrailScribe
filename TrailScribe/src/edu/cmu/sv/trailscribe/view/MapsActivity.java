@@ -337,11 +337,11 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
     public void onSensorChanged(SensorEvent event) {
         float[] values = event.values;
         if (Math.abs(values[0] - mAzimuth) <= 10) {
-//          Ignore minor rotation
+//          Ignore minor rotations
             return;
         }
         
-        mAzimuth = values[0];
+        mAzimuth = (int) values[0];
         if (mIsDisplayCurrentLocation) {
             setLayers(MessageToWebview.HideCurrentLocation);
             setLayers(MessageToWebview.DisplayCurrentLocation);
