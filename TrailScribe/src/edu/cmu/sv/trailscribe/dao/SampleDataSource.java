@@ -18,16 +18,36 @@ public class SampleDataSource extends DataSource {
 	public SampleDataSource(Context context) {
 		super(context);
 	}
-	
+
 	public SampleDataSource(DBHelper dbHelper) {
 		super(dbHelper);
 		
 //		TODO: Remove when feature to add samples is implemented
-		Sample sample = new Sample(
-	    		0, "default name", "default description", "default time",
-	    		-122.04451, 37.41800, 0, "default custom field", "default last modified",
+		Sample s1 = new Sample(
+	    		0, "Carnegie Mellon University: Silicon Valley Campus", 
+	    		"sample #1", "default time",
+	    		-122.059746, 37.410418, 0, "default custom field", "default last modified",
 	    		0, 0, 0);
-		add(sample);
+        Sample s2 = new Sample(
+                0, "Hangar 1", 
+                "sample #2", "default time",
+                -122.054195, 37.412675, 0, "default custom field", "default last modified",
+                0, 0, 0);
+        Sample s3 = new Sample(
+                0, "Moffett Field Historical Society Museum", 
+                "sample #3", "default time",
+                -122.054230, 37.411352, 0, "default custom field", "default last modified",
+                0, 0, 0);
+        Sample s4 = new Sample(
+                0, "Pool", 
+                "sample #4", "default time",
+                -122.056896, 37.409516, 0, "default custom field", "default last modified",
+                0, 0, 0);
+		
+		add(s1);
+		add(s2);
+		add(s3);
+		add(s4);
 	}
 
 	@Override

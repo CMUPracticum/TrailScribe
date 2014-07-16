@@ -82,8 +82,6 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	@Override
 	public void onOpen(SQLiteDatabase db) {
-		Log.d(MSG_TAG, "onOpen");
-		
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MAP_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_SAMPLE_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_LOCATION_COLUMN_DEFINITION);
