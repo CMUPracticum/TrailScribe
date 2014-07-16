@@ -21,7 +21,7 @@ public class TrailScribeApplication extends Application
 	private static Context mContext;
 	
 //	Database
-	private static DBHelper mDBHelper;
+	public static DBHelper mDBHelper;
 
 //	Location
     protected static Location mLocation;
