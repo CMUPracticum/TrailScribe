@@ -33,7 +33,7 @@ import edu.cmu.sv.trailscribe.model.Sample;
 
 public class MapsActivity extends BaseActivity implements OnClickListener, SensorEventListener {
 	
-	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Maps", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
 
 //	Controllers
