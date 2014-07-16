@@ -1,67 +1,86 @@
+/**
+ * OpenLayers.Style settings for all map elements.
+ */
 
-// Styles
+/**
+ * Layer Styles
+ */
 var layer_style;
-var style_blue;
-var style_line;
-var style_fat_line;
-var style_mark_blue;
-var style_mark_green;
-var style_mark_gold;
 
-// Layer style
 // We want opaque external graphics and non-opaque internal graphics
 layer_style = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
 layer_style.fillOpacity = 0.4;
 layer_style.graphicOpacity = 1;
 layer_style.strokeWidth = 1.5;
 
-// Blue style
+/** 
+ * Vector Point and Marker Styles
+ */
+var style_blue;
+var style_line;
+var style_line_thick;
+var marker_default;
+var marker_blue;
+var marker_red;
+var marker_green;
+var marker_gold;
+var marker_colors = ["blue", "red", "green", "gold"];
+
+var style_current_location;
+
+var defaultStyle = {
+  'pointRadius': 10,
+  'graphicWidth': 46,
+  'graphicHeight': 64,
+  'graphicXOffset': -23, // -(graphicWidth/2)
+  'graphicYOffset': -64, // -graphicHeight
+  'fillOpacity': 1,
+  'externalGraphic': './lib/openlayers/img/marker-default.png'
+};
+
+// Blue vector point style
 style_blue = OpenLayers.Util.extend({}, layer_style);
 style_blue.strokeColor = "blue";
 style_blue.fillColor = "blue";
 
-// Line style
+// Line styles
 style_line = OpenLayers.Util.extend({}, layer_style);
 style_line.strokeColor = "red";
 style_line.strokeWidth = 2;
 
-style_fat_line = OpenLayers.Util.extend({}, layer_style);
-style_fat_line.strokeColor = "yellow";
-style_fat_line.strokeWidth = 5;
+style_line_thick = OpenLayers.Util.extend({}, layer_style);
+style_line_thick.strokeColor = "gold";
+style_line_thick.strokeWidth = 4;
 
-// Mark style
-style_mark_blue = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);    
-style_mark_green = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-style_mark_gold = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']); 
+// Marker default style
+marker_default = defaultStyle;
 
-// If graphicWidth and graphicHeight are both set, the aspect ratio of the image will be ignored
-style_mark_blue.graphicWidth = 42;
-style_mark_blue.graphicHeight = 50;
-style_mark_blue.graphicXOffset = -(style_mark_blue.graphicWidth/2);
-style_mark_blue.graphicYOffset = -style_mark_blue.graphicHeight;
-style_mark_blue.externalGraphic = "./lib/openlayers/img/location_place.png";
-style_mark_blue.fillOpacity = 1;
-style_mark_blue.title = "this is a test tooltip"; // title only works in Firefox and Internet Explorer
+// Set other marker styles
+for (var i = 0; i < marker_colors.length; i++) {    
+    switch (marker_colors[i]) {
+        case "blue":
+            marker_blue = OpenLayers.Util.extend({}, defaultStyle);
+            marker_blue['externalGraphic'] = "./lib/openlayers/img/marker-default-blue.png";
+            break;
+        case "red":
+            marker_red = OpenLayers.Util.extend({}, defaultStyle);
+            marker_red['externalGraphic'] = "./lib/openlayers/img/marker-default-red.png";
+            break;
+        case "green":
+            marker_green = OpenLayers.Util.extend({}, defaultStyle);
+            marker_green['externalGraphic'] = "./lib/openlayers/img/marker-default-green.png";
+            break;
+        case "gold":
+            marker_gold = OpenLayers.Util.extend({}, defaultStyle)
+            marker_gold['externalGraphic'] = "./lib/openlayers/img/marker-default-gold.png";
+            break;
+    }
+}
 
-style_mark_green.graphicWidth = 42;
-style_mark_green.graphicHeight = 50;
-style_mark_green.graphicXOffset = -(style_mark_blue.graphicWidth/2);
-style_mark_green.graphicYOffset = -style_mark_blue.graphicHeight;
-style_mark_green.externalGraphic = "./lib/openlayers/img/marker-green.png";
-
-style_mark_green.graphicWidth = 42;
-style_mark_green.graphicHeight = 50;
-style_mark_green.graphicXOffset = -(style_mark_green.graphicWidth/2);
-style_mark_green.graphicYOffset = -(style_mark_green.graphicHeight/2);
-style_mark_green.externalGraphic = "./lib/openlayers/img/location_found.png";
-
-style_mark_green.fillOpacity = 1;
-style_mark_green.title = "this is a test tooltip";
-
-style_mark_gold.graphicWidth = 42;
-style_mark_gold.graphicHeight = 50;
-style_mark_gold.graphicXOffset = -(style_mark_gold.graphicWidth/2);
-style_mark_gold.graphicYOffset = -style_mark_gold.graphicHeight;
-style_mark_gold.externalGraphic = "./lib/openlayers/img/marker-gold.png";
-style_mark_gold.fillOpacity = 1;
-style_mark_gold.title = "this is a test tooltip"; // TODO: change this
+// Current location style
+style_current_location = OpenLayers.Util.extend({}, defaultStyle);
+style_current_location['externalGraphic'] = "./lib/openlayers/img/location_arrow.png";
+style_current_location['graphicWidth'] = 50;
+style_current_location['graphicHeight'] = 50;
+style_current_location['graphicXOffset'] = -25;
+style_current_location['graphicYOffset'] = -25;
