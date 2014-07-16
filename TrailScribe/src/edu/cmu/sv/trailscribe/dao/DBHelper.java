@@ -75,9 +75,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		Log.d(MSG_TAG, "onCreate");
 		
-		db.execSQL(CREATE_TABLE_MAP);
-		db.execSQL(CREATE_TABLE_SAMPLE);
-        db.execSQL(CREATE_TABLE_LOCATION);
+		createTables(db);
 	}
 	
 	@Override
@@ -91,12 +89,19 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Log.d(MSG_TAG, "onUpgrade");
 		
-		// on upgrade drop older tables
+		dropTables(db);
+		createTables(db);
+	}
+	
+	private void createTables(SQLiteDatabase db) {
+	    db.execSQL(CREATE_TABLE_MAP);
+	    db.execSQL(CREATE_TABLE_SAMPLE);
+	    db.execSQL(CREATE_TABLE_LOCATION);
+	}
+	
+	private void dropTables(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SAMPLE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATION);
-        
-        // create new tables
-        onCreate(db);
 	}
 }
