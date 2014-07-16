@@ -14,9 +14,11 @@
  */
 var map;
 var mapBounds;
+var extent;
 var mapMinZoom;
 var mapMaxZoom;
 var mapProjection;
+var displayProjection;
 var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
@@ -62,10 +64,12 @@ var layerListeners;
  * initMapProperties - {JSON String}
  */
 function initMapProperties(mapProperties) {    
+    mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
+    displayProjection = new OpenLayers.Projection("EPSG:4326")
     mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
+    extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = 11;
     mapMaxZoom = 15;
-    mapProjection = "EPSG:900913"; // Default: Web Mercator
 }
 
 /**
@@ -94,7 +98,7 @@ function init() {
                 }),                
             ],
             projection: mapProjection,
-            displayProjection: new OpenLayers.Projection("EPSG:4326"), // Spherical Mercator
+            displayProjection: displayProjection, // Spherical Mercator
             tileSize: new OpenLayers.Size(256, 256)
         };
     
@@ -149,8 +153,6 @@ function init() {
 
     // Register layers for event listeners
     sampleLayer.events.on(layerListeners);
-    currentLocationLayer.events.on(layerListeners);
-    positionHistoryLayer.events.on(layerListeners);
 
     // Add layers to map
     map.addLayers([sampleLayer, currentLocationLayer, positionHistoryLayer]);
@@ -163,8 +165,8 @@ function init() {
     selectControl.activate();
 
     // Zoom to extent
-    map.zoomToExtent(mapBounds.transform(map.displayProjection, map.projection));
-    map.zoomTo(14);
+    map.zoomToExtent(extent);
+    map.setOptions({restrictedExtent: extent});    
 }
 
 /**
