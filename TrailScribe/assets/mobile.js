@@ -65,7 +65,7 @@ var layerListeners;
  */
 function initMapProperties(mapProperties) {    
     mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
-    displayProjection = new OpenLayers.Projection("EPSG:4326")
+    displayProjection = new OpenLayers.Projection("EPSG:4326");
     mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = 11;
