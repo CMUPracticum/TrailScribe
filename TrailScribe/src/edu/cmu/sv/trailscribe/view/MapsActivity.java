@@ -23,6 +23,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
@@ -41,6 +42,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	
 //	Views
 	private WebView mWebView;
+	private TextView mCoordinateTextView;
 	private Button mSamplesButton;
 	private Button mCurrentLocationButton;
 	private Button mPositionHistoryButton;
@@ -80,9 +82,10 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	private void setView() {
 		setContentView(R.layout.activity_maps);
 
-		setMap();
 		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
-		setListener();
+		setMap();
+		setButton();
+		setTextView();
 	}
 	
     @SuppressWarnings("deprecation")
@@ -126,7 +129,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	    return super.onOptionsItemSelected(item);
 	}
 	
-	private void setListener() {
+	private void setButton() {
 	    mSamplesButton = (Button) findViewById(R.id.maps_samples);
 		mCurrentLocationButton = (Button) findViewById(R.id.maps_current_location);
 		mPositionHistoryButton = (Button) findViewById(R.id.maps_position_history);
@@ -137,6 +140,20 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		mPositionHistoryButton.setOnClickListener(this);
 		mKmlButton.setOnClickListener(this);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+	}
+	
+	private void setTextView() {
+	    mCoordinateTextView = (TextView) findViewById(R.id.maps_coordinate);
+	    updateCoordinateTextView();
+	}
+	
+	private void updateCoordinateTextView() {
+	    if (mLocation == null) {
+	        mCoordinateTextView.setText(R.string.map_coordinate);
+	    }
+	    
+	    Log.d(MSG_TAG, mLocation.getLatitude() + "," + mLocation.getLongitude());
+	    mCoordinateTextView.setText(mLocation.getLatitude() + "," + mLocation.getLongitude());
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
@@ -322,7 +339,8 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	@Override
 	public void onLocationChanged(Location location) {
 	    super.onLocationChanged(location);
-		
+	    
+	    updateCoordinateTextView();
 		if (mIsDisplayCurrentLocation) {
 		    setLayers(MessageToWebview.HideCurrentLocation);
 		    setLayers(MessageToWebview.DisplayCurrentLocation);

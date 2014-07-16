@@ -28,6 +28,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 	        Environment.getExternalStorageDirectory() + "/trailscribe/";
 	
 //	Location
+	public static final int MIN_LOCATION_DISTANCE = 3;
     protected static Location mLocation;
     private LocationManager mLocationManager;
     
@@ -83,7 +84,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 
     @Override
     public void onLocationChanged(Location location) {
-        if (mLocation != null && Math.abs(location.distanceTo(mLocation)) <= 10) {
+        if (mLocation != null && Math.abs(location.distanceTo(mLocation)) <= MIN_LOCATION_DISTANCE) {
 //          Ignore minor changes
             return;
         }
