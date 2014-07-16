@@ -114,6 +114,11 @@ function init() {
     // Add TMS overlay
     map.addLayer(tmsOverlay);
 
+    // Listen to zoom levels for preventing the user going beyond the min zoom level
+    map.events.register("zoomend", map, function() {
+         checkMinZoomLevel();
+    });
+
     // Add popup events to base layer
     layerListeners = {
         'featureselected': onFeatureSelect,
@@ -187,6 +192,20 @@ function getURL(bounds) {
         return url + path;
     } else {
         return emptyTileURL;
+    }
+}
+
+/**
+ * Function: checkMinZoomLevel
+ * If the user tries to zoom further back then the min zoom level, 
+ * zoom back to mapMinZoom
+ *
+ * Parameters:
+ * -
+ */
+function checkMinZoomLevel() {
+    if (map.zoom < mapMinZoom) {
+        map.zoomTo(mapMinZoom);
     }
 }
 
