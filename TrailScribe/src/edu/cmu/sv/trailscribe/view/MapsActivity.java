@@ -6,10 +6,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,8 +31,7 @@ import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.Sample;
 
 
-@SuppressLint("NewApi")
-public class MapsActivity extends BaseActivity implements OnClickListener {
+public class MapsActivity extends BaseActivity implements OnClickListener, SensorEventListener {
 	
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MapActivity", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
@@ -47,13 +51,31 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	private boolean mIsDisplayCurrentLocation = false;
 	private boolean mIsDisplayPositionHistory = false;
 	private boolean mIsDisplayKML = false;
+	
+//	Orientation
+	private SensorManager mSensorManager;
+	private Sensor mOrientationSensor;
+	private float mAzimuth;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		setView();
+		setSensor();
 	}
+	
+	@Override
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, mOrientationSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }	
 	
 	private void setView() {
 		setContentView(R.layout.activity_maps);
@@ -63,6 +85,12 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 		setListener();
 	}
 	
+    @SuppressWarnings("deprecation")
+    private void setSensor() {
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);      
+    }
+    
 	@Override
 	protected void setActionBar(String color) {
 	    super.setActionBar(color);
@@ -131,6 +159,23 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 	
 	private void setLayers(MessageToWebview message) {
 		mWebView.loadUrl("javascript:setLayers(\"" + message.getMessage() + "\")");
+	}
+	
+	@JavascriptInterface
+	public String getOrientation() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{'orientation':[");
+        buffer.append("{'azimuth':'").append(mAzimuth).append("'}");
+        buffer.append("]}'");
+        
+        JSONObject orientation = null;
+        try {
+            orientation = new JSONObject(buffer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        return orientation.toString();
 	}
 	
 	@JavascriptInterface
@@ -275,19 +320,38 @@ public class MapsActivity extends BaseActivity implements OnClickListener {
 
 	@Override
 	public void onLocationChanged(Location location) {
-		mLocation = location;
-
-//		TODO: Verify if map layer changes whenever the location has changed
-		Toast.makeText(getApplicationContext(), 
-				"onLocationChanged: (" + mLocation.getLatitude() + "," + mLocation.getLongitude() + ")", Toast.LENGTH_SHORT).show();
-		String state = mSamplesButton.getText().toString();
-		boolean shouldisplay = (state.equals(getResources().getString(R.string.map_hide_current_location)));
-		if (shouldisplay) {
-			setLayers(MessageToWebview.DisplayCurrentLocation);
+	    super.onLocationChanged(location);
+		
+		if (mIsDisplayCurrentLocation) {
+		    setLayers(MessageToWebview.HideCurrentLocation);
+		    setLayers(MessageToWebview.DisplayCurrentLocation);
 		}
 		
-		super.onLocationChanged(location);
+        if (mIsDisplayPositionHistory) {
+            setLayers(MessageToWebview.HidePositionHistory);
+            setLayers(MessageToWebview.DisplayPositionHistory);
+        }		
 	}
+	
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float[] values = event.values;
+        if (Math.abs(values[0] - mAzimuth) <= 10) {
+//          Ignore minor rotation
+            return;
+        }
+        
+        mAzimuth = values[0];
+        if (mIsDisplayCurrentLocation) {
+            setLayers(MessageToWebview.HideCurrentLocation);
+            setLayers(MessageToWebview.DisplayCurrentLocation);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
+    }
 	
 	private enum MessageToWebview {
 		Default("default"),

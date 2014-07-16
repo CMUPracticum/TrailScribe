@@ -45,15 +45,9 @@ style_mark_blue.title = "this is a test tooltip"; // title only works in Firefox
 
 style_mark_green.graphicWidth = 42;
 style_mark_green.graphicHeight = 50;
-style_mark_green.graphicXOffset = -(style_mark_blue.graphicWidth/2);
-style_mark_green.graphicYOffset = -style_mark_blue.graphicHeight;
-style_mark_green.externalGraphic = "./lib/openlayers/img/marker-green.png";
-
-style_mark_green.graphicWidth = 42;
-style_mark_green.graphicHeight = 50;
 style_mark_green.graphicXOffset = -(style_mark_green.graphicWidth/2);
 style_mark_green.graphicYOffset = -(style_mark_green.graphicHeight/2);
-style_mark_green.externalGraphic = "./lib/openlayers/img/location_found.png";
+style_mark_green.externalGraphic = "./lib/openlayers/img/location_arrow.png";
 
 style_mark_green.fillOpacity = 1;
 style_mark_green.title = "this is a test tooltip";
