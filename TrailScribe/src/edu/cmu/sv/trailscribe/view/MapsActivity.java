@@ -321,7 +321,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	@Override
 	public void onLocationChanged(Location location) {
 	    super.onLocationChanged(location);
-            saveLocationToDatabase();
 		
 		if (mIsDisplayCurrentLocation) {
 		    setLayers(MessageToWebview.HideCurrentLocation);
@@ -334,16 +333,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
         }		
 	}
 	
-
-    	private void saveLocationToDatabase() {
-	    LocationDataSource dataSource = new LocationDataSource(mDBHelper);
-	    edu.cmu.sv.trailscribe.model.Location loc = 
-	            new edu.cmu.sv.trailscribe.model.Location(
-	                    (int) (Math.random() * Integer.MAX_VALUE), "default time", 
-	                    mLocation.getLongitude(), mLocation.getLatitude(), mLocation.getAltitude(), 
-	                    0, 0, 0);
-        dataSource.add(loc);
-	}
 
     @Override
     public void onSensorChanged(SensorEvent event) {

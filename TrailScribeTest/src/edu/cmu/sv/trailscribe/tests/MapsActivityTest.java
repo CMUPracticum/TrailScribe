@@ -6,13 +6,13 @@ import android.webkit.WebView;
 import android.test.UiThreadTest;
 import android.widget.Button;
 import android.util.Log;
-import com.google.android.gms.location.LocationClient;
 import android.os.SystemClock;
 import edu.cmu.sv.trailscribe.R;
 import android.test.RenamingDelegatingContext;
 import edu.cmu.sv.trailscribe.dao.DBHelper;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 import android.location.Location;
 
 public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActivity> {
@@ -25,8 +25,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     private static final String LOC_PROVIDER = "flp";
     private static final String TEST_FILE_PREFIX = "test_";
 
-    private LocationClient tLocationClient;
-
+    private TrailScribeApplication tApplication;
     private MapsActivity tMapsActivity;
     private WebView tWebView;
 
@@ -46,6 +45,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
 
         // find all UI elements
         tMapsActivity = getActivity();
+        tApplication = (TrailScribeApplication) tMapsActivity.getApplication();
         Log.d(LOG_TAG, "Found main activity");
         tWebView = (WebView) tMapsActivity
             .findViewById(R.id.maps_webview);
@@ -59,8 +59,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         // setup database
         final RenamingDelegatingContext context = new RenamingDelegatingContext(getInstrumentation().getTargetContext().getApplicationContext(), TEST_FILE_PREFIX);
         tHelper = new DBHelper(context);
+        tApplication.setDBHelper(tHelper);
         tMapsActivity.setDBHelper(tHelper);
-
     }
 
     private Location createLocation(final double lat, final double lng, final float accuracy) {
@@ -75,6 +75,7 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     }
 
     public void testPreconditions() {
+        assertNotNull("Application not found", tApplication);
         assertNotNull("Maps activity not found", tMapsActivity);
         assertNotNull("WebView not found", tWebView);
         assertNotNull("Samples button not found", tSamplesButton);
@@ -95,8 +96,8 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
 
     public void testInterface_positionHistory() {
         // hijack the onlocation changed event
-        tMapsActivity.onLocationChanged(createLocation(1.0, 1.0, 3.0f));
-        tMapsActivity.onLocationChanged(createLocation(2.0, 2.0, 3.0f));
+        tApplication.onLocationChanged(createLocation(1.0, 1.0, 3.0f));
+        tApplication.onLocationChanged(createLocation(2.0, 2.0, 3.0f));
 
         final String actual = tMapsActivity.getPositionHistory();
         assertEquals("Position history didn't respond to location change correctly",
@@ -105,7 +106,9 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
 
     public void testInterface_currentLocation() {
         // hijack the onlocationchanged event
-        tMapsActivity.onLocationChanged(createLocation(3.0, 3.0, 3.0f));
+        tApplication.onLocationChanged(createLocation(3.0, 3.0, 3.0f));
+        // the same needs to be called in mapsactivity to cause it to update
+        tMapsActivity.onLocationChanged(null);
 
         try {
             final String actual = tMapsActivity.getCurrentLocation();
