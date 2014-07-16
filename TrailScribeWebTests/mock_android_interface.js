@@ -50,5 +50,16 @@ window.android = {
             ]
         };
         return JSON.stringify(obj);
+    },
+
+    getOrientation: function() {
+        var obj = {
+            orientation: [
+                {
+                    azimuth: '1.0'
+                }
+            ]
+        };
+        return JSON.stringify(obj);
     }
 };
