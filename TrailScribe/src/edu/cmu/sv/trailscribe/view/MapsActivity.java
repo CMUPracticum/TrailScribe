@@ -203,7 +203,8 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 			mapPoints = new JSONObject(buffer.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
-		} 
+		}
+		
 		return mapPoints.toString();
 	}
 	
