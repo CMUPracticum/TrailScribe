@@ -21,7 +21,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 	private static Context mContext;
 	
 //	Database
-	private static DBHelper mDBHelper;
+	public static DBHelper mDBHelper;
 
 //  Storage
 	public static final String STORAGE_PATH = 

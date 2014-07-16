@@ -1,6 +1,7 @@
 package edu.cmu.sv.trailscribe.model;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.DownloadManager;
@@ -13,22 +14,29 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.Log;
 
 public class Downloader extends AsyncTask<Void, Integer, Void> {
-	private Map mMap;
+	private ArrayList<Map> mMaps;
 	private Context mContext;
 	private ProgressDialog mDownloadProgressDialog;
 	private DownloadReceiver mDownloadReceiver; 
-	private AsyncTaskCompleteListener<Integer> mTaskCompletedCallback;
+	private AsyncTaskCompleteListener<Boolean> mTaskCompletedCallback;
+	private ArrayList<Long> mPendingDownloads = new ArrayList<Long>();
+	private ArrayList<Map> mDownloads;
+	private int mNumberOfDownloads;
+	private String mDownloadDirectory;
 
 
-	public Downloader (Map map, Context context, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Integer> callback){
-		this.mMap = map;
+	public Downloader (ArrayList<Map> mMaps, Context context, String downloadDirectory, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
+		this.mMaps	 = mMaps;
 		this.mContext = context;
 		this.mTaskCompletedCallback = callback;
 		this.mDownloadReceiver = new DownloadReceiver();
 		this.mDownloadProgressDialog = downloadProgressDialog;
+		this.mDownloadDirectory = downloadDirectory;
         this.mContext.registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        
 	}
 	
 	@Override
@@ -37,9 +45,9 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		//Set the progress dialog to display a horizontal progress bar 
 		mDownloadProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		//Set the dialog title to 'Loading...'
-		mDownloadProgressDialog.setTitle("Downloading...");
+		mDownloadProgressDialog.setTitle("Synchronizing...");
 		//Set the dialog message to 'Loading application View, please wait...'
-		mDownloadProgressDialog.setMessage("Downloading items, please wait...");
+		mDownloadProgressDialog.setMessage("Synchronizing items, please wait...");
 		//This dialog can't be canceled by pressing the back key
 		mDownloadProgressDialog.setCancelable(false);
 		//This dialog isn't indeterminate
@@ -60,52 +68,71 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			mDownloadProgressDialog.dismiss();
 		}
 		this.mContext.unregisterReceiver(mDownloadReceiver);
+		boolean success = true;
+//		if(this.mPendingDownloads.size() != 0){
+//			success = false;
+//		}
+		this.mTaskCompletedCallback.onTaskCompleted(success);
 
 	}
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		int subStringIndex = mMap.getFilename().lastIndexOf("/") +1;
-    	String mapFileName = mMap.getFilename().substring(subStringIndex);
-    	final DownloadManager downloadManager = (DownloadManager) 
-				mContext.getSystemService(Context.DOWNLOAD_SERVICE);
-		boolean isDownloading = false;
-		
-		DownloadManager.Query query = new DownloadManager.Query();
-		query.setFilterByStatus(
-		    DownloadManager.STATUS_PAUSED|
-		    DownloadManager.STATUS_PENDING|
-		    DownloadManager.STATUS_RUNNING|
-		    DownloadManager.STATUS_SUCCESSFUL);
-		Cursor cur = downloadManager.query(query);
-		int col = cur.getColumnIndex(
-		    DownloadManager.COLUMN_LOCAL_FILENAME);
-		for(cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
-		    isDownloading = isDownloading || (mapFileName == cur.getString(col));
-		}
-		cur.close();
+		mDownloads = new ArrayList<Map>();
+		for (Map map: mMaps){
+			int subStringIndex = map.getFilename().lastIndexOf("/") +1;
+	    	String mapFileName = map.getFilename().substring(subStringIndex);
+	    	final DownloadManager downloadManager = (DownloadManager) 
+					mContext.getSystemService(Context.DOWNLOAD_SERVICE);
+			boolean isDownloading = false;
 			
-		// Download the file if it is not already downloaded
-		if (!isDownloading) {
-		    startDownload(mapFileName, downloadManager);            
-   		}
+			DownloadManager.Query query = new DownloadManager.Query();
+			query.setFilterByStatus(
+			    DownloadManager.STATUS_PAUSED|
+			    DownloadManager.STATUS_PENDING|
+			    DownloadManager.STATUS_RUNNING|
+			    DownloadManager.STATUS_SUCCESSFUL);
+			Cursor cur = downloadManager.query(query);
+			int col = cur.getColumnIndex(
+			    DownloadManager.COLUMN_LOCAL_FILENAME);
+			for(cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
+			    isDownloading = isDownloading || (mapFileName == cur.getString(col));
+			}
+			cur.close();
+				
+			// Download the file if it is not already downloaded
+			if (!isDownloading) {
+			    startDownload(map, mapFileName, downloadManager);
+			    mDownloads.add(map);
+	   		}
+		}
 		return null;
 	}
+	
+	private void verifyDirectory(String directory) {
+		File file = new File(directory); 
+		if(!file.isDirectory()) { 
+			file.mkdirs(); 
+		} 
+	}
 
-	private void startDownload(String mapFileName,
+	private void startDownload(Map map, String mapFileName,
 			final DownloadManager downloadManager) {
-		Uri source = Uri.parse(mMap.getFilename());
-		Uri destination = Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/trailscribe/"+ mapFileName));
+		Uri source = Uri.parse(map.getFilename());
+		String directory = this.mDownloadDirectory + map.getName()+ "/";
+		verifyDirectory(directory);
+		Uri destination = Uri.fromFile(new File(directory + mapFileName));
  
 		DownloadManager.Request request = 
 		    new DownloadManager.Request(source);
-		request.setTitle(mMap.getName());
+		request.setTitle(map.getName());
 		request.setDestinationUri(destination);
 		request.setNotificationVisibility(DownloadManager
 		    .Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 		request.allowScanningByMediaScanner();
  
 		final long id = downloadManager.enqueue(request);
+		mPendingDownloads.add(id);
    
 		boolean downloading = true;
 		while (downloading) {
@@ -129,23 +156,27 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		        @Override
 		        public void run() {
 
-		        	mDownloadProgressDialog.setProgress((int) dl_progress);
+		        	publishProgress((int) dl_progress);
 
 		        }
 		    });
 		    cursor.close();
-		}
+		}  
 	}
+	
+	protected void onProgressUpdate(Integer... progress) {
+		mDownloadProgressDialog.setProgress(progress[0]);
+        if(mDownloads != null) {
+        	mDownloadProgressDialog.setMessage("Synchronizing..." + (mDownloads.size()+1) + "/" + this.mMaps.size());
+        }
+        
+        
+   }
 	
 	class DownloadReceiver extends BroadcastReceiver{
 		
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-	    	//close the progress dialog
-			if(mDownloadProgressDialog!= null){
-				mDownloadProgressDialog.dismiss();
-			}
-			
 	        long receivedID = intent.getLongExtra(
 	            DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
 	        DownloadManager mgr = (DownloadManager)
@@ -157,7 +188,9 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	        int index = cur.getColumnIndex(
 	            DownloadManager.COLUMN_STATUS);
 	        if(cur.moveToFirst()) {
-	        	mTaskCompletedCallback.onTaskCompleted(cur.getInt(index));
+	        	if(cur.getInt(index) == DownloadManager.STATUS_SUCCESSFUL){
+	        		//mPendingDownloads.remove(receivedID);
+	        	}
 	        }
 	        cur.close();
 	    }

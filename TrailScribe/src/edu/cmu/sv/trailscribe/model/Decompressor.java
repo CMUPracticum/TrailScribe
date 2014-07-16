@@ -17,7 +17,6 @@ public class Decompressor {
 	public Decompressor(String zipFile, String location) { 
 		mCompressedFileFullPath = zipFile; 
 		mDecompressingDirectory = location; 
-		verifyDirectory(""); 
 	} 
 		 
 	public void unzip() { 
@@ -25,7 +24,7 @@ public class Decompressor {
 			FileInputStream fileInputStream = new FileInputStream(mCompressedFileFullPath); 
 			ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(fileInputStream)); 
 			ZipEntry zipEntry = null; 
-			while ((zipEntry = zipInputStream.getNextEntry()) != null) {  
+			while ((zipEntry = zipInputStream.getNextEntry()) != null) { 
 				if(zipEntry.isDirectory()) { 
 					verifyDirectory(zipEntry.getName()); 
 				} else { 
@@ -39,18 +38,26 @@ public class Decompressor {
 					baos.writeTo(fout);
 					zipInputStream.closeEntry(); 
 					fout.close(); 
-				}  
-			} 
+				}
+			}  
 			zipInputStream.close(); 
+			removeZipFile();
 		} catch(Exception e) {
 			//TODO
 		}	 
-	} 
-	 
-	private void verifyDirectory(String dir) {
-		File file = new File(mDecompressingDirectory + dir); 
+	}
+	
+	private void verifyDirectory(String directory) {
+		File file = new File(mDecompressingDirectory + directory); 
 		if(!file.isDirectory()) { 
 			file.mkdirs(); 
 		} 
-	}		 
+	}
+
+	private void removeZipFile() {
+		File zipFile = new File(this.mCompressedFileFullPath);
+		if(zipFile !=null){
+			zipFile.delete();
+		}
+	} 		 
 }
