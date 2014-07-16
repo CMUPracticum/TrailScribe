@@ -1,5 +1,10 @@
+/**
+ * OpenLayers.Style settings for all map elements.
+ */
 
-// Layer Styles
+/**
+ * Layer Styles
+ */
 var layer_style;
 
 // We want opaque external graphics and non-opaque internal graphics
@@ -8,7 +13,9 @@ layer_style.fillOpacity = 0.4;
 layer_style.graphicOpacity = 1;
 layer_style.strokeWidth = 1.5;
 
-// Vector Point and Marker Styles
+/** 
+ * Vector Point and Marker Styles
+ */
 var style_blue;
 var style_line;
 var style_line_thick;
@@ -42,7 +49,7 @@ style_line.strokeColor = "red";
 style_line.strokeWidth = 2;
 
 style_line_thick = OpenLayers.Util.extend({}, layer_style);
-style_line_thick.strokeColor = "blue";
+style_line_thick.strokeColor = "gold";
 style_line_thick.strokeWidth = 4;
 
 // Marker default style
@@ -71,9 +78,9 @@ for (var i = 0; i < marker_colors.length; i++) {
 }
 
 // Current location style
-style_current_location = OpenLayers.Util.extend({}, OpenLayers.Feature.Vector.style['default']);
-style_current_location.pointRadius = 14;
-style_current_location.fillColor = "blue";
-style_current_location.fillOpacity = 0.4;
-style_current_location.strokeColor = "blue";
-style_current_location.strokeWidth = 2;
+style_current_location = OpenLayers.Util.extend({}, defaultStyle);
+style_current_location['externalGraphic'] = "./lib/openlayers/img/location_arrow.png";
+style_current_location['graphicWidth'] = 50;
+style_current_location['graphicHeight'] = 50;
+style_current_location['graphicXOffset'] = -25;
+style_current_location['graphicYOffset'] = -25;

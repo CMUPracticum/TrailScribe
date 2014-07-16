@@ -91,20 +91,10 @@ public class SynchronizationCenterActivity
 	 
 	         // Assign adapter to ListView
 	         mListView.setAdapter(mAdapter); 
-	         
-	         // ListView Item Click Listener
-	         mListView.setOnItemClickListener(new OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-						long arg3) {
-					mCurrentMap = mMaps.get(arg2);
-					new Downloader(mCurrentMap, SynchronizationCenterActivity.this, mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
-				}
-	         }); 
 		}
-		else if(result instanceof Integer){
-			int downloadResult = (Integer) result;
-			if(downloadResult == DownloadManager.STATUS_SUCCESSFUL){
+		else if(result instanceof Boolean){
+			boolean downloadResult = (Boolean) result;
+			if(downloadResult == true){
 	            	new UnzipTask().execute();
 	            }
 		}
@@ -113,6 +103,11 @@ public class SynchronizationCenterActivity
                 if (mapsFetchedCallback != null) {
                     mapsFetchedCallback.run();
                 }
+	}
+	
+	public void onSyncAll(View v){
+		new Downloader(mMaps, SynchronizationCenterActivity.this, 
+				mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
 	}
 	
 	private class UnzipTask extends AsyncTask<Void, Integer, Void>{
@@ -129,10 +124,12 @@ public class SynchronizationCenterActivity
 			//Get the current thread's token
 			synchronized (this) 
 			{
-				int subStringIndex = mCurrentMap.getFilename().lastIndexOf("/") +1;
-            	String mapFileName = mCurrentMap.getFilename().substring(subStringIndex);
-            	Decompressor decompressor = new Decompressor(Environment.getExternalStorageDirectory() + "/trailscribe/" + mapFileName, Environment.getExternalStorageDirectory() + "/trailscribe/");
-            	decompressor.unzip();
+				for (Map map: mMaps){
+					int subStringIndex = map.getFilename().lastIndexOf("/") +1;
+	            	String mapFileName = map.getFilename().substring(subStringIndex);
+	            	Decompressor decompressor = new Decompressor(Environment.getExternalStorageDirectory() + "/trailscribe/" + mapFileName, Environment.getExternalStorageDirectory() + "/trailscribe/");
+	            	decompressor.unzip();
+				}
 			}
 			return null;
 		}
@@ -145,7 +142,8 @@ public class SynchronizationCenterActivity
 			if(mUnzippingProgressDialog!= null){
 				mUnzippingProgressDialog.dismiss();
 			}
-			mAdapter.remove(mCurrentMap);
+			//Check for success
+			mAdapter.clear();
 			mAdapter.notifyDataSetChanged();
 		}
 	}
