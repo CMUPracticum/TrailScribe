@@ -14,8 +14,8 @@ import com.google.gson.JsonParser;
 import edu.cmu.sv.trailscribe.dao.DBHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.BackendFacade;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.utils.BackendFacade;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class SynchronizationCenterController 
