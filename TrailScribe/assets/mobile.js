@@ -184,7 +184,7 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
         
-    var path = "file:///sdcard/trailscribe" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+    var path = "file:///sdcard/trailscribe/maps/basemap" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
