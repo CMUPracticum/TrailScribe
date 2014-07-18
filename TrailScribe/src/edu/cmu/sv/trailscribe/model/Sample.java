@@ -1,6 +1,7 @@
 package edu.cmu.sv.trailscribe.model;
 
 
+
 public class Sample {
 	private long id;
 	private long userId;

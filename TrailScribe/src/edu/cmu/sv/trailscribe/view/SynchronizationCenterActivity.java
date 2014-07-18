@@ -2,13 +2,12 @@ package edu.cmu.sv.trailscribe.view;
 
 import java.util.ArrayList;
 
-
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.Decompressor;
-import edu.cmu.sv.trailscribe.model.Downloader;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.utils.Decompressor;
+import edu.cmu.sv.trailscribe.utils.Downloader;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -38,6 +37,7 @@ public class SynchronizationCenterActivity
     private boolean mapsFetched = false;
     private Runnable mapsFetchedCallback = null;
     private static final String LOG_TAG = "SynchronizationCenterActivity";
+		private String downloadDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/maps/";
 	  
 
     public void setMapsFetchedCallback(Runnable callback) {
@@ -105,8 +105,9 @@ public class SynchronizationCenterActivity
                 }
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void onSyncAll(View v){
-		new Downloader(mMaps, SynchronizationCenterActivity.this, 
+		new Downloader(mMaps, SynchronizationCenterActivity.this, downloadDirectory,
 				mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
 	}
 	
@@ -127,7 +128,7 @@ public class SynchronizationCenterActivity
 				for (Map map: mMaps){
 					int subStringIndex = map.getFilename().lastIndexOf("/") +1;
 	            	String mapFileName = map.getFilename().substring(subStringIndex);
-	            	Decompressor decompressor = new Decompressor(Environment.getExternalStorageDirectory() + "/trailscribe/" + mapFileName, Environment.getExternalStorageDirectory() + "/trailscribe/");
+	            	Decompressor decompressor = new Decompressor( downloadDirectory + map.getName() + "/" + mapFileName, downloadDirectory + map.getName() + "/");
 	            	decompressor.unzip();
 				}
 			}

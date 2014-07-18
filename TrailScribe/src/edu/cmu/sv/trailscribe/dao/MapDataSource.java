@@ -22,9 +22,6 @@ public class MapDataSource extends DataSource {
 	
 	public MapDataSource(DBHelper dbHelper) {
 		super(dbHelper);
-		
-//		TODO
-//		Insert seed data
 	}
 	
 	@Override

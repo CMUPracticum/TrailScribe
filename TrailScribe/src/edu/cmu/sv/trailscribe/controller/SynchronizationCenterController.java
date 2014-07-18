@@ -11,10 +11,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import edu.cmu.sv.trailscribe.dao.DBHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.BackendFacade;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.utils.BackendFacade;
+import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class SynchronizationCenterController 
 	extends AsyncTask<String, Void, Void> implements AsyncTaskCompleteListener<String>{
@@ -57,11 +59,11 @@ public class SynchronizationCenterController
 				map.setMaxX(mapsJsonArray.get("max_x").getAsDouble());
 				map.setMinY(mapsJsonArray.get("min_y").getAsDouble());
 				
-				//Persist
-//				MapDataSource ds = new MapDataSource(mContext);
-//				ds.open();
-//				ds.createMap(map);
 				maps.add(map);
+				//Persist
+				MapDataSource mapsDataSource = new MapDataSource(TrailScribeApplication.mDBHelper);
+				mapsDataSource.add(map);
+				
 			}
 		}
 		mTaskCompletedCallback.onTaskCompleted(maps);

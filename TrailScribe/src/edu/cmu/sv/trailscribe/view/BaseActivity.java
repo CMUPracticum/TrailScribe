@@ -24,6 +24,9 @@ public class BaseActivity extends Activity implements LocationListener {
 //	Database
 	protected static DBHelper mDBHelper;
 	
+//	Storage
+	public static String STORAGE_PATH ;
+	
 //	Location
 	protected static Location mLocation;
 	protected static LocationManager mLocationManager;
@@ -38,6 +41,7 @@ public class BaseActivity extends Activity implements LocationListener {
 		super.onCreate(savedInstanceState);
 		mApplication = (TrailScribeApplication) getApplication();
 		mDBHelper = mApplication.getDBHelper();
+		STORAGE_PATH = TrailScribeApplication.STORAGE_PATH;
 		
 		setLocation();
 	}

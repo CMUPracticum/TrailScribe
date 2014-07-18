@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import android.os.AsyncTask;
 
 public class BackendFacade extends AsyncTask <String, Void, String>{

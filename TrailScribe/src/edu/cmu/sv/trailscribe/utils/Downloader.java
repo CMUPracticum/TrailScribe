@@ -1,8 +1,10 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.utils;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
+import edu.cmu.sv.trailscribe.model.Map;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -25,14 +27,16 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private ArrayList<Long> mPendingDownloads = new ArrayList<Long>();
 	private ArrayList<Map> mDownloads;
 	private int mNumberOfDownloads;
+	private String mDownloadDirectory;
 
 
-	public Downloader (ArrayList<Map> mMaps, Context context, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
+	public Downloader (ArrayList<Map> mMaps, Context context, String downloadDirectory, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
 		this.mMaps	 = mMaps;
 		this.mContext = context;
 		this.mTaskCompletedCallback = callback;
 		this.mDownloadReceiver = new DownloadReceiver();
 		this.mDownloadProgressDialog = downloadProgressDialog;
+		this.mDownloadDirectory = downloadDirectory;
         this.mContext.registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         
 	}
@@ -106,12 +110,20 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		}
 		return null;
 	}
+	
+	private void verifyDirectory(String directory) {
+		File file = new File(directory); 
+		if(!file.isDirectory()) { 
+			file.mkdirs(); 
+		} 
+	}
 
 	private void startDownload(Map map, String mapFileName,
 			final DownloadManager downloadManager) {
-		Log.d("download amount: "+ mPendingDownloads.size(), "mapFileName: "+mapFileName);
 		Uri source = Uri.parse(map.getFilename());
-		Uri destination = Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/trailscribe/"+ mapFileName));
+		String directory = this.mDownloadDirectory + map.getName()+ "/";
+		verifyDirectory(directory);
+		Uri destination = Uri.fromFile(new File(directory + mapFileName));
  
 		DownloadManager.Request request = 
 		    new DownloadManager.Request(source);
