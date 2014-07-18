@@ -1,11 +1,17 @@
 package edu.cmu.sv.trailscribe.view;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -30,6 +36,7 @@ import edu.cmu.sv.trailscribe.controller.MapsController;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 
 
 public class MapsActivity extends BaseActivity implements OnClickListener, SensorEventListener {
@@ -58,6 +65,10 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	private SensorManager mSensorManager;
 	private Sensor mOrientationSensor;
 	private float mAzimuth;
+	
+//  Displayed Overlays
+	private HashSet<String> mOverlays;
+	private ArrayList<String> mSelectedOverlayNames;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -152,7 +163,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	        mCoordinateTextView.setText(R.string.map_coordinate);
 	    }
 	    
-	    Log.d(MSG_TAG, mLocation.getLatitude() + "," + mLocation.getLongitude());
 	    mCoordinateTextView.setText(mLocation.getLatitude() + "," + mLocation.getLongitude());
 	}
 	
@@ -275,12 +285,37 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		return mapPoints.toString();
 	}
 	
+    @JavascriptInterface
+    public String getKMLs() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{'kmls':[");
+        for (int i = 0; i < mSelectedOverlayNames.size(); i++) {
+            buffer.append("{'path':'").append(mSelectedOverlayNames.get(i)).append("'}");
+            
+            if (i != mSelectedOverlayNames.size() - 1) {
+                buffer.append(", ");
+            }
+        }
+        buffer.append("]}'");
+        
+        JSONObject overlays = null;
+        try {
+            overlays = new JSONObject(buffer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        return overlays.toString();
+    }
+	
 	@Override
 	public void onClick(View v) {
 		MessageToWebview message = MessageToWebview.Default;
 		
 		switch (v.getId()) {
 		case R.id.maps_samples:
+		    mIsDisplaySamples = !mIsDisplaySamples;
+		    
 //		    Hide samples if they are currently displayed 
 		    if (mIsDisplaySamples) {
 		        message = MessageToWebview.HideSamples;
@@ -289,10 +324,10 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		        message = MessageToWebview.DisplaySamples;
 		        mSamplesButton.setBackgroundResource(R.drawable.button_samples_toggle);
 		    }
-		    
-		    mIsDisplaySamples = !mIsDisplaySamples;
 			break;
 		case R.id.maps_current_location:
+		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
+		    
 //          Hide current location if it is currently displayed 
 		    if (mIsDisplayCurrentLocation) {
 		        message = MessageToWebview.HideCurrentLocation;
@@ -301,10 +336,10 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		        message = MessageToWebview.DisplayCurrentLocation;
 		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location_toggle);
 		    }
-          
-		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
 			break;
 		case R.id.maps_position_history:
+		    mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
+		    
 //          Hide location history if it is currently displayed
             if (mIsDisplayPositionHistory) {
                 message = MessageToWebview.HidePositionHistory;
@@ -313,20 +348,21 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
                 message = MessageToWebview.DisplayPositionHistory;
                 mPositionHistoryButton.setBackgroundResource(R.drawable.button_position_history_toggle);
             }
-          
-            mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
 			break;
 		case R.id.maps_kml:
+		    mIsDisplayKML = !mIsDisplayKML;
+		    
+//          Hide KML if it is currently displayed
 			if (mIsDisplayKML) {
                 message = MessageToWebview.HideKML;
                 mKmlButton.setBackgroundResource(R.drawable.button_kml);
             } else {
-                message = MessageToWebview.DisplayKML;
+//              Message to webview will be sent after positive button in the selector is clicked 
+                createKMLSelector();
                 mKmlButton.setBackgroundResource(R.drawable.button_kml_toggle);
+                return;
             }
-          
-			mIsDisplayKML = !mIsDisplayKML;
-			break;		
+			break;
 		default:
 				Toast.makeText(getApplicationContext(), 
 						"Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
@@ -355,7 +391,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] values = event.values;
-        if (Math.abs(values[0] - mAzimuth) <= 10) {
+        if (Math.abs(values[0] - mAzimuth) <= 5) {
 //          Ignore minor rotations
             return;
         }
@@ -366,12 +402,91 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
             setLayers(MessageToWebview.DisplayCurrentLocation);
         }
     }
+    
+    private void displayOverlays(List<String> overlayNames) {
+        mSelectedOverlayNames = (ArrayList<String>) overlayNames;
+        
+        MessageToWebview message = MessageToWebview.DisplayKML;
+        setLayers(message);
+    }
+    
+    private void getOverlaysFromStorage() {
+        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "kmls/";
+        List<String> fileNames = StorageSystemHelper.getFiles(overlayDirectory);
+        
+        mOverlays = new HashSet<String>();
+        for (String fileName : fileNames) {
+            mOverlays.add(fileName);
+        }
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
     }
-	
+    
+    private void createKMLSelector() {
+        getOverlaysFromStorage();
+        
+        String[] overlayNames = new String[mOverlays.size()];
+        mOverlays.toArray(overlayNames);
+        
+        KMLSelectorBuilder builder = new KMLSelectorBuilder(this, overlayNames);
+        builder.show();
+    }
+    
+    private class KMLSelectorBuilder extends AlertDialog.Builder {
+        private HashSet<Integer> mSelectedItems;
+        private String[] mOverlayNames;
+        
+        public KMLSelectorBuilder(Context context, String[] overlayNames) {
+            super(context);
+        
+            mSelectedItems = new HashSet<Integer>();
+            mOverlayNames = Arrays.copyOf(overlayNames, overlayNames.length);
+            
+            this.setTitle(R.string.map_select_overlays);
+            this.setMultiChoiceItems(mOverlayNames, null, mOverlaySelector);
+            this.setPositiveButton(R.string.map_display_overlays, mPositiveListener);
+            this.setNegativeButton(R.string.map_display_overlays_cancel, mNegativeListener);
+            
+        }
+        
+        private DialogInterface.OnMultiChoiceClickListener mOverlaySelector = 
+                new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                if (isChecked) {
+                    mSelectedItems.add(which);
+                } else if (mSelectedItems.contains(mOverlayNames[which])) {
+                    mSelectedItems.remove(which);
+                }
+            }
+        };
+        
+        private DialogInterface.OnClickListener mPositiveListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                List<String> selectedItemNames = new ArrayList<String>();
+                for (Integer item : mSelectedItems) {
+                    selectedItemNames.add(mOverlayNames[item.intValue()]);
+                }
+                
+                displayOverlays(selectedItemNames);
+            }
+        };
+        
+        private DialogInterface.OnClickListener mNegativeListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+//              Restore image and state
+                mKmlButton.setBackgroundResource(R.drawable.button_kml);
+                mIsDisplayKML = false;
+            }
+        };
+        
+    }
+    
 	private enum MessageToWebview {
 		Default("default"),
 		

@@ -47,7 +47,7 @@ var tmsOverlay;
 var sampleLayer;
 var currentLocationLayer;
 var positionHistoryLayer;
-var kmlLayer;
+var kmlLayers = [];
 
 /**
  * Map Events
@@ -292,7 +292,7 @@ function onFeatureUnselect(evt) {
  * kml - {String}
  */
 function getKmlUrl(kml) {    
-    return "file:///sdcard/trailscribe" + "/kml/" + kml + "." + "kml";
+    return "file:///sdcard/trailscribe" + "/kmls/" + kml;
 }
 
 /**
@@ -322,17 +322,24 @@ function setLayers(msg) {
         case "HideCurrentLocation":            
             hideLayer(currentLocationLayer);            
             break;            
-		case "DisplayPositionHistory":			
+		case "DisplayPositionHistory":
             positionHistoryLayer.addFeatures(getLinesFromJava(msg));            
 			break;			
 		case "HidePositionHistory":			
             hideLayer(positionHistoryLayer);
 			break;
-        case "DisplayKML":            
-            displayKML("test_layer"); // TO DO: This is hardcoded. 
+        case "DisplayKML":
+            var kmlPaths = getKMLsFromJava();
+            var index;
+            for (index = 0; index < kmlPaths.length; ++index) {
+                displayKML(kmlPaths[index]);
+            }
             break;
         case "HideKML":
-            map.removeLayer(kmlLayer);            
+            for (index = 0; index < kmlLayers.length; ++index) {
+                map.removeLayer(kmlLayers[index]);            
+            }
+            kmlLayers = [];
             break;
         default:
             break;
@@ -370,7 +377,7 @@ function hideLayer(layer) {
  * kml - {String}
  */
 function displayKML(kml) {
-    kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
+    var kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
             projection: map.displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
@@ -386,6 +393,27 @@ function displayKML(kml) {
 
     // Add KML Overlay
     map.addLayer(kmlLayer);
+    kmlLayers.push(kmlLayer);
+}
+
+/**
+ * Function: getKMLsFromJava
+ * Given a message, summon the correct Android/Java method 
+ * to get a list of KML files. 
+ *
+ * Parameters:
+ */
+function getKMLsFromJava() {
+    var kmls = android.getKMLs();
+    var kmlNames = [];
+
+    kmls = JSON.parse(kmls);
+    for(data in kmls['kmls']){
+        var kml = kmls['kmls'][data].path;
+        kmlNames.push(kml);
+    }
+
+    return kmlNames;
 }
 
 /**

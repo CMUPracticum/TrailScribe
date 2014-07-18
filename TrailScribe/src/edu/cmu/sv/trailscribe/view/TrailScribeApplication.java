@@ -1,7 +1,5 @@
 package edu.cmu.sv.trailscribe.view;
 
-import java.io.File;
-
 import android.app.Application;
 import android.content.Context;
 import android.location.Location;
@@ -14,6 +12,7 @@ import android.text.format.Time;
 import android.util.Log;
 import edu.cmu.sv.trailscribe.dao.DBHelper;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
+import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 
 public class TrailScribeApplication extends Application implements LocationListener {
     
@@ -45,8 +44,10 @@ public class TrailScribeApplication extends Application implements LocationListe
 		mDBHelper = new DBHelper(mContext);
 		mTime = new Time();
 		
+//		Create necessary folders in the external storage system
+		StorageSystemHelper.createFolder();
+		
 		setLocationManager();
-		createFolder();
 	}
 	
 	public DBHelper getDBHelper() {
@@ -69,16 +70,6 @@ public class TrailScribeApplication extends Application implements LocationListe
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
         } catch (Exception e) {
             Log.e(MSG_TAG, e.getMessage());
-        }
-    }
-    
-    private void createFolder() {
-        File directory = new File(STORAGE_PATH);
-        if (!directory.exists()) {
-            Log.d(MSG_TAG, "directory does not exist, creating");
-            directory.mkdir();
-        } else {
-            Log.d(MSG_TAG, "directory exists");
         }
     }
 

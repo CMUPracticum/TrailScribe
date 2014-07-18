@@ -21,6 +21,9 @@
     <string name="map_hide_position_history">Hide Position History</string>   
     <string name="map_display_kml">Show KML</string>
     <string name="map_hide_kml">Hide KML</string>
+    <string name="map_select_overlays">Select overlays</string>
+    <string name="map_display_overlays">Display overlays</string>
+    <string name="map_display_overlays_cancel">Cancel</string>
     <string name="map_coordinate">Current location is not available</string>
         
     <!-- SynchronizationCenterActivity -->
