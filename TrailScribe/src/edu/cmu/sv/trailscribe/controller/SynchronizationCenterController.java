@@ -1,33 +1,35 @@
 package edu.cmu.sv.trailscribe.controller;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import edu.cmu.sv.trailscribe.dao.DBHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.BackendFacade;
+import edu.cmu.sv.trailscribe.model.Kml;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.SyncItem;
+import edu.cmu.sv.trailscribe.model.SyncItems;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class SynchronizationCenterController 
 	extends AsyncTask<String, Void, Void> implements AsyncTaskCompleteListener<String>{
 	
-	private final String endpoint = "http://trail-scribe.mlep.net/maps";
-	private AsyncTaskCompleteListener<ArrayList<Map>> mTaskCompletedCallback;
-	private Context mContext;
+	private final String endpoint = "http://trail-scribe.mlep.net/sync/";
+	private AsyncTaskCompleteListener<ArrayList<SyncItem>> mTaskCompletedCallback;
+	MapDataSource mMapsDataSource = new MapDataSource(TrailScribeApplication.mDBHelper);
 	
-	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<Map>> callback, Context context){
+	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<SyncItem>> callback){
 		this.mTaskCompletedCallback = callback;
-		mContext = context;
 	}
 	
 	@Override
@@ -41,37 +43,61 @@ public class SynchronizationCenterController
 		}
 		
 		JsonArray syncResultJson = (JsonArray)jsonParser.parse(syncResult);
-		ArrayList<Map> maps = new ArrayList<Map>();
+		ArrayList<SyncItem> itemsToSync = new ArrayList<SyncItem>();
+		ArrayList<Kml> kmls = new ArrayList<Kml>();
 		Map map;
+		Kml kml;
 		for (JsonElement item:syncResultJson) {
 			String model = item.getAsJsonObject().get("model").getAsString();
+			JsonObject syncItemJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
 			if(model.equals("sync_center.map")){
-				map = new Map(0, model, model, model, 0, 0, 0, 0, 0, 0, model, model);
-				JsonObject mapsJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
-				map.setMinX(mapsJsonArray.get("min_x").getAsDouble());
-				map.setMaxZoomLevel(mapsJsonArray.get("max_zoom_level").getAsInt());
-				map.setMaxY(mapsJsonArray.get("max_y").getAsDouble());
-				map.setName(mapsJsonArray.get("name").getAsString());
-				map.setFilename(mapsJsonArray.get("filename").getAsString());
-				map.setProjection(mapsJsonArray.get("projection").getAsString());
-				map.setLastModified(mapsJsonArray.get("last_modified").getAsString());
-				map.setMinZoomLevel(mapsJsonArray.get("min_zoom_level").getAsInt());
-				map.setMaxX(mapsJsonArray.get("max_x").getAsDouble());
-				map.setMinY(mapsJsonArray.get("min_y").getAsDouble());
+				map = new Map();
+				map.setId(item.getAsJsonObject().get("pk").getAsLong());
+				map.setMinX(syncItemJsonArray.get("min_x").getAsDouble());
+				map.setMaxZoomLevel(syncItemJsonArray.get("max_zoom_level").getAsInt());
+				map.setMaxY(syncItemJsonArray.get("max_y").getAsDouble());
+				map.setName(syncItemJsonArray.get("name").getAsString());
+				map.setFilename(syncItemJsonArray.get("filename").getAsString());
+				map.setProjection(syncItemJsonArray.get("projection").getAsString());
+				map.setLastModified(syncItemJsonArray.get("last_modified").getAsString());
+				map.setMinZoomLevel(syncItemJsonArray.get("min_zoom_level").getAsInt());
+				map.setMaxX(syncItemJsonArray.get("max_x").getAsDouble());
+				map.setMinY(syncItemJsonArray.get("min_y").getAsDouble());
 				
-				maps.add(map);
+				itemsToSync.add(map);
+				
 				//Persist
-				MapDataSource mapsDataSource = new MapDataSource(TrailScribeApplication.mDBHelper);
-				mapsDataSource.add(map);
+				mMapsDataSource.add(map);
 				
 			}
+			else if(model.equals("sync_center.kml")){
+				kml = new Kml();
+				kml.setName(syncItemJsonArray.get("name").getAsString());
+				kml.setId(item.getAsJsonObject().get("pk").getAsLong());
+				kml.setFilename(syncItemJsonArray.get("filename").getAsString());
+				kmls.add(kml);
+				itemsToSync.add(kml);
+				//Persist
+				//mMapsDataSource.add(map);				
+			}
 		}
-		mTaskCompletedCallback.onTaskCompleted(maps);
+		mTaskCompletedCallback.onTaskCompleted(itemsToSync);
 	}
 
 	@Override
 	protected Void doInBackground(String... params) {
-		BackendFacade backend = new BackendFacade(endpoint, this);
+		List<Map> maps = mMapsDataSource.getAll();
+		Hashtable <Long, Map> mapsToSync = new Hashtable<Long, Map>();
+		for(Map map:maps){
+			mapsToSync.put(map.getId(), map);
+		}
+		List<Kml> kmls = new ArrayList<Kml>();
+		Hashtable <Long, Kml> KMLsToSync = new Hashtable<Long, Kml>();
+		for(Kml kml:kmls){
+			KMLsToSync.put(kml.getId(), kml);
+		}
+		SyncItems itemsToSync = new SyncItems(mapsToSync, KMLsToSync);
+		BackendFacade backend = new BackendFacade(endpoint, this, new Gson().toJson(itemsToSync));
 		backend.execute();
 		return null;
 	}

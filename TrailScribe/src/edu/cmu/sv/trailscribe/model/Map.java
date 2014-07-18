@@ -1,10 +1,7 @@
 package edu.cmu.sv.trailscribe.model;
 
 
-public class Map {
-
-	private long mId;
-	private String mName;
+public class Map extends SyncItem{
 	private String mDescription;
 	private String mProjection;
 	private int mMinZoomLevel;
@@ -15,14 +12,15 @@ public class Map {
 	private double mMinY;
 	private String mFilename; 
 	private String mLastModified; 
-			
+	
+	public Map(){}
 	public Map(
 			long id, String name, String description, String projection, 
 			int minZoomLevel, int maxZoomLevel, 
 			double minX, double minY, double maxX, double maxY, 
 			String filename, String lastModified) {
-		mId = id;
-		mName = name;
+		super.setId(id);
+		super.setName(name);
 		mDescription = description;
 		mProjection = projection;
 		mMinZoomLevel = minZoomLevel;
@@ -33,22 +31,6 @@ public class Map {
 		mMinY = minY;
 		mFilename = filename;
 		mLastModified = lastModified;
-	}
-	
-	public String getName() {
-		return mName;
-	}
-
-	public void setName(String name) {
-		this.mName = name;
-	}
-	
-	public long getId() {
-		return mId;
-	}
-
-	public void setId(long mId) {
-		this.mId = mId;
 	}
 
 	public int getMaxZoomLevel() {
@@ -100,11 +82,11 @@ public class Map {
 	}
 
 	public String getFilename() {
-		return mFilename;
+		return super.getFilename();
 	}
 
 	public void setFilename(String mFilename) {
-		this.mFilename = mFilename;
+		super.setFilename(mFilename);
 	}
 
 	public String getProjection() {
@@ -134,5 +116,21 @@ public class Map {
 
 	public void setDescription(String mDescription) {
 		this.mDescription = mDescription;
+	}
+	
+	public long getId() {
+		return super.getId();
+	}
+	
+	public void setId(long id){
+		super.setId(id);
+	}
+
+	public void setName(String name) {
+		super.setName(name);
+	}
+	
+	public String getName(){
+		return super.getName();
 	}
 }
