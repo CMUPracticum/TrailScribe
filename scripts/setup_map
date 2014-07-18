@@ -1,63 +1,70 @@
 #!/bin/bash
 
 if [ $# -ne 2 ]; then
-	echo "Usage $0 source_map.tif map_name" # We expect source image and a name for the map
-	exit 2
+    echo "Usage $0 tmp/<source_map.tif> map_name" # We expect source image and a name for the map
+    exit 2
 fi
 
 echo "Re-projecting source image to Spherical Mercator - WGS84"
 echo "--------------------------------------------------------"
-gdal_translate -a_srs 'epsg:4326' $1 'map_projected.tif'
+gdal_translate -a_srs 'epsg:4326' $1 './tmp/map_projected.tif'
 
 echo
 echo "Spatial information for re-projected map"
 echo "----------------------------------------"
-gdalinfo 'map_projected.tif'
+gdalinfo './tmp/map_projected.tif'
 
 echo
 echo "JPEG Compression and scale down from 16-bit Geotiff to 8-bit Geotiff"
 echo "--------------------------------------------------------------------"
 echo "Checking if source image has 1 band (Greyscale) or 4 bands (RGBA)..."
 
-is_rgba=$(gdalinfo -mm 'map_projected.tif' | grep -oa 'Band 2')
+is_rgba=$(gdalinfo -mm './tmp/map_projected.tif' | grep -oa 'Band 2')
 
 if [ "$is_rgba" == "" ]; then
-	echo "Source image is greyscale."
-	echo "Compressing image..."
-	gdal_translate -co 'COMPRESS=JPEG' 'map_projected.tif' 'map_compressed.tif' -scale 0 4095 0 2047 -ot BYTE
+    echo "Source image is greyscale."
+    echo "Compressing image..."
+    gdal_translate -co 'COMPRESS=JPEG' './tmp/map_projected.tif' './tmp/map_compressed.tif' -scale 0 4095 0 2047 -ot BYTE
 else
-	echo "Source image is RGBA"
-	echo "Compressing image..."
-	gdal_translate -co 'COMPRESS=JPEG' 'map_projected.tif' 'map_compressed.tif' -scale 0 4095 0 2047 -ot BYTE -b 1 -b 2 -b 3 -mask 4
+    echo "Source image is RGBA"
+    echo "Compressing image..."
+    gdal_translate -co 'COMPRESS=JPEG' './tmp/map_projected.tif' './tmp/map_compressed.tif' -scale 0 4095 0 2047 -ot BYTE -b 1 -b 2 -b 3 -b 4
 fi
-
-#gdal_translate -co 'COMPRESS=JPEG' 'map_projected.tif' 'map_compressed.tif' -scale 0 4095 0 2047 -ot BYTE -b 1 -b 2 -b 3 -mask 4
 
 echo
 echo "Creating Tiles..."
 echo "-----------------"
-if [ ! -d "tiles" ]; then
-	echo "Creating tiles folder..."
-	mkdir 'tiles'
+if [ ! -d "./tmp/tiles" ]; then
+    echo "Creating tiles folder..."
+    mkdir './tmp/tiles'
 else
-	echo "Cleaning tiles folder..."
-	rm -Rf "tiles"/*
+    echo "Cleaning tiles folder..."
+    rm -Rf "./tmp/tiles"/*
 fi
 
+echo
 echo "Creating tiles..."
-gdal2tiles.py -r 'bilinear' 'map_compressed.tif' './tiles'
+echo "-----------------"
+gdal2tiles.py -r 'bilinear' './tmp/map_compressed.tif' './tmp/tiles'
 echo "Tiles created!"
 
-echo "Clean up..."
-# Removing unnecessary xml files created by gdal2tiles.py
-find 'tiles/.' -name '*.png.aux.xml' -type f -delete
-rm -f 'tiles/googlemaps.html'
-rm -f 'tiles/openlayers.html'
+echo
 echo "Creating zip folder..."
-if [ -f $2"_tiles.zip" ]; then
-	rm -f $2"_tiles.zip"
+echo "-----------------"
+# Removing unnecessary xml files created by gdal2tiles.py
+find './tmp/tiles/.' -name '*.png.aux.xml' -type f -delete
+rm -f './tmp/tiles/googlemaps.html'
+rm -f './tmp/tiles/openlayers.html'
+if [ -f "./tmp/"$2"_tiles.zip" ]; then
+    rm -f "./tmp/"$2"_tiles.zip"
 fi
-#tar -czf $2'_tiles.tgz' --exclude='tilemapresource.xml' 'tiles/.'
-zip -9 -q -r --exclude='tilemapresource.xml' $2'_tiles.zip' 'tiles/.'
-mv $2'_tiles.zip' '/home/scribe/trailscribe/media/map/'$2'_tiles.zip'
+
+zip -9 -q -r --exclude='tilemapresource.xml' './tmp/'$2'_tiles.zip' './tmp/tiles/.'
+mv './tmp/'$2'_tiles.zip' '../media/map/'$2'_tiles.zip'
+echo "Zip created at: '../media/map/"$2"_tiles.zip'"
+echo
+echo "Clean up..."
+echo "-----------------"
+# Remove all source and intermediary map and tile images
+#rm -Rf "./tmp"/*
 echo "Done!"

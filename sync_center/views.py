@@ -50,8 +50,17 @@ def sync_data(request):
             kml.filename = request.build_absolute_uri(settings.MEDIA_URL + 'kml/' + kml.filename)
 
 
-        response = {}
-        response['map'] = serializers.serialize('json', maps)
-        response['kml'] = serializers.serialize('json', kmls)
+#        response = {}
+#        response['map'] = serializers.serialize('json', maps)
+#        response['kml'] = serializers.serialize('json', kmls)
 
-        return HttpResponse(json.dumps(response), content_type = "application/json")
+        response = []
+        for map in maps:
+            response.append(map)
+
+        for kml in kmls:
+            response.append(kml)
+        #response.append(serializers.serialize('json', maps))
+        #response.append(serializers.serialize('json', kmls))
+
+        return HttpResponse(serializers.serialize('json', response), content_type = "application/json")
