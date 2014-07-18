@@ -1,7 +1,5 @@
 package edu.cmu.sv.trailscribe.model;
 
-import java.util.ArrayList;
-
 public abstract class SyncItem {
 	private long mId;
 	private String mName;

@@ -7,7 +7,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import edu.cmu.sv.trailscribe.model.Map;
-import edu.cmu.sv.trailscribe.model.Sample;
 
 public class MapDataSource extends DataSource {
 	private String[] allColumns = {
@@ -22,9 +21,6 @@ public class MapDataSource extends DataSource {
 	
 	public MapDataSource(DBHelper dbHelper) {
 		super(dbHelper);
-		
-//		TODO
-//		Insert seed data
 	}
 	
 	@Override
@@ -33,6 +29,7 @@ public class MapDataSource extends DataSource {
 		Map map = (Map) data;
 		
 		ContentValues values = new ContentValues();
+		values.put(DBHelper.KEY_ID, map.getId());
 		values.put(DBHelper.NAME, map.getName());
 		values.put(DBHelper.DESCRIPTION, map.getDescription());
 		values.put(DBHelper.PROJECTION, map.getProjection());
@@ -83,18 +80,18 @@ public class MapDataSource extends DataSource {
 	
     @Override
     protected Object cursorToData(Cursor cursor) {
-        return new Sample(
+        return new Map(
                 cursor.getLong(0),
                 cursor.getString(1), 
                 cursor.getString(2), 
                 cursor.getString(3), 
-                cursor.getDouble(4), 
-                cursor.getDouble(5), 
+                cursor.getInt(4), 
+                cursor.getInt(5), 
                 cursor.getDouble(6),
-                cursor.getString(7),
-                cursor.getString(8),
-                cursor.getLong(9),
-                cursor.getLong(10), 
-                cursor.getLong(11));
+                cursor.getDouble(7),
+                cursor.getDouble(8),
+                cursor.getDouble(9),
+                cursor.getString(10), 
+                cursor.getString(11));
     }
 }

@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.utils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -8,7 +8,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class BackendFacade extends AsyncTask <String, Void, String>{
 	private String urlParameters;	
@@ -46,6 +48,7 @@ public class BackendFacade extends AsyncTask <String, Void, String>{
 	     DataOutputStream wr = new DataOutputStream (
               connection.getOutputStream ());
 	     wr.write(urlParameters.getBytes());
+	     Log.d("req", urlParameters);
 	     wr.flush ();
 	     wr.close ();
 

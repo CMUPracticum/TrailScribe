@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.utils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

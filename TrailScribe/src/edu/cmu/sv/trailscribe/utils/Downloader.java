@@ -1,8 +1,12 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.utils;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
+import edu.cmu.sv.trailscribe.model.Kml;
+import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.SyncItem;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;

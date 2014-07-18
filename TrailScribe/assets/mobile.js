@@ -47,7 +47,7 @@ var tmsOverlay;
 var sampleLayer;
 var currentLocationLayer;
 var positionHistoryLayer;
-var kmlLayer;
+var kmlLayers = [];
 
 /**
  * Map Events
@@ -184,7 +184,7 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
         
-    var path = "file:///sdcard/trailscribe" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+    var path = "file:///sdcard/trailscribe/maps/basemap" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
@@ -233,10 +233,28 @@ function onPopupClose(evt) {
 function onFeatureSelect(evt) {
     feature = evt.feature;
 
+    var lon = feature.geometry.getBounds().getCenterLonLat().lon;
+    var lat = feature.geometry.getBounds().getCenterLonLat().lat;
+    var html = '';
+
+//  TODO: Samples are currently hardcoded, remove the hard-coded part after the demo
+    if (lon == -13587628.769185 && lat == 4496469.2098323) {
+        html = '<div class="markerContent">Carnegie Mellon University</div><div>37.410418, -122.059746</div><center><img src="./lib/openlayers/img/demo/cmu_bldg23.jpg" alt="cmu_bldg23" width="120" height="80"></center>';
+
+    } else if (lon == -13587311.508636 && lat == 4496342.7978354) {
+        html = '<div class="markerContent">Pool</div><div>37.409516, -122.056896</div><center><img src="./lib/openlayers/img/demo/swimming_pool.jpg" alt="swimming_pool" width="120" height="80"></center>';
+    } else if (lon == -13587014.730874 && lat == 4496600.1081161) {
+        html = '<div class="markerContent">Moffett Field Historical Society Museum</div><div>37.411352, -122.054230</div><center><img src="./lib/openlayers/img/demo/moffett_field_museum.jpg" alt="moffett_field_museum" width="120" height="80"></center>';
+    } else if (lon == -13587010.834692 && lat == 4496785.5267868) {
+        html = '<div class="markerContent">Hangar 1</div><div>37.412675, -122.054195</div><center><img src="./lib/openlayers/img/demo/hangar_one.jpg" alt="hangar_one" width="120" height="80"></center>';
+    } else {
+        html = '<div class="markerContent">default popup</div>';
+    }
+
     popup = new OpenLayers.Popup.FramedCloud("pop",
           feature.geometry.getBounds().getCenterLonLat(),
           null,
-          '<div class="markerContent">Example popup.</div>',
+          html,
           null,
           true,
           onPopupClose);
@@ -274,7 +292,7 @@ function onFeatureUnselect(evt) {
  * kml - {String}
  */
 function getKmlUrl(kml) {    
-    return "file:///sdcard/trailscribe" + "/kml/" + kml + "." + "kml";
+    return "file:///sdcard/trailscribe" + "/kmls/" + kml;
 }
 
 /**
@@ -304,17 +322,24 @@ function setLayers(msg) {
         case "HideCurrentLocation":            
             hideLayer(currentLocationLayer);            
             break;            
-		case "DisplayPositionHistory":			
+		case "DisplayPositionHistory":
             positionHistoryLayer.addFeatures(getLinesFromJava(msg));            
 			break;			
 		case "HidePositionHistory":			
             hideLayer(positionHistoryLayer);
 			break;
-        case "DisplayKML":            
-            displayKML("test_layer"); // TO DO: This is hardcoded. 
+        case "DisplayKML":
+            var kmlPaths = getKMLsFromJava();
+            var index;
+            for (index = 0; index < kmlPaths.length; ++index) {
+                displayKML(kmlPaths[index]);
+            }
             break;
         case "HideKML":
-            map.removeLayer(kmlLayer);            
+            for (index = 0; index < kmlLayers.length; ++index) {
+                map.removeLayer(kmlLayers[index]);            
+            }
+            kmlLayers = [];
             break;
         default:
             break;
@@ -352,7 +377,7 @@ function hideLayer(layer) {
  * kml - {String}
  */
 function displayKML(kml) {
-    kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
+    var kmlLayer = new OpenLayers.Layer.Vector("KML", new OpenLayers.Layer.Vector("KML", {
             projection: map.displayProjection,
             strategies: [new OpenLayers.Strategy.Fixed()],
             protocol: new OpenLayers.Protocol.HTTP({
@@ -368,6 +393,27 @@ function displayKML(kml) {
 
     // Add KML Overlay
     map.addLayer(kmlLayer);
+    kmlLayers.push(kmlLayer);
+}
+
+/**
+ * Function: getKMLsFromJava
+ * Given a message, summon the correct Android/Java method 
+ * to get a list of KML files. 
+ *
+ * Parameters:
+ */
+function getKMLsFromJava() {
+    var kmls = android.getKMLs();
+    var kmlNames = [];
+
+    kmls = JSON.parse(kmls);
+    for(data in kmls['kmls']){
+        var kml = kmls['kmls'][data].path;
+        kmlNames.push(kml);
+    }
+
+    return kmlNames;
 }
 
 /**

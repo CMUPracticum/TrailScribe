@@ -1,17 +1,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
- 		 <Button
-            android:id="@+id/sync_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onSyncAll"
-            android:text="@string/sync_all"/>
+    android:orientation="vertical"> 	
+         <ImageButton 
+ 		    android:id="@+id/sync_all"
+ 		    android:layout_width="253dp"
+ 		    android:layout_height="73dp"
+ 		    android:onClick="onSyncAll"
+ 		    android:background="@android:color/transparent"
+ 		    android:src="@drawable/button_sync_all"
+ 		    style="android:attr/borderlessButtonStyle"
+ 		    android:paddingTop="16dp"
+ 		    android:layout_gravity="center|top"
+ 		    android:scaleType="fitCenter" />	 
          <ListView
               android:id="@+id/sync_list"
               android:layout_height="wrap_content"
               android:layout_width="match_parent">
-         </ListView>
- 
+         </ListView> 
 </LinearLayout>

@@ -4,12 +4,15 @@ import java.util.ArrayList;
 
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
+import edu.cmu.sv.trailscribe.dao.KmlDataSource;
+import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.Decompressor;
-import edu.cmu.sv.trailscribe.model.Downloader;
 import edu.cmu.sv.trailscribe.model.Kml;
 import edu.cmu.sv.trailscribe.model.Map;
 import edu.cmu.sv.trailscribe.model.SyncItem;
+import edu.cmu.sv.trailscribe.utils.Decompressor;
+import edu.cmu.sv.trailscribe.utils.Downloader;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -126,6 +129,17 @@ public class SynchronizationCenterActivity
 			if(mUnzippingProgressDialog!= null){
 				mUnzippingProgressDialog.dismiss();
 			}
+			
+			for(SyncItem item: mSyncItems)
+			if(item instanceof Map){
+    			MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
+    			mapsDs.add(item);
+    		}
+    		else if(item instanceof Kml){
+    			KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
+    			kmlsDs.add(item);
+    		}
+			
 			//Check for success
 			mAdapter.clear();
 			mAdapter.notifyDataSetChanged();

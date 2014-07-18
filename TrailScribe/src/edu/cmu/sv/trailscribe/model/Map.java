@@ -1,6 +1,5 @@
 package edu.cmu.sv.trailscribe.model;
 
-
 public class Map extends SyncItem{
 	private String mDescription;
 	private String mProjection;
@@ -10,7 +9,6 @@ public class Map extends SyncItem{
 	private double mMaxY; 
 	private double mMaxX;
 	private double mMinY;
-	private String mFilename; 
 	private String mLastModified; 
 	
 	public Map(){}
@@ -21,6 +19,7 @@ public class Map extends SyncItem{
 			String filename, String lastModified) {
 		super.setId(id);
 		super.setName(name);
+		super.setFilename(filename);
 		mDescription = description;
 		mProjection = projection;
 		mMinZoomLevel = minZoomLevel;
@@ -29,7 +28,6 @@ public class Map extends SyncItem{
 		mMinY = minY;
 		mMaxX = maxX;
 		mMinY = minY;
-		mFilename = filename;
 		mLastModified = lastModified;
 	}
 

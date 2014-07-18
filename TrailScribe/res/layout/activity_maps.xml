@@ -10,11 +10,29 @@
     android:orientation="vertical" >
 
     <!-- The main content view -->
-	<WebView 
-		tools:context="edu.cmu.sv.trailscribe.view.MapsActivity"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:id="@+id/maps_webview" />
+    <RelativeLayout
+        android:layout_alignParentTop="true"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >        
+		<WebView 
+			tools:context="edu.cmu.sv.trailscribe.view.MapsActivity"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:id="@+id/maps_webview" />
+
+		<TextView
+		    android:id="@+id/maps_coordinate"
+		    android:layout_width="640px"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentRight="true"
+		    android:layout_alignParentBottom="true"
+		    android:background="@color/panel"
+		    android:gravity="right"
+		    android:text="@string/map_coordinate"
+		    android:textColor="@color/blue"
+		    android:textSize="18sp" />
+
+    </RelativeLayout>
 	
 	<!-- The navigation drawer -->
     <LinearLayout
@@ -56,6 +74,6 @@
             <View
 				android:layout_width="fill_parent"
 				android:layout_height="20px"/>
-        </LinearLayout>    
+    </LinearLayout>    
     
 </android.support.v4.widget.DrawerLayout>
