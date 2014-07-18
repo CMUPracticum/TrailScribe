@@ -53,9 +53,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals(expected, actual);
     }
 
-    public void testButton_mapsActivity() throws Throwable {
+    public void testButton_mapsActivity() {
         final ActivityMonitor monitor = getInstrumentation().addMonitor(MapsActivity.class.getName(), null, false);
-        runTestOnUiThread(new Runnable() {
+        tMainActivity.runOnUiThread(new Runnable() {
                 public void run() {
                     tGridView.performItemClick(tGridView.getAdapter().getView(MAPS_GRID_BUTTON, null, null),
                                                MAPS_GRID_BUTTON, tGridView.getAdapter().getItemId(MAPS_GRID_BUTTON));
@@ -66,9 +66,9 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         activity.finish();
     }
 
-    public void testButton_syncActivity() throws Throwable {
+    public void testButton_syncActivity() {
         final ActivityMonitor monitor = getInstrumentation().addMonitor(SynchronizationCenterActivity.class.getName(), null, false);
-        runTestOnUiThread(new Runnable() {
+        tMainActivity.runOnUiThread(new Runnable() {
                 public void run() {
                     tGridView.performItemClick(tGridView.getAdapter().getView(SYNC_GRID_BUTTON, null, null),
                                                SYNC_GRID_BUTTON, tGridView.getAdapter().getItemId(SYNC_GRID_BUTTON));

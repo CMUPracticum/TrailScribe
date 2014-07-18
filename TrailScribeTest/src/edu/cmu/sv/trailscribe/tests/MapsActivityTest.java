@@ -14,12 +14,15 @@ import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.Sample;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 import android.location.Location;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 
 public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActivity> {
+    private static final long GENERAL_AWAIT_TIMEOUT = 10L;
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";
     private static final boolean JAVASCRIPT_ENABLED = true;
     private static final String LOG_TAG = "MapsActivityTest";
-    private static final String SAMPLES_RESULT = "{\"points\":[{\"y\":\"37.418\",\"x\":\"-122.04451\"},{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"},{\"y\":\"37.418\",\"x\":\"-122.04451\"}]}";
+    private static final String SAMPLES_RESULT = "{\"points\":[{\"y\":\"37.410418\",\"x\":\"-122.059746\"},{\"y\":\"37.412675\",\"x\":\"-122.054195\"},{\"y\":\"37.411352\",\"x\":\"-122.05423\"},{\"y\":\"37.409516\",\"x\":\"-122.056896\"},{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"},{\"y\":\"37.410418\",\"x\":\"-122.059746\"},{\"y\":\"37.412675\",\"x\":\"-122.054195\"},{\"y\":\"37.411352\",\"x\":\"-122.05423\"},{\"y\":\"37.409516\",\"x\":\"-122.056896\"}]}";
     private static final String CURRENT_LOCATION_RESULT = "{\"points\":[{\"y\":\"3.0\",\"x\":\"3.0\"}]}";
     private static final String POSITION_HISTORY_RESULT = "{\"points\":[{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"}]}";
     private static final String LOC_PROVIDER = "flp";
@@ -108,8 +111,21 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         // hijack the onlocationchanged event
         tApplication.onLocationChanged(createLocation(3.0, 3.0, 3.0f));
         // the same needs to be called in mapsactivity to cause it to update
-        tMapsActivity.onLocationChanged(null);
+        final CountDownLatch done = new CountDownLatch(1);
+        tMapsActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    tMapsActivity.onLocationChanged(null);
+                    done.countDown();
+                }
+            });
 
+        try {
+            assertTrue("Pushing current location change through MapsActivity took too long",
+                       done.await(GENERAL_AWAIT_TIMEOUT, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            fail("Interrupted while waiting for MapsActivity to update position");
+        }
         try {
             final String actual = tMapsActivity.getCurrentLocation();
             assertEquals("Current location returned incorrect result",
