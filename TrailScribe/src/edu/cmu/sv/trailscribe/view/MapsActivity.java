@@ -190,6 +190,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	
 	@JavascriptInterface
 	public String getOrientation() {
+	    Log.d(MSG_TAG, "getOrientation");
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'orientation':[");
         buffer.append("{'azimuth':'").append(mAzimuth).append("'}");
@@ -314,8 +315,6 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		
 		switch (v.getId()) {
 		case R.id.maps_samples:
-		    mIsDisplaySamples = !mIsDisplaySamples;
-		    
 //		    Hide samples if they are currently displayed 
 		    if (mIsDisplaySamples) {
 		        message = MessageToWebview.HideSamples;
@@ -324,10 +323,10 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		        message = MessageToWebview.DisplaySamples;
 		        mSamplesButton.setBackgroundResource(R.drawable.button_samples_toggle);
 		    }
+		    
+		    mIsDisplaySamples = !mIsDisplaySamples;
 			break;
 		case R.id.maps_current_location:
-		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
-		    
 //          Hide current location if it is currently displayed 
 		    if (mIsDisplayCurrentLocation) {
 		        message = MessageToWebview.HideCurrentLocation;
@@ -336,10 +335,10 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		        message = MessageToWebview.DisplayCurrentLocation;
 		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location_toggle);
 		    }
+		    
+		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
 			break;
 		case R.id.maps_position_history:
-		    mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
-		    
 //          Hide location history if it is currently displayed
             if (mIsDisplayPositionHistory) {
                 message = MessageToWebview.HidePositionHistory;
@@ -348,6 +347,8 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
                 message = MessageToWebview.DisplayPositionHistory;
                 mPositionHistoryButton.setBackgroundResource(R.drawable.button_position_history_toggle);
             }
+            
+            mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
 			break;
 		case R.id.maps_kml:
 		    mIsDisplayKML = !mIsDisplayKML;
@@ -398,6 +399,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
         
         mAzimuth = (int) values[0];
         if (mIsDisplayCurrentLocation) {
+            Log.d(MSG_TAG, "onSensorChanged: " + mAzimuth);
             setLayers(MessageToWebview.HideCurrentLocation);
             setLayers(MessageToWebview.DisplayCurrentLocation);
         }
