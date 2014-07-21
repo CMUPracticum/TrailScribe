@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
+import edu.cmu.sv.trailscribe.model.Kml;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.SyncItem;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -15,23 +17,21 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.util.Log;
 
 public class Downloader extends AsyncTask<Void, Integer, Void> {
-	private ArrayList<Map> mMaps;
+	private ArrayList<SyncItem> mSyncItems;
 	private Context mContext;
 	private ProgressDialog mDownloadProgressDialog;
 	private DownloadReceiver mDownloadReceiver; 
 	private AsyncTaskCompleteListener<Boolean> mTaskCompletedCallback;
 	private ArrayList<Long> mPendingDownloads = new ArrayList<Long>();
-	private ArrayList<Map> mDownloads;
-	private int mNumberOfDownloads;
+	private ArrayList<SyncItem> mDownloads;
 	private String mDownloadDirectory;
+	private SyncItem mCurrentItem = null;
 
 
-	public Downloader (ArrayList<Map> mMaps, Context context, String downloadDirectory, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
-		this.mMaps	 = mMaps;
+	public Downloader (ArrayList<SyncItem> mSyncItems, Context context, String downloadDirectory, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
+		this.mSyncItems	 = mSyncItems;
 		this.mContext = context;
 		this.mTaskCompletedCallback = callback;
 		this.mDownloadReceiver = new DownloadReceiver();
@@ -80,10 +80,10 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		mDownloads = new ArrayList<Map>();
-		for (Map map: mMaps){
-			int subStringIndex = map.getFilename().lastIndexOf("/") +1;
-	    	String mapFileName = map.getFilename().substring(subStringIndex);
+		mDownloads = new ArrayList<SyncItem>();
+		for (SyncItem item: mSyncItems){
+			int subStringIndex = item.getFilename().lastIndexOf("/") +1;
+	    	String mapFileName = item.getFilename().substring(subStringIndex);
 	    	final DownloadManager downloadManager = (DownloadManager) 
 					mContext.getSystemService(Context.DOWNLOAD_SERVICE);
 			boolean isDownloading = false;
@@ -104,8 +104,8 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 				
 			// Download the file if it is not already downloaded
 			if (!isDownloading) {
-			    startDownload(map, mapFileName, downloadManager);
-			    mDownloads.add(map);
+			    startDownload(item, mapFileName, downloadManager);
+			    mDownloads.add(item);
 	   		}
 		}
 		return null;
@@ -118,16 +118,24 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		} 
 	}
 
-	private void startDownload(Map map, String mapFileName,
+	private void startDownload(SyncItem item, String mapFileName,
 			final DownloadManager downloadManager) {
-		Uri source = Uri.parse(map.getFilename());
-		String directory = this.mDownloadDirectory + map.getName()+ "/";
+		Uri source = Uri.parse(item.getFilename());
+		String folderName = null;
+		if(item instanceof Map){
+			folderName = "maps";
+		}
+		else if(item instanceof Kml){
+			folderName = "kmls";
+		}
+		String directory = this.mDownloadDirectory + folderName + "/"+ item.getName()+ "/";
 		verifyDirectory(directory);
 		Uri destination = Uri.fromFile(new File(directory + mapFileName));
- 
+		mCurrentItem = item;
+		
 		DownloadManager.Request request = 
 		    new DownloadManager.Request(source);
-		request.setTitle(map.getName());
+		request.setTitle(item.getName());
 		request.setDestinationUri(destination);
 		request.setNotificationVisibility(DownloadManager
 		    .Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -169,7 +177,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	protected void onProgressUpdate(Integer... progress) {
 		mDownloadProgressDialog.setProgress(progress[0]);
         if(mDownloads != null) {
-        	mDownloadProgressDialog.setMessage("Synchronizing..." + (mDownloads.size()+1) + "/" + this.mMaps.size());
+        	mDownloadProgressDialog.setMessage("Synchronizing " + this.mCurrentItem.getName() + ". Item "+ (mDownloads.size()+1) + "/" + this.mSyncItems.size());
         }
         
         

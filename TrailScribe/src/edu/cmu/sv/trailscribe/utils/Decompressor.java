@@ -8,8 +8,6 @@ import java.io.FileOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import android.util.Log;
-
 public class Decompressor {
 	private String mCompressedFileFullPath; 
 	private String mDecompressingDirectory; 
@@ -55,9 +53,17 @@ public class Decompressor {
 	}
 
 	private void removeZipFile() {
-		File zipFile = new File(this.mCompressedFileFullPath);
-		if(zipFile !=null){
-			zipFile.delete();
+		String extension = "";
+		int i = this.mCompressedFileFullPath.lastIndexOf('.');
+		if (i >= 0) {
+		    extension = this.mCompressedFileFullPath.substring(i+1);
+		}
+		
+		if(extension.equals("zip")){
+			File zipFile = new File(this.mCompressedFileFullPath);
+			if(zipFile !=null){
+				zipFile.delete();
+			}
 		}
 	} 		 
 }

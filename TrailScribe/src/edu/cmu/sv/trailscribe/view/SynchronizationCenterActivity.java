@@ -4,8 +4,12 @@ import java.util.ArrayList;
 
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
+import edu.cmu.sv.trailscribe.dao.KmlDataSource;
+import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
+import edu.cmu.sv.trailscribe.model.Kml;
 import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.SyncItem;
 import edu.cmu.sv.trailscribe.utils.Decompressor;
 import edu.cmu.sv.trailscribe.utils.Downloader;
 import android.app.DownloadManager;
@@ -14,8 +18,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.util.Log;
@@ -28,16 +30,15 @@ public class SynchronizationCenterActivity
     
 		private ListView mListView;
 		private SynchronizationCenterController mController;
-		private ArrayList<Map> mMaps;
-		private Map mCurrentMap;
+		private ArrayList<SyncItem> mSyncItems;
 		private ProgressDialog mSyncProgressDialog;
 		private ProgressDialog mDownloadProgressDialog;
 		private ProgressDialog mUnzippingProgressDialog; 
-		private ArrayAdapter<Map> mAdapter;
     private boolean mapsFetched = false;
     private Runnable mapsFetchedCallback = null;
     private static final String LOG_TAG = "SynchronizationCenterActivity";
-		private String downloadDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/maps/";
+		private ArrayAdapter<SyncItem> mAdapter;
+		private String downloadDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
 	  
 
     public void setMapsFetchedCallback(Runnable callback) {
@@ -54,7 +55,7 @@ public class SynchronizationCenterActivity
           mSyncProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.synchronizing), true, true);
       	  mDownloadProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
       	  mUnzippingProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
-          mController = new SynchronizationCenterController(this, this);
+          mController = new SynchronizationCenterController(this);
           mController.execute();
       }
 	  
@@ -72,7 +73,7 @@ public class SynchronizationCenterActivity
 	@Override
 	public void onTaskCompleted(Object result) {
 		if (result instanceof ArrayList<?>){
-			mMaps = (ArrayList<Map>) result;
+			mSyncItems = (ArrayList<SyncItem>) result;
 			
 			if (mSyncProgressDialog != null){
                             try {
@@ -86,8 +87,8 @@ public class SynchronizationCenterActivity
 			mListView = (ListView) findViewById(R.id.sync_list);
 	
             setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
-			mAdapter = new ArrayAdapter<Map>(SynchronizationCenterActivity.this,
-	           android.R.layout.simple_list_item_1, android.R.id.text1, mMaps);
+			mAdapter = new ArrayAdapter<SyncItem>(SynchronizationCenterActivity.this,
+	           android.R.layout.simple_list_item_1, android.R.id.text1, mSyncItems);
 	 
 	         // Assign adapter to ListView
 	         mListView.setAdapter(mAdapter); 
@@ -107,7 +108,7 @@ public class SynchronizationCenterActivity
 	
 	@SuppressWarnings("unchecked")
 	public void onSyncAll(View v){
-		new Downloader(mMaps, SynchronizationCenterActivity.this, downloadDirectory,
+		new Downloader(mSyncItems, SynchronizationCenterActivity.this, downloadDirectory,
 				mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
 	}
 	
@@ -125,10 +126,17 @@ public class SynchronizationCenterActivity
 			//Get the current thread's token
 			synchronized (this) 
 			{
-				for (Map map: mMaps){
-					int subStringIndex = map.getFilename().lastIndexOf("/") +1;
-	            	String mapFileName = map.getFilename().substring(subStringIndex);
-	            	Decompressor decompressor = new Decompressor( downloadDirectory + map.getName() + "/" + mapFileName, downloadDirectory + map.getName() + "/");
+				for (SyncItem item: mSyncItems){
+					int subStringIndex = item.getFilename().lastIndexOf("/") +1;
+	            	String mapFileName = item.getFilename().substring(subStringIndex);
+	            	String folderName = null;
+	        		if(item instanceof Map){
+	        			folderName = "maps";
+	        		}
+	        		else if(item instanceof Kml){
+	        			folderName = "kmls";
+	        		}
+	            	Decompressor decompressor = new Decompressor( downloadDirectory + folderName + "/"+ item.getName() + "/" + mapFileName, downloadDirectory + folderName + "/" + item.getName() + "/");
 	            	decompressor.unzip();
 				}
 			}
@@ -143,6 +151,17 @@ public class SynchronizationCenterActivity
 			if(mUnzippingProgressDialog!= null){
 				mUnzippingProgressDialog.dismiss();
 			}
+			
+			for(SyncItem item: mSyncItems)
+			if(item instanceof Map){
+    			MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
+    			mapsDs.add(item);
+    		}
+    		else if(item instanceof Kml){
+    			KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
+    			kmlsDs.add(item);
+    		}
+			
 			//Check for success
 			mAdapter.clear();
 			mAdapter.notifyDataSetChanged();

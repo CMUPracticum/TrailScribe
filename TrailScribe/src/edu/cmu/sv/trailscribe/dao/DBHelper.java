@@ -15,6 +15,7 @@ public class DBHelper extends SQLiteOpenHelper {
     
 	// Tables Names
     public static final String TABLE_MAP = "MAP";
+    public static final String TABLE_KML = "KML";
     public static final String TABLE_SAMPLE = "SAMPLE";
     public static final String TABLE_LOCATION = "LOCATION";
     
@@ -49,6 +50,11 @@ public class DBHelper extends SQLiteOpenHelper {
     		+ MIN_X + " INTEGER, " + MIN_Y + " INTEGER, "
     		+ MAX_X + " INTEGER, " + MAX_Y + " INTEGER, "
     		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + ")";
+    
+ // Create Statements
+    private static final String TABLE_KML_COLUMN_DEFINITION = TABLE_KML 
+    		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME + " TEXT," 
+    		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + ")";
  
     private static final String TABLE_SAMPLE_COLUMN_DEFINITION = TABLE_SAMPLE 
     		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," 
@@ -64,6 +70,7 @@ public class DBHelper extends SQLiteOpenHelper {
     
     private static final String CREATE_TABLE = "CREATE TABLE ";
     private static final String CREATE_TABLE_MAP = CREATE_TABLE + TABLE_MAP_COLUMN_DEFINITION;
+    private static final String CREATE_TABLE_KML = CREATE_TABLE + TABLE_KML_COLUMN_DEFINITION;
     private static final String CREATE_TABLE_SAMPLE = CREATE_TABLE + TABLE_SAMPLE_COLUMN_DEFINITION;
     private static final String CREATE_TABLE_LOCATION = CREATE_TABLE + TABLE_LOCATION_COLUMN_DEFINITION;
     
@@ -81,6 +88,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MAP_COLUMN_DEFINITION);
+		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_KML_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_SAMPLE_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_LOCATION_COLUMN_DEFINITION);
 	}
@@ -95,12 +103,14 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	private void createTables(SQLiteDatabase db) {
 	    db.execSQL(CREATE_TABLE_MAP);
+	    db.execSQL(CREATE_TABLE_KML);
 	    db.execSQL(CREATE_TABLE_SAMPLE);
 	    db.execSQL(CREATE_TABLE_LOCATION);
 	}
 	
 	private void dropTables(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_MAP);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_KML);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SAMPLE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATION);
 	}
