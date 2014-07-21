@@ -27,6 +27,10 @@ public class StorageSystemHelper {
         ArrayList<String> files = new ArrayList<String>();
         
         File folder = new File(directory);
+        if (!folder.exists()) {
+            return files;
+        }
+        
         File[] listOfFiles = folder.listFiles();
         
         for (File file : listOfFiles) {
@@ -42,4 +46,27 @@ public class StorageSystemHelper {
         
         return files;
     }
+    
+    /**
+     * @param directory For example, "/sdcard/trailscribe/maps/"
+     * @return list of every folder under that directory
+     */
+    public static List<String> getFolders(String directory) {
+        ArrayList<String> files = new ArrayList<String>();
+        
+        File folder = new File(directory);
+        if (!folder.exists()) {
+            return files;
+        }
+        
+        File[] listOfFolders = folder.listFiles();
+        
+        for (File f : listOfFolders) {
+            if (f.isDirectory()) {
+                files.add(f.getName());
+            }
+        }
+        
+        return files;
+    }    
 }

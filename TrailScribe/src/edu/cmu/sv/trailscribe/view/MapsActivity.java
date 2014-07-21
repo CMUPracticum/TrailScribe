@@ -9,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,7 +30,9 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
@@ -39,7 +43,8 @@ import edu.cmu.sv.trailscribe.model.Sample;
 import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 
 
-public class MapsActivity extends BaseActivity implements OnClickListener, SensorEventListener {
+public class MapsActivity extends BaseActivity 
+    implements OnClickListener, SensorEventListener, OnNavigationListener {
 	
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Maps", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
@@ -66,9 +71,13 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	private Sensor mOrientationSensor;
 	private float mAzimuth;
 	
-//  Displayed Overlays
-	private HashSet<String> mOverlays;
+//  Overlays
+	private ArrayList<String> mOverlays;
 	private ArrayList<String> mSelectedOverlayNames;
+	
+//	Base Map
+	private ArrayList<String> mBaseMaps;
+	private SpinnerAdapter mSpinnerAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -94,6 +103,7 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 		setContentView(R.layout.activity_maps);
 
 		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
+		
 		setMap();
 		setButton();
 		setTextView();
@@ -129,6 +139,11 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setHomeButtonEnabled(true);
+        
+//      Create spinner in action bar 
+        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        
+        setSpinner();
 	}
 	
 	@Override
@@ -158,9 +173,23 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
 	    updateCoordinateTextView();
 	}
 	
+	private void setSpinner() {
+	    getBaseMapsFromStorage();
+//      Add the title of the spinner to the head of the list, will be ignored if it is selected
+        mBaseMaps.add(0, getResources().getString(R.string.map_display_basemap));
+        
+        String[] basemaps = new String[mBaseMaps.size()];
+        mBaseMaps.toArray(basemaps);
+
+//      Create spinner adapter, then add the adapter and the listener to the action bar
+        mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);
+        mActionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
+	}
+	
 	private void updateCoordinateTextView() {
 	    if (mLocation == null) {
 	        mCoordinateTextView.setText(R.string.map_coordinate);
+	        return;
 	    }
 	    
 	    mCoordinateTextView.setText(mLocation.getLatitude() + "," + mLocation.getLongitude());
@@ -412,11 +441,21 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
         setLayers(message);
     }
     
+    private void getBaseMapsFromStorage() {
+        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "maps/";
+        List<String> fileNames = StorageSystemHelper.getFolders(overlayDirectory);
+        
+        mBaseMaps = new ArrayList<String>();
+        for (String fileName : fileNames) {
+            mBaseMaps.add(fileName);
+        }
+    }
+    
     private void getOverlaysFromStorage() {
         final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "kmls/";
         List<String> fileNames = StorageSystemHelper.getFiles(overlayDirectory);
         
-        mOverlays = new HashSet<String>();
+        mOverlays = new ArrayList<String>();
         for (String fileName : fileNames) {
             mOverlays.add(fileName);
         }
@@ -435,6 +474,19 @@ public class MapsActivity extends BaseActivity implements OnClickListener, Senso
         
         KMLSelectorBuilder builder = new KMLSelectorBuilder(this, overlayNames);
         builder.show();
+    }
+    
+
+    @Override
+    public boolean onNavigationItemSelected(int position, long itemId) {
+        if (position == 0) {
+//          Ignore if title of the spinner is selected
+            return true;
+        }
+        
+//      TODO: call webview
+        Toast.makeText(MapsActivity.this, "Position=" + position, Toast.LENGTH_SHORT).show();
+        return true;        
     }
     
     private class KMLSelectorBuilder extends AlertDialog.Builder {

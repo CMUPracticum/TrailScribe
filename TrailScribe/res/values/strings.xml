@@ -25,6 +25,7 @@
     <string name="map_display_overlays">Display overlays</string>
     <string name="map_display_overlays_cancel">Cancel</string>
     <string name="map_coordinate">Current location is not available</string>
+    <string name="map_display_basemap">Select base map</string>
         
     <!-- SynchronizationCenterActivity -->
     <string name="synchronizing">Synchronizing...</string>
