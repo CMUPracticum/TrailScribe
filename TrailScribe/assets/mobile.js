@@ -57,6 +57,12 @@ var selectControl;
 var layerListeners;
 
 /**
+ * Global boolean to determine
+ * whether we should pan to current location
+ */
+var panToCurrentLocation = true;
+
+/**
  * Function: initMapProperties
  * Get mapProperties for this map from the Android interface and set them.
  *
@@ -317,10 +323,17 @@ function setLayers(msg) {
             hideLayer(sampleLayer);
             break;
         case "DisplayCurrentLocation":            
-            currentLocationLayer.addFeatures(getPointsFromJava(msg));            
+            coordinates = getPointsFromJava(msg);
+            currentLocationLayer.addFeatures(coordinates);            
+            if (panToCurrentLocation) {
+                panToCurrentLocation = false;
+                // Pan to location
+                //map.panTo(coordinates[0].geometry.point);
+            }
             break;
         case "HideCurrentLocation":            
-            hideLayer(currentLocationLayer);            
+            hideLayer(currentLocationLayer);
+            //panToCurrentLocation = true;
             break;            
 		case "DisplayPositionHistory":
             positionHistoryLayer.addFeatures(getLinesFromJava(msg));            
@@ -444,14 +457,13 @@ function getPointsFromJava(msg) {
             for (data in orientation['orientation']) {
                 azimuth = orientation['orientation'][data].azimuth;
             }
-
             break;
         default:
             return;
     }
 
     points = JSON.parse(points);
-    var pointList = [];
+    //var pointList = [];
     var pointFeatures = [];
     for(data in points['points']){
 	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
@@ -463,7 +475,7 @@ function getPointsFromJava(msg) {
         }
 
         pointFeatures.push(pointFeature);
-        pointList.push(point);
+        //pointList.push(point);
     }
 
     return pointFeatures;

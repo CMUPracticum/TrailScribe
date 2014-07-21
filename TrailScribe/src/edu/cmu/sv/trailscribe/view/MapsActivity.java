@@ -219,7 +219,7 @@ public class MapsActivity extends BaseActivity
 	
 	@JavascriptInterface
 	public String getOrientation() {
-	    Log.d(MSG_TAG, "getOrientation");
+	    //Log.d(MSG_TAG, "getOrientation");
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'orientation':[");
         buffer.append("{'azimuth':'").append(mAzimuth).append("'}");
@@ -428,7 +428,7 @@ public class MapsActivity extends BaseActivity
         
         mAzimuth = (int) values[0];
         if (mIsDisplayCurrentLocation) {
-            Log.d(MSG_TAG, "onSensorChanged: " + mAzimuth);
+            //Log.d(MSG_TAG, "onSensorChanged: " + mAzimuth);
             setLayers(MessageToWebview.HideCurrentLocation);
             setLayers(MessageToWebview.DisplayCurrentLocation);
         }
@@ -463,7 +463,7 @@ public class MapsActivity extends BaseActivity
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
+        //Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
     }
     
     private void createKMLSelector() {
