@@ -2,6 +2,13 @@ package edu.cmu.sv.trailscribe.view;
 
 import java.util.ArrayList;
 
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
 import edu.cmu.sv.trailscribe.dao.KmlDataSource;
@@ -12,14 +19,6 @@ import edu.cmu.sv.trailscribe.model.Map;
 import edu.cmu.sv.trailscribe.model.SyncItem;
 import edu.cmu.sv.trailscribe.utils.Decompressor;
 import edu.cmu.sv.trailscribe.utils.Downloader;
-import android.app.DownloadManager;
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.util.Log;
 
 public class SynchronizationCenterActivity 
