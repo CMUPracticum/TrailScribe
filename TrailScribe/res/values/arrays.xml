@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="map_basemaps_selector">
+        <item name="default">Select basemap</item>
+    </string-array>
+</resources>

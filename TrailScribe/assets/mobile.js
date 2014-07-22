@@ -339,35 +339,38 @@ function getKmlUrl(kml) {
 function setLayers(msg) {
     switch (msg) {
         case "DisplaySamples":            
-            sampleLayer.addFeatures(getPointsFromJava(msg));
+            sampleLayer.addFeatures(getPointFeatures(msg));
             break;
         case "HideSamples":            
             hideLayer(sampleLayer);
             break;
-        case "DisplayCurrentLocation":                        
-            currentLocationLayer.addFeatures(getPointsFromJava(msg));
+        case "DisplayCurrentLocation":            
+            currentLocationLayer.addFeatures(getPointFeatures(msg));
             break;
         case "HideCurrentLocation":            
-            hideLayer(currentLocationLayer);            
+            hideLayer(currentLocationLayer);
             break;            
 		case "DisplayPositionHistory":
-            positionHistoryLayer.addFeatures(getLinesFromJava(msg));            
+            positionHistoryLayer.addFeatures(getLinesFromJava(msg));
 			break;			
 		case "HidePositionHistory":			
             hideLayer(positionHistoryLayer);
 			break;
         case "DisplayKML":
             var kmlPaths = getKMLsFromJava();
-            var index;
-            for (index = 0; index < kmlPaths.length; ++index) {
-                displayKML(kmlPaths[index]);
+            for (var i = 0; i < kmlPaths.length; i++) {
+                displayKML(kmlPaths[i]);
             }
             break;
         case "HideKML":
-            for (index = 0; index < kmlLayers.length; ++index) {
-                map.removeLayer(kmlLayers[index]);            
+            for (var i = 0; i < kmlLayers.length; i++) {
+                map.removeLayer(kmlLayers[i]);            
             }
             kmlLayers = [];
+            break;
+        case "PanToCurrentLocation":
+            var points = getPointsFromJava(msg);
+            map.panTo(new OpenLayers.LonLat(points[0].x, points[0].y));
             break;
         default:
             break;
@@ -446,29 +449,61 @@ function getKMLsFromJava() {
 
 /**
  * Function: getPointsFromJava
+ * Summon the correct Android/Java method and return the point of current coordinates.
+ *
+ * Parameters:
+ */
+function getPointsFromJava(msg) {
+    var points;
+    switch (msg) {
+        case "DisplaySamples":
+            points = android.getSamples();
+            break;
+        case "DisplayCurrentLocation":
+            points = android.getCurrentLocation();
+            break;
+        case "PanToCurrentLocation":
+            points = android.getCurrentLocation();
+            break;
+        default:
+            return;
+    }
+
+    points = JSON.parse(points);
+    var pointList = [];
+    for (data in points['points']) {
+        var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
+        point = point.transform(map.displayProjection, map.projection);
+        pointList.push(point);
+    }
+
+    return pointList;
+}
+
+/**
+ * Function: getPointFeatures
  * Given a message, summon the correct Android/Java method 
  * to get a list of vector points. 
  *
  * Parameters:
  * msg - {String}
  */
-function getPointsFromJava(msg) {
+function getPointFeatures(msg) {
     var points;
     var marker_style;
     var azimuth = -1;
 
     switch (msg) {
         case "DisplaySamples":
-            points = android.getSamples();
+            points = getPointsFromJava(msg);
             marker_style = marker_red;
             break;
         case "DisplayCurrentLocation":
-            points = android.getCurrentLocation();
+            points = getPointsFromJava(msg);
             marker_style = style_current_location;
             
             var orientation = android.getOrientation();
             orientation = JSON.parse(orientation);
-
             for (data in orientation['orientation']) {
                 azimuth = orientation['orientation'][data].azimuth;
             }
@@ -477,20 +512,14 @@ function getPointsFromJava(msg) {
             return;
     }
 
-    points = JSON.parse(points);
-    //var pointList = [];
     var pointFeatures = [];
-    for(data in points['points']){
-	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
-        point = point.transform(map.displayProjection, map.projection);
-        var pointFeature = new OpenLayers.Feature.Vector(point, null, marker_style);
-
+    for(var i = 0; i < points.length; i++){
+        var pointFeature = new OpenLayers.Feature.Vector(points[i], null, marker_style);
         if (msg == "DisplayCurrentLocation") {
             pointFeature.style.rotation = azimuth;
         }
 
         pointFeatures.push(pointFeature);
-        //pointList.push(point);
     }
 
     return pointFeatures;
@@ -526,6 +555,8 @@ function getLinesFromJava(msg) {
         var pointFeature = new OpenLayers.Feature.Vector(point, null, line_style);
         pointFeatures.push(pointFeature);
         pointList.push(point);
+
+console.log(point.x + "," + point.y);
     }
     var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), 
     null, line_style);
