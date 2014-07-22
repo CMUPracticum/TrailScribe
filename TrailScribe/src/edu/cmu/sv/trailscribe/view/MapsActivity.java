@@ -22,7 +22,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -219,7 +218,6 @@ public class MapsActivity extends BaseActivity
 	
 	@JavascriptInterface
 	public String getOrientation() {
-	    //Log.d(MSG_TAG, "getOrientation");
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'orientation':[");
         buffer.append("{'azimuth':'").append(mAzimuth).append("'}");
@@ -235,6 +233,52 @@ public class MapsActivity extends BaseActivity
         return orientation.toString();
 	}
 	
+//	TODO Merge getSample() and getSamples()
+	@JavascriptInterface()
+	public String getSample(String id) {
+	    SampleDataSource dataSource = new SampleDataSource(mDBHelper);
+	    
+//	    TODO Implement search in data source
+        List<Sample> samples = dataSource.getAll();
+        
+        Sample sample = null;
+        for (int i = 0; i < samples.size(); i++) {
+            if (samples.get(i).getId() == Long.parseLong(id)) {
+                sample = samples.get(i);
+                break;
+            }
+        }
+        
+        if (sample == null) return new String();
+	    
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{'points':[");
+        buffer.append("{");
+        buffer.append("'id':'").append(sample.getId()).append("', ");
+        buffer.append("'userId':'").append(sample.getUserId()).append("', ");
+        buffer.append("'mapId':'").append(sample.getMapId()).append("', ");
+        buffer.append("'expeditionId':'").append(sample.getExpeditionId()).append("', ");
+        buffer.append("'x':'").append(sample.getX()).append("', ");
+        buffer.append("'y':'").append(sample.getY()).append("', ");
+        buffer.append("'z':'").append(sample.getZ()).append("', ");
+        buffer.append("'name':'").append(sample.getName()).append("', ");
+        buffer.append("'description':'").append(sample.getDescription()).append("', ");
+        buffer.append("'time':'").append(sample.getTime()).append("', ");
+        buffer.append("'customField':'").append(sample.getCustomField()).append("', ");
+        buffer.append("'lastModified':'").append(sample.getLastModified()).append("'");
+        buffer.append("}");
+        buffer.append("]}'");
+        
+        JSONObject sampleJSON = null;
+        try {
+            sampleJSON = new JSONObject(buffer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        return sampleJSON.toString();
+	}
+	
 	@JavascriptInterface
 	public String getSamples() {
 		SampleDataSource dataSource = new SampleDataSource(mDBHelper);
@@ -246,8 +290,20 @@ public class MapsActivity extends BaseActivity
 		for (int i = 0; i < samples.size(); i++) {
 			Sample sample = samples.get(i);
 			
-			buffer.append("{'x':'").append(sample.getX()).append("', ");
-			buffer.append("'y':'").append(sample.getY()).append("'}");
+			buffer.append("{");
+			buffer.append("'id':'").append(sample.getId()).append("', ");
+			buffer.append("'userId':'").append(sample.getUserId()).append("', ");
+			buffer.append("'mapId':'").append(sample.getMapId()).append("', ");
+			buffer.append("'expeditionId':'").append(sample.getExpeditionId()).append("', ");
+			buffer.append("'x':'").append(sample.getX()).append("', ");
+			buffer.append("'y':'").append(sample.getY()).append("', ");
+			buffer.append("'z':'").append(sample.getZ()).append("', ");
+			buffer.append("'name':'").append(sample.getName()).append("', ");
+			buffer.append("'description':'").append(sample.getDescription()).append("', ");
+			buffer.append("'time':'").append(sample.getTime()).append("', ");
+			buffer.append("'customField':'").append(sample.getCustomField()).append("', ");
+			buffer.append("'lastModified':'").append(sample.getLastModified()).append("'");
+			buffer.append("}");
 			
 			if (i != samples.size() - 1) {
 				buffer.append(", ");

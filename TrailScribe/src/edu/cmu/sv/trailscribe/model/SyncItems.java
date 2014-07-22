@@ -1,13 +1,6 @@
 package edu.cmu.sv.trailscribe.model;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Hashtable;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 public class SyncItems {
 //	private Hashtable<Long, Map> maps;

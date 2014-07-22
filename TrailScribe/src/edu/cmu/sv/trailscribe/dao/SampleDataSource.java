@@ -22,7 +22,17 @@ public class SampleDataSource extends DataSource {
 	public SampleDataSource(DBHelper dbHelper) {
 		super(dbHelper);
 		
-//		TODO: Remove when feature to add samples is implemented
+//		TODO: Sample data. Remove when feature to add samples is implemented
+//      Insert sample data whenever the data source is created
+        List<Sample> samples = getAll();
+        if (samples.size() == 4) {
+            return;
+        }
+        
+        for (Sample sample : samples) {
+            delete(sample);
+        }
+        
 		Sample s1 = new Sample(
 	    		0, "Carnegie Mellon University: Silicon Valley Campus", 
 	    		"sample #1", "default time",
@@ -53,8 +63,8 @@ public class SampleDataSource extends DataSource {
 	@Override
 	public boolean add(Object data) {
 		if (data.getClass() != Sample.class) return false;
+
 		Sample sample = (Sample) data;
-		
 	    ContentValues values = new ContentValues();
 	    values.put(DBHelper.NAME, sample.getName());
 	    values.put(DBHelper.DESCRIPTION, sample.getDescription());
@@ -76,8 +86,8 @@ public class SampleDataSource extends DataSource {
 		if (data.getClass() != Sample.class) return false;
 
 		Sample sample = (Sample) data;
-	    deleteHelper(DBHelper.TABLE_SAMPLE, sample.getId());
-	    
+		deleteHelper(DBHelper.TABLE_SAMPLE, sample.getId());
+		
 		return true;
 	}
 
