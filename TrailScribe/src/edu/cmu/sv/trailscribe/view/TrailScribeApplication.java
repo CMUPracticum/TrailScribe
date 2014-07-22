@@ -28,7 +28,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 	
 //	Location
 	public static final int MIN_LOCATION_DISTANCE = 3;
-    protected static Location mLocation;
+    private Location mLocation;
     private LocationManager mLocationManager;
     
 //  Time
@@ -66,8 +66,17 @@ public class TrailScribeApplication extends Application implements LocationListe
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
         try {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, (android.location.LocationListener) this);
-            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
+            mLocationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 0, 0, (android.location.LocationListener) this);
+            mLocationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
+            
+            mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            
+//          Use location from GPS if it is available
+            if (mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+                mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);    
+            }
         } catch (Exception e) {
             Log.e(MSG_TAG, e.getMessage());
         }
@@ -75,6 +84,10 @@ public class TrailScribeApplication extends Application implements LocationListe
 
     @Override
     public void onLocationChanged(Location location) {
+        if (location == null) {
+            return;
+        }
+        
         if (mLocation != null && Math.abs(location.distanceTo(mLocation)) <= MIN_LOCATION_DISTANCE) {
 //          Ignore minor changes
             return;
@@ -88,8 +101,6 @@ public class TrailScribeApplication extends Application implements LocationListe
         LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 
         mTime.setToNow();
-        Log.d(MSG_TAG, "Current time:" + mTime.format2445());
-        Log.d(MSG_TAG, "Current location: (" + mLocation.getLatitude() + "," + mLocation.getLongitude() + "), altitude=" + mLocation.getAltitude());
         
         edu.cmu.sv.trailscribe.model.Location loc = 
                 new edu.cmu.sv.trailscribe.model.Location(

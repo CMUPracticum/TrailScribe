@@ -363,6 +363,8 @@ public class MapsActivity extends BaseActivity
 		    } else {
 		        message = MessageToWebview.DisplayCurrentLocation;
 		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location_toggle);
+		        
+		        setLayers(MessageToWebview.PanToCurrentLocation);
 		    }
 		    
 		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
@@ -551,7 +553,8 @@ public class MapsActivity extends BaseActivity
 		DisplayPositionHistory("DisplayPositionHistory"),
 		HidePositionHistory("HidePositionHistory"),
 		DisplayKML("DisplayKML"),
-		HideKML("HideKML");
+		HideKML("HideKML"),
+		PanToCurrentLocation("PanToCurrentLocation");
 		
 		private final String message;
 		MessageToWebview(String message) {
