@@ -13,6 +13,7 @@
  * Map and OpenLayers Properties
  */
 var map;
+var mapName;
 var mapBounds;
 var extent;
 var mapMinZoom;
@@ -68,7 +69,11 @@ var sampleList = {};
  * Parameters:
  * initMapProperties - {JSON String}
  */
-function initMapProperties(mapProperties) {    
+function initMapProperties() {
+
+    // TO DO: Get map properties from Java
+
+    mapName = "basemap";  
     mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
     displayProjection = new OpenLayers.Projection("EPSG:4326");
     mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
@@ -175,6 +180,29 @@ function init() {
 }
 
 /**
+ * Function: redrawMap
+ * This function redraws the base map (TMS overlay layer)
+ * based on the selection of the user.
+ *
+ * Parameters:
+ * -
+ */
+function redrawMap() {
+
+    // TO DO: Get map properties from Java
+
+    mapName = "map1";
+    mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
+    displayProjection = new OpenLayers.Projection("EPSG:4326");
+    mapBounds = new OpenLayers.Bounds(-122.134491212, 37.368043856, -121.998776839, 37.4690932857);
+    extent = mapBounds.transform(displayProjection, mapProjection);
+    mapMinZoom = 11;
+    mapMaxZoom = 17;
+
+    tmsOverlay.redraw();
+}
+
+/**
  * Function: getURL
  * This function gets the correct tiles (for the TMS Overlay) to display on the map
  * from the device.
@@ -189,7 +217,7 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
         
-    var path = "file:///sdcard/trailscribe/maps/basemap" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
