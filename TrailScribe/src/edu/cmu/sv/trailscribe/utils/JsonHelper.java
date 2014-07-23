@@ -10,6 +10,12 @@ import edu.cmu.sv.trailscribe.model.Sample;
 
 public class JsonHelper {
 
+    /**
+     * Given the azimuth, return it in Json format
+     * 
+     * @param azimuth
+     * @return azimuth in Json format 
+     */
     public static String getOrientationJson(float azimuth) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'orientation':[");
@@ -26,12 +32,18 @@ public class JsonHelper {
         return orientation.toString();
     }
     
+    /**
+     * @return the every sample in database in Json format
+     */
     public static String getSamplesJson(List<Sample> samples) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'points':[");
         for (int i = 0; i < samples.size(); i++) {
             Sample sample = samples.get(i);
+            
+            buffer.append("{");
             buffer.append(sample.toString());
+            buffer.append("}");
             
             if (i != samples.size() - 1) {
                 buffer.append(", ");
@@ -49,6 +61,9 @@ public class JsonHelper {
         return mapPoints.toString();
     }
     
+    /**
+     * @return the current location in database in Json format
+     */
     public static String getCurrentLocationJson(Location location) throws Exception {
         JSONObject mapPoints = null;
         
@@ -63,12 +78,18 @@ public class JsonHelper {
         return mapPoints.toString();
     }
     
+    /**
+     * @return the every past location in database in Json format
+     */
     public static String getPositionHistoryJson(List<edu.cmu.sv.trailscribe.model.Location> locations) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'points':[");
         for (int i = 0; i < locations.size(); i++) {
             edu.cmu.sv.trailscribe.model.Location location = locations.get(i);
+            
+            buffer.append("{");
             buffer.append(location.toString());
+            buffer.append("}");
             
             if (i != locations.size() - 1) {
                 buffer.append(", ");
@@ -86,6 +107,12 @@ public class JsonHelper {
         return mapPoints.toString();
     }
     
+    /**
+     * Given a list of names of selected overlays, return the names in Json format.
+     * 
+     * @param selectedOverlayNames
+     * @return selectedOverlayNames in Json format 
+     */
     public static String getSelectedKmlJson(List<String> selectedOverlayNames) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'kmls':[");

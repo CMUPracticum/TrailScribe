@@ -114,7 +114,6 @@ public class Map extends SyncItem{
 						  "'minY':'" + this.getMinY() + "'," +  
 						  "'maxY':'" + this.getMaxY() + "'"
 						  );
-						  
 	}
 	
 	public String getDescription() {

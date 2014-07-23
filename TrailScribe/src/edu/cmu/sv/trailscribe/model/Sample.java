@@ -1,7 +1,5 @@
 package edu.cmu.sv.trailscribe.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 
 
@@ -133,11 +131,13 @@ public class Sample {
 	public void setExpeditionId(long expeditionId) {
 		this.expeditionId = expeditionId;
 	}
-	
+
+    /**
+     * @return the object is Json format. For example, "'id':'0', 'userId':'0'"
+     */
 	@Override
 	public String toString() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("{");
         buffer.append("'id':'").append(this.getId()).append("', ");
         buffer.append("'userId':'").append(this.getUserId()).append("', ");
         buffer.append("'mapId':'").append(this.getMapId()).append("', ");
@@ -150,7 +150,6 @@ public class Sample {
         buffer.append("'time':'").append(this.getTime()).append("', ");
         buffer.append("'customField':'").append(this.getCustomField()).append("', ");
         buffer.append("'lastModified':'").append(this.getLastModified()).append("'");
-        buffer.append("}");
         
         return buffer.toString();
 	}

@@ -3,6 +3,8 @@ package edu.cmu.sv.trailscribe.model;
 import java.util.ArrayList;
 
 public class SyncItems {
+//  TODO: Implement toString() to print the class in Json format
+    
 //	private Hashtable<Long, Map> maps;
 //	private Hashtable<Long, Kml> kmls;
 	
@@ -34,7 +36,6 @@ public class SyncItems {
 	
 	public void setKMLs(ArrayList<Kml> kMLsToSync) {
 		this.kmls = kMLsToSync;
-		
 	}
 
 	public void setMaps(ArrayList<Map> mapsToSync) {

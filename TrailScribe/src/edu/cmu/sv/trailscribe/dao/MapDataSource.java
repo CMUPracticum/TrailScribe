@@ -1,6 +1,5 @@
 package edu.cmu.sv.trailscribe.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -8,7 +7,7 @@ import android.content.Context;
 import android.database.Cursor;
 import edu.cmu.sv.trailscribe.model.Map;
 
-public class MapDataSource extends DataSource {
+public class MapDataSource extends DataSource<Map> {
 	private String[] allColumns = {
 			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.PROJECTION, 
 			DBHelper.MIN_ZOOM_LEVEL, DBHelper.MAX_ZOOM_LEVEL, 
@@ -24,10 +23,7 @@ public class MapDataSource extends DataSource {
 	}
 	
 	@Override
-	public boolean add(Object data) {
-		if (data.getClass() != Map.class) return false;
-		Map map = (Map) data;
-		
+	public boolean add(Map map) {
 		ContentValues values = new ContentValues();
 		values.put(DBHelper.KEY_ID, map.getId());
 		values.put(DBHelper.NAME, map.getName());
@@ -46,40 +42,29 @@ public class MapDataSource extends DataSource {
 	}
 
 	@Override
-	public boolean delete(Object data) {
-		if (data.getClass() != Map.class) return false;
-
-		Map map = (Map) data;
+	public boolean delete(Map map) {
 	    deleteHelper(DBHelper.TABLE_MAP, map.getId());
-	    
 		return true;
-	}
-
-	@Override
-	public List<Map> getAll() {
-		open();
-		
-	    List<Map> maps = new ArrayList<Map>();
-	
-	    Cursor cursor = database.query(DBHelper.TABLE_MAP,
-	        allColumns, null, null, null, null, null);
-	    
-	    if (cursor != null) {
-		    cursor.moveToFirst();
-		    while (!cursor.isAfterLast()) {
-		    	Map map = (Map) cursorToData(cursor);
-		    	maps.add(map);
-		    	cursor.moveToNext();
-		    }
-		    cursor.close();
-	    }
-	    
-	    close();
-	    return maps;
 	}
 	
     @Override
-    protected Object cursorToData(Cursor cursor) {
+    public boolean deleteAll() {
+        deleteAllHelper(DBHelper.TABLE_MAP);
+        return true;
+    }
+    
+    @Override
+    public Map get(long id) {
+        return getHelper(DBHelper.TABLE_MAP, allColumns, id);
+    }    
+
+	@Override
+	public List<Map> getAll() {
+        return getAllHelper(DBHelper.TABLE_MAP, allColumns);
+	}
+	
+    @Override
+    protected Map cursorToData(Cursor cursor) {
         return new Map(
                 cursor.getLong(0),
                 cursor.getString(1), 

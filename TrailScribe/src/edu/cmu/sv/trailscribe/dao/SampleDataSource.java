@@ -1,6 +1,5 @@
 package edu.cmu.sv.trailscribe.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -9,7 +8,7 @@ import android.database.Cursor;
 import edu.cmu.sv.trailscribe.model.Sample;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
-public class SampleDataSource extends DataSource {
+public class SampleDataSource extends DataSource<Sample> {
 	private String[] allColumns = {
 			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.TIME, 
 			DBHelper.X, DBHelper.Y, DBHelper.Z,
@@ -71,10 +70,7 @@ public class SampleDataSource extends DataSource {
 	}
 
 	@Override
-	public boolean add(Object data) {
-		if (data.getClass() != Sample.class) return false;
-
-		Sample sample = (Sample) data;
+	public boolean add(Sample sample) {
 	    ContentValues values = new ContentValues();
 	    values.put(DBHelper.NAME, sample.getName());
 	    values.put(DBHelper.DESCRIPTION, sample.getDescription());
@@ -92,41 +88,30 @@ public class SampleDataSource extends DataSource {
 	}
 
 	@Override
-	public boolean delete(Object data) {
-		if (data.getClass() != Sample.class) return false;
-
-		Sample sample = (Sample) data;
+	public boolean delete(Sample sample) {
 		deleteHelper(DBHelper.TABLE_SAMPLE, sample.getId());
-		
 		return true;
 	}
+	   
+    @Override
+    public boolean deleteAll() {
+        deleteAllHelper(DBHelper.TABLE_SAMPLE);
+        return true;
+    }
 
+    @Override
+    public Sample get(long id) {
+        return getHelper(DBHelper.TABLE_SAMPLE, allColumns, id);
+    }
+    
 	@Override
 	public List<Sample> getAll() {
-		open();
-		
-	    List<Sample> samples = new ArrayList<Sample>();
-	
-	    Cursor cursor = database.query(DBHelper.TABLE_SAMPLE,
-	        allColumns, null, null, null, null, null);
-	    
-	    if (cursor != null) {
-		    cursor.moveToFirst();
-		    while (!cursor.isAfterLast()) {
-		    	Sample sample = (Sample) cursorToData(cursor);
-		    	samples.add(sample);
-		    	cursor.moveToNext();
-		    }
-		    cursor.close();
-	    }
-	    
-	    close();
-	    return samples;
+	    return getAllHelper(DBHelper.TABLE_SAMPLE, allColumns);
 	}
-	
-	@Override
-	protected Object cursorToData(Cursor cursor) {
-	    return new Sample(
+
+    @Override
+    protected Sample cursorToData(Cursor cursor) {
+        return new Sample(
                 cursor.getLong(0),
                 cursor.getString(1), 
                 cursor.getString(2), 
@@ -139,5 +124,5 @@ public class SampleDataSource extends DataSource {
                 cursor.getLong(9),
                 cursor.getLong(10), 
                 cursor.getLong(11));
-	}
+    }
 }
