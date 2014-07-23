@@ -266,8 +266,9 @@ function onPopupClose(evt) {
 function onFeatureSelect(evt) {
     feature = evt.feature;
 
-    var sample = 0;
+    // Sample id is stored in attributes of the feature
     var points = android.getSample(feature.attributes);
+    var sample = 0;
 
     points = JSON.parse(points);
     for (data in points['points']) {
@@ -276,9 +277,10 @@ function onFeatureSelect(evt) {
             break;
         }
     }
-    
+
     var html = '';
     if (sample == 0) {
+        // If no sample with id = feature.attributes is found
         html += '<div class="markerContent">Error: Cannot find sample information from database</div>';        
     } else {
         var name = sample.name;
@@ -288,9 +290,13 @@ function onFeatureSelect(evt) {
         html += '<div class="markerContent">' + name + '</div>';
         html += '<div>' + description + '</div>';
         html += '<div>' + '(' + y + ',' + x + ')' + '</div>';
-    }
 
-// <center><img src="./lib/openlayers/img/demo/cmu_bldg23.jpg" alt="cmu_bldg23" width="120" height="80"></center>
+        // Image of the samples are stored in:
+        // file:///sdcard/trailscribe/samples/<sample.name>/
+        // In the order of 1.jpg, 2.jpg, 3.jpg, etc.
+        var imagePath = 'file:///sdcard/trailscribe/samples/' + name + '/1.jpg';
+        html += '<center><img src="' + imagePath + '" alt="sample_image" width="120" height="80"></center>'
+    }
 
     popup = new OpenLayers.Popup.FramedCloud("pop",
           feature.geometry.getBounds().getCenterLonLat(), null, html, null, true, onPopupClose);
@@ -484,6 +490,7 @@ function getPointsFromJava(msg) {
         point = point.transform(map.displayProjection, map.projection);
         pointList.push(point);
 
+        // Store a sample's id to a map
         if (msg == "DisplaySamples") {
             sampleList[point.toShortString()] = points['points'][data].id;
         }
@@ -527,9 +534,12 @@ function getPointFeatures(msg) {
     var pointFeatures = [];
     for(var i = 0; i < points.length; i++){
         var pointFeature = new OpenLayers.Feature.Vector(points[i], null, marker_style);
+
         if (msg == "DisplayCurrentLocation") {
             pointFeature.style.rotation = azimuth;
         } else if (msg == "DisplaySamples") {
+            // Put the sample's id to the feature's attribute.
+            // It is used to identify different samples when pop-up is triggered.
             pointFeature.attributes = sampleList[points[i].toShortString()];
         }
 

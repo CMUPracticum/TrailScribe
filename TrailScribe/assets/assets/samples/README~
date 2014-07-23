@@ -1,0 +1,6 @@
+This folder (/TrailScribe/TrailScribe/assets/samples) contains the images of the samples.
+
+Currently the samples are created in SampleDataSource.java as examples.
+On the other hand, sample images is copied from here to device storage.
+
+In the future, after features to add/sync samples are implemented.

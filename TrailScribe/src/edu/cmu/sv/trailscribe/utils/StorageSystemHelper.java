@@ -1,21 +1,26 @@
 package edu.cmu.sv.trailscribe.utils;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.util.Log;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class StorageSystemHelper {
-
-    public static final String[] folders = {"maps", "tiles", "kmls"};
+    private static final String MSG_TAG = "StorageSystemHelper";
+    public static final String[] folders = {"maps", "tiles", "kmls", "samples"};
     
-    public static void createFolder() {
+    public static void createDefaultFolders() {
         for (String folder : folders) {
-            File directory = new File(TrailScribeApplication.STORAGE_PATH + folder);
-            if (!directory.exists()) {
-                directory.mkdir();
-            }
+            createFolder(TrailScribeApplication.STORAGE_PATH + folder);
         }
     }
     
@@ -68,5 +73,77 @@ public class StorageSystemHelper {
         }
         
         return files;
+    }
+    
+    /**
+     * Copy assets files to device storage recursively.
+     * 
+     * @param context
+     * @param sourceDirectory directory of the assets to be copied.
+     *          The files should under ~/TrailScribe/TrailScribe/assets/<sourceDirectory>
+     * @param targetDirectory target directory of the asset files.
+     *          For example, sdcard/trailscribe/samples
+     */
+    public static boolean copyAssetToDevice(
+            Context context, String sourceDirectory, String targetDirectory) {
+//      Remove the tailing '/' in targetDirectory
+        if (targetDirectory.charAt(targetDirectory.length() - 1) == '/') {
+            targetDirectory = targetDirectory.substring(0, targetDirectory.length() - 1);
+        }
+        
+        String[] list = null;
+        Resources resources = context.getResources();
+        AssetManager assetManager = resources.getAssets();
+        
+        try {
+            list = assetManager.list(sourceDirectory);
+            if (list == null) return true;
+        } catch (IOException e) {
+            Log.e(MSG_TAG, "Failed to get asset file list: " + e.getMessage());
+        }
+        
+        for (String file : list) {
+            if (file.indexOf(".") >= 0) {
+                copyFile(assetManager, sourceDirectory + "/" + file, targetDirectory + "/" + file);
+            } else {
+                createFolder(targetDirectory + "/" + file);
+                copyAssetToDevice(context, sourceDirectory + "/" + file, targetDirectory + "/" + file);
+            }
+        }
+        
+        return true;
+    }
+    
+    private static void copyFile(
+            AssetManager assetManager, String sourceDirectory, String targetDirectory) {
+        InputStream in = null;
+        OutputStream out = null;
+        
+        try {
+            in = assetManager.open(sourceDirectory);
+            out = new FileOutputStream(targetDirectory);
+             
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch(IOException e) {
+            Log.e(MSG_TAG, "Failed to copy asset file: " + sourceDirectory);
+            Log.e(MSG_TAG, e.getMessage());
+        }   
+    }
+    
+    private static void createFolder(String path) {
+        File directory = new File(path);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
     }    
 }

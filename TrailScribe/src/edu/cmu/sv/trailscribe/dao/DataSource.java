@@ -9,8 +9,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 public abstract class DataSource {
-	@SuppressWarnings("unused")
-    private static final String MSG_TAG = "DataSource";
+    protected static final String MSG_TAG = "DataSource";
 	
 	// Database fields
 	protected static SQLiteDatabase database;

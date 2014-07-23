@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class SampleDataSource extends DataSource {
 	private String[] allColumns = {
@@ -22,9 +23,10 @@ public class SampleDataSource extends DataSource {
 	public SampleDataSource(DBHelper dbHelper) {
 		super(dbHelper);
 		
-//		TODO: Sample data. Remove when feature to add samples is implemented
-//      Insert sample data whenever the data source is created
+//		TODO: Remove when feature to add samples is implemented
+//		Inserting samples.
         List<Sample> samples = getAll();
+        
         if (samples.size() == 4) {
             return;
         }
@@ -33,26 +35,34 @@ public class SampleDataSource extends DataSource {
             delete(sample);
         }
         
+        // Path of sample's images are stored in custom field
+        // The images are located in:
+        // file:///sdcard/trailscribe/samples/<sample.name>/
+        // In the order of 1.jpg, 2.jpg, 3.jpg, etc.
 		Sample s1 = new Sample(
-	    		0, "Carnegie Mellon University: Silicon Valley Campus", 
+	    		0, "Carnegie Mellon University - Silicon Valley Campus", 
 	    		"sample #1", "default time",
-	    		-122.059746, 37.410418, 0, "default custom field", "default last modified",
-	    		0, 0, 0);
+	    		-122.059746, 37.410418, 0, 
+	    		TrailScribeApplication.STORAGE_PATH + "samples/Carnegie Mellon University - Silicon Valley Campus/1.jpg", 
+	    		"default last modified", 0, 0, 0);
         Sample s2 = new Sample(
                 0, "Hangar 1", 
                 "sample #2", "default time",
-                -122.054195, 37.412675, 0, "default custom field", "default last modified",
-                0, 0, 0);
+                -122.054195, 37.412675, 0, 
+                TrailScribeApplication.STORAGE_PATH + "samples/Hangar 1/1.jpg", 
+                "default last modified", 0, 0, 0);
         Sample s3 = new Sample(
                 0, "Moffett Field Historical Society Museum", 
                 "sample #3", "default time",
-                -122.054230, 37.411352, 0, "default custom field", "default last modified",
-                0, 0, 0);
+                -122.054230, 37.411352, 0, 
+                TrailScribeApplication.STORAGE_PATH + "samples/Moffett Field Historical Society Museum/1.jpg", 
+                "default last modified", 0, 0, 0);
         Sample s4 = new Sample(
                 0, "Pool", 
                 "sample #4", "default time",
-                -122.056896, 37.409516, 0, "default custom field", "default last modified",
-                0, 0, 0);
+                -122.056896, 37.409516, 0, 
+                TrailScribeApplication.STORAGE_PATH + "samples/Pool/1.jpg", 
+                "default last modified", 0, 0, 0);
 		
 		add(s1);
 		add(s2);
