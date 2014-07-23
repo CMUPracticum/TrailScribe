@@ -18,7 +18,7 @@ public class LocationDataSource extends DataSource<Location> {
 	}
 	
 	public LocationDataSource(DBHelper dbHelper) {
-		super (dbHelper);
+		super(dbHelper);
 	}
 	
 	@Override

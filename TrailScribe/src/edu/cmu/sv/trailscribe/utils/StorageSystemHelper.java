@@ -16,8 +16,10 @@ import android.util.Log;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class StorageSystemHelper {
-    private static final String MSG_TAG = "StorageSystemHelper";
+//  SD card folders the application needs, will be created in createFolder()
     public static final String[] folders = {"maps", "tiles", "kmls", "samples"};
+    
+    private static final String MSG_TAG = "StorageSystemHelper";
     
     public static void createDefaultFolders() {
         for (String folder : folders) {
@@ -77,7 +79,7 @@ public class StorageSystemHelper {
     }
     
     /**
-     * Copy assets files to device storage recursively.
+     * Copy assets files to device storage, recursively.
      * 
      * @param context
      * @param sourceDirectory directory of the assets to be copied.

@@ -13,7 +13,8 @@ public class SampleDataSource extends DataSource<Sample> {
 			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.TIME, 
 			DBHelper.X, DBHelper.Y, DBHelper.Z,
 			DBHelper.CUSTOM_FIELD, DBHelper.LAST_MODIFIED,
-			DBHelper.USER_ID, DBHelper.MAP_ID, DBHelper.EXPEDITION_ID };
+			DBHelper.USER_ID, DBHelper.MAP_ID, DBHelper.EXPEDITION_ID
+	};
 	
 	public SampleDataSource(Context context) {
 		super(context);

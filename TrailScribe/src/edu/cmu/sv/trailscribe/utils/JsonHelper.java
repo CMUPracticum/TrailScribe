@@ -104,7 +104,8 @@ public class JsonHelper {
     /**
      * @return the every past location in database in Json format
      */
-    public static String getPositionHistoryJson(List<edu.cmu.sv.trailscribe.model.data.Location> locations) {
+    public static String getPositionHistoryJson(
+            List<edu.cmu.sv.trailscribe.model.data.Location> locations) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'points':[");
         for (int i = 0; i < locations.size(); i++) {

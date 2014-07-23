@@ -13,13 +13,13 @@ public class DBHelper extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "TrailScribeDB";
     
-	// Tables Names
+//  Tables Names
     public static final String TABLE_MAP = "MAP";
     public static final String TABLE_KML = "KML";
     public static final String TABLE_SAMPLE = "SAMPLE";
     public static final String TABLE_LOCATION = "LOCATION";
     
-    // Common column names
+//  Common column names
     public static final String KEY_ID = "id";
     public static final String NAME = "name";
     public static final String VERSION = "version";
@@ -42,7 +42,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MAX_Y = "max_y";
     public static final String FILENAME = "filename";
     
-    // Create Statements
+//  Definition of tables
     private static final String TABLE_MAP_COLUMN_DEFINITION = TABLE_MAP 
     		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME + " TEXT," 
     		+ DESCRIPTION + " TEXT," + PROJECTION + " TEXT," 
@@ -51,7 +51,6 @@ public class DBHelper extends SQLiteOpenHelper {
     		+ MAX_X + " INTEGER, " + MAX_Y + " INTEGER, "
     		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + ")";
     
- // Create Statements
     private static final String TABLE_KML_COLUMN_DEFINITION = TABLE_KML 
     		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME + " TEXT," 
     		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + ")";

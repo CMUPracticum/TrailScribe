@@ -12,7 +12,8 @@ public class MapDataSource extends DataSource<Map> {
 			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.PROJECTION, 
 			DBHelper.MIN_ZOOM_LEVEL, DBHelper.MAX_ZOOM_LEVEL, 
 			DBHelper.MIN_X, DBHelper.MIN_Y, DBHelper.MAX_X, DBHelper.MAX_Y, 
-			DBHelper.FILENAME, DBHelper.LAST_MODIFIED };
+			DBHelper.FILENAME, DBHelper.LAST_MODIFIED
+	};
 	
 	public MapDataSource(Context context) {
 		super(context);

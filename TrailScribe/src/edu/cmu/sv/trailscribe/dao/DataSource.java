@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 public abstract class DataSource<T> {
     protected static final String MSG_TAG = "DataSource";
 	
-	// Database fields
+//  Database fields
 	protected static SQLiteDatabase database;
 	protected static DBHelper dbHelper;
 	
@@ -42,6 +42,7 @@ public abstract class DataSource<T> {
 	}
 
 	public abstract boolean delete(T data);
+	
 	protected void deleteHelper(String table, long id) {
 	    open();
 	    database.delete(table, DBHelper.KEY_ID + " = " + id, null);
@@ -55,6 +56,12 @@ public abstract class DataSource<T> {
         close();
     }
 
+    /**
+     * Get row from table by id
+     * 
+     * @param table
+     * @param id
+     */
 	public abstract T get(long id);
     protected T getHelper(String table, String[] allColumns, long id) {
         open();
@@ -76,6 +83,12 @@ public abstract class DataSource<T> {
         return data;
     }
     
+    /**
+     * Get row from table by name. Note that some tables do not have a 'name' column
+     * 
+     * @param table
+     * @param id
+     */
     public abstract T get(String name);
     protected T getHelper(String table, String[] allColumns, String name) {
         open();

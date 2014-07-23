@@ -129,9 +129,6 @@ public class Sample {
 		this.mExpeditionId = expeditionId;
 	}
 
-    /**
-     * @return the object is Json format. For example, "'id':'0', 'userId':'0'"
-     */
 	@Override
 	public String toString() {
         StringBuffer buffer = new StringBuffer();
