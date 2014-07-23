@@ -24,5 +24,16 @@ public abstract class SyncItem {
 	public void setFilename(String fileName){
 		this.mFileName = fileName;
 	}
+	
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        
+        buffer.append("'id':'").append(this.getId()).append("', ");
+        buffer.append("'name':'").append(this.getName()).append("', ");
+        buffer.append("'fileName':'").append(this.getFilename()).append("'");
+        
+        return buffer.toString();
+    }
 
 }

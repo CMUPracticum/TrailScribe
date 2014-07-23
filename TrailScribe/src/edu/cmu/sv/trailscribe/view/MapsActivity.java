@@ -411,7 +411,6 @@ public class MapsActivity extends BaseActivity
         
         mAzimuth = (int) values[0];
         if (mIsDisplayCurrentLocation) {
-            //Log.d(MSG_TAG, "onSensorChanged: " + mAzimuth);
             setLayers(MessageToWebview.HideCurrentLocation);
             setLayers(MessageToWebview.DisplayCurrentLocation);
         }

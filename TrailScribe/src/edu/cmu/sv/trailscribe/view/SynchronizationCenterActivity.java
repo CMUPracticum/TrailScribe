@@ -132,11 +132,11 @@ public class SynchronizationCenterActivity
 			for(SyncItem item: mSyncItems)
 			if(item instanceof Map){
     			MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
-    			mapsDs.add(item);
+    			mapsDs.add((Map) item);
     		}
     		else if(item instanceof Kml){
     			KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
-    			kmlsDs.add(item);
+    			kmlsDs.add((Kml) item);
     		}
 			
 			//Check for success
