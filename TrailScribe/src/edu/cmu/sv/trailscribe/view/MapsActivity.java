@@ -45,7 +45,8 @@ import edu.cmu.sv.trailscribe.model.data.Sample;
 public class MapsActivity extends BaseActivity 
     implements OnClickListener, SensorEventListener, OnNavigationListener {
 	
-	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Maps", "Display map and layers", R.color.green);
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme(
+	        "Maps", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
 
 //	Controllers
@@ -122,6 +123,7 @@ public class MapsActivity extends BaseActivity
 	    mActionBar.setIcon(R.drawable.button_settings);
 	    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_layout);
 	    
+//	    Define the listen of the navigation drawer
 	    mDrawerToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, 
                 R.drawable.icon_trailscribe, R.string.map_display_tools, R.string.map_hide_tools) {
@@ -137,11 +139,12 @@ public class MapsActivity extends BaseActivity
             }
         };
 
-        mActionBar.setDisplayHomeAsUpEnabled(true);
-        mActionBar.setHomeButtonEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
         
 //      Create spinner in action bar 
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setHomeButtonEnabled(true);
         
         setSpinner();
 	}
@@ -165,7 +168,6 @@ public class MapsActivity extends BaseActivity
 		mCurrentLocationButton.setOnClickListener(this);
 		mPositionHistoryButton.setOnClickListener(this);
 		mKmlButton.setOnClickListener(this);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 	
 	private void setTextView() {
@@ -215,9 +217,9 @@ public class MapsActivity extends BaseActivity
 		mWebView.getSettings().setUseWideViewPort(false);
 		mWebView.setWebViewClient(new WebViewClient());
 		
-		// Setting to give OpenLayers access to local KML files
-		// Sets whether JavaScript running in the context of a file scheme URL should be allowed to 
-		// access content from any origin.
+//		Setting to give OpenLayers access to local KML files
+//		Sets whether JavaScript running in the context of a file scheme URL should be allowed to 
+//		access content from any origin.
 		mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
 
 		mController = new MapsController();
@@ -394,8 +396,9 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] values = event.values;
+        
+//      Ignore minor rotations
         if (Math.abs(values[0] - mAzimuth) <= 5) {
-//          Ignore minor rotations
             return;
         }
         
@@ -415,9 +418,10 @@ public class MapsActivity extends BaseActivity
     
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        //Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
+//      Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
     }
     
+//  Create the selector dialog for displaying KML layers
     private void createKMLSelector() {
         mOverlays = StorageSystemHelper.getOverlaysFromStorage();
         
@@ -432,6 +436,7 @@ public class MapsActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(int position, long itemId) {
         if (position == 0) {
+//          Ignore when tile of the spinner is selected
             return true;
         }
         

@@ -32,7 +32,6 @@ public class TrailScribeApplication extends Application implements LocationListe
     private LocationManager mLocationManager;
     
 //  Time
-    private static Time mTime;
     
 	public TrailScribeApplication() {
 		
@@ -42,7 +41,6 @@ public class TrailScribeApplication extends Application implements LocationListe
 	public void onCreate() {
 		mContext = getApplicationContext();
 		mDBHelper = new DBHelper(mContext);
-		mTime = new Time();
 		
 //		Create necessary folders in the external storage system
 		StorageSystemHelper.createDefaultFolders();
@@ -75,12 +73,7 @@ public class TrailScribeApplication extends Application implements LocationListe
             mLocationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
             
-            mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            
-//          Use location from GPS if it is available
-            if (mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-                mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);    
-            }
+            requestLocationUpdates();
         } catch (Exception e) {
             Log.e(MSG_TAG, e.getMessage());
         }
@@ -88,12 +81,10 @@ public class TrailScribeApplication extends Application implements LocationListe
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location == null) {
-            return;
-        }
+        if (location == null) return;
         
+//      Ignore minor changes
         if (mLocation != null && Math.abs(location.distanceTo(mLocation)) <= MIN_LOCATION_DISTANCE) {
-//          Ignore minor changes
             return;
         }
         
@@ -103,12 +94,12 @@ public class TrailScribeApplication extends Application implements LocationListe
     
     private void saveLocationToDatabase() {
         LocationDataSource dataSource = new LocationDataSource(mDBHelper);
-
-        mTime.setToNow();
+        Time time = new Time();
+        time.setToNow();
         
         edu.cmu.sv.trailscribe.model.data.Location loc = 
                 new edu.cmu.sv.trailscribe.model.data.Location(
-                        (int) (Math.random() * Integer.MAX_VALUE), mTime.format2445(), 
+                        (int) (Math.random() * Integer.MAX_VALUE), time.format2445(), 
                         mLocation.getLongitude(), mLocation.getLatitude(), mLocation.getAltitude(), 
                         0, 0, 0);
         dataSource.add(loc);
@@ -122,10 +113,18 @@ public class TrailScribeApplication extends Application implements LocationListe
     @Override
     public void onProviderEnabled(String provider) {
         Log.d(MSG_TAG, "Location provider is enabled: " + provider);
-        mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        
+
+        requestLocationUpdates();
         saveLocationToDatabase();
+    }
+    
+    private void requestLocationUpdates() {
+        mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        
+//      Use location from GPS if it is available
+        if (mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+            mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);    
+        }
     }
 
     @Override
