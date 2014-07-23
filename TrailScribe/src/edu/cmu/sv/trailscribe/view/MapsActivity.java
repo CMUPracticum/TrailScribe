@@ -355,12 +355,11 @@ public class MapsActivity extends BaseActivity
             mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
 			break;
 		case R.id.maps_kml:
-		    mIsDisplayKML = !mIsDisplayKML;
-		    
 //          Hide KML if it is currently displayed
 			if (mIsDisplayKML) {
                 message = MessageToWebview.HideKML;
                 mKmlButton.setBackgroundResource(R.drawable.button_kml);
+                mIsDisplayKML = false;
             } else {
 //              Message to webview will be sent after positive button in the selector is clicked 
                 createKMLSelector();
@@ -480,6 +479,8 @@ public class MapsActivity extends BaseActivity
         private DialogInterface.OnClickListener mPositiveListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                mIsDisplayKML = true;
+                
                 List<String> selectedItemNames = new ArrayList<String>();
                 for (Integer item : mSelectedItems) {
                     selectedItemNames.add(mOverlayNames[item.intValue()]);
