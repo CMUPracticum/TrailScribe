@@ -1,12 +1,10 @@
 package edu.cmu.sv.trailscribe.controller;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import android.os.AsyncTask;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -36,51 +34,59 @@ public class SynchronizationCenterController
 		this.mTaskCompletedCallback = callback;
 	}
 	
+	// This method is invoked by the BackendFacade once the response from the backend is available
 	@Override
 	public void onTaskCompleted(String syncResult) {
+		ArrayList<SyncItem> itemsToSync = null;
+
 		JsonParser jsonParser = new JsonParser();
-		JsonElement jsonElement = jsonParser.parse(syncResult);
-		
-		if (jsonElement.isJsonNull()) {
-//			TODO Show notification when returned result is null
-			return;
-		}
-		
-		JsonArray syncResultJson = (JsonArray)jsonParser.parse(syncResult);
-		ArrayList<SyncItem> itemsToSync = new ArrayList<SyncItem>();
-		ArrayList<Kml> kmls = new ArrayList<Kml>();
-		Map map;
-		Kml kml;
-		for (JsonElement item:syncResultJson) {
-			String model = item.getAsJsonObject().get("model").getAsString();
-			JsonObject syncItemJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
-			if(model.equals("sync_center.map")){
-				map = new Map();
-				map.setId(item.getAsJsonObject().get("pk").getAsLong());
-				map.setMinX(syncItemJsonArray.get("min_x").getAsDouble());
-				map.setMaxZoomLevel(syncItemJsonArray.get("max_zoom_level").getAsInt());
-				map.setMaxY(syncItemJsonArray.get("max_y").getAsDouble());
-				map.setName(syncItemJsonArray.get("name").getAsString());
-				map.setFilename(syncItemJsonArray.get("filename").getAsString());
-				map.setProjection(syncItemJsonArray.get("projection").getAsString());
-				map.setLastModified(syncItemJsonArray.get("last_modified").getAsString());
-				map.setMinZoomLevel(syncItemJsonArray.get("min_zoom_level").getAsInt());
-				map.setMaxX(syncItemJsonArray.get("max_x").getAsDouble());
-				map.setMinY(syncItemJsonArray.get("min_y").getAsDouble());
+		JsonElement jsonElement = jsonParser.parse(syncResult);		
+
+		// Unless there is an error in the communication, jsonElement should not be null
+		if (!jsonElement.isJsonNull()) {
+			JsonArray syncResultJson = (JsonArray)jsonParser.parse(syncResult);
+			itemsToSync = new ArrayList<SyncItem>();
+			for (JsonElement item:syncResultJson) {
+				String model = item.getAsJsonObject().get("model").getAsString();
+				JsonObject syncItemJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
 				
-				itemsToSync.add(map);
-			}
-			else if(model.equals("sync_center.kml")){
-				kml = new Kml();
-				kml.setName(syncItemJsonArray.get("name").getAsString());
-				kml.setId(item.getAsJsonObject().get("pk").getAsLong());
-				kml.setFilename(syncItemJsonArray.get("filename").getAsString());
-				kml.setLastModified(syncItemJsonArray.get("last_modified").getAsString());
-				kmls.add(kml);
-				itemsToSync.add(kml);
+				// Parsing maps and kmls differently given their attributes are not quite the same
+				if(model.equals("sync_center.map")){
+					itemsToSync.add(parseMapInformation(item, syncItemJsonArray));
+				}
+				else if(model.equals("sync_center.kml")){
+					itemsToSync.add(parseKmlInformation(item, syncItemJsonArray));
+				}
 			}
 		}
 		mTaskCompletedCallback.onTaskCompleted(itemsToSync);
+	}
+
+	private Kml parseKmlInformation(JsonElement item, JsonObject syncItemJsonArray) {
+		Kml kml;
+		kml = new Kml();
+		kml.setName(syncItemJsonArray.get("name").getAsString());
+		kml.setId(item.getAsJsonObject().get("pk").getAsLong());
+		kml.setFilename(syncItemJsonArray.get("filename").getAsString());
+		kml.setLastModified(syncItemJsonArray.get("last_modified").getAsString());
+		return kml;
+	}
+
+	private Map parseMapInformation(JsonElement item, JsonObject syncItemJsonArray) {
+		Map map;
+		map = new Map();
+		map.setId(item.getAsJsonObject().get("pk").getAsLong());
+		map.setMinX(syncItemJsonArray.get("min_x").getAsDouble());
+		map.setMaxZoomLevel(syncItemJsonArray.get("max_zoom_level").getAsInt());
+		map.setMaxY(syncItemJsonArray.get("max_y").getAsDouble());
+		map.setName(syncItemJsonArray.get("name").getAsString());
+		map.setFilename(syncItemJsonArray.get("filename").getAsString());
+		map.setProjection(syncItemJsonArray.get("projection").getAsString());
+		map.setLastModified(syncItemJsonArray.get("last_modified").getAsString());
+		map.setMinZoomLevel(syncItemJsonArray.get("min_zoom_level").getAsInt());
+		map.setMaxX(syncItemJsonArray.get("max_x").getAsDouble());
+		map.setMinY(syncItemJsonArray.get("min_y").getAsDouble());
+		return map;
 	}
 
 	@Override

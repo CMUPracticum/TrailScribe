@@ -22,6 +22,14 @@ var mapProjection;
 var displayProjection = new OpenLayers.Projection("EPSG:4326"); // display projection is always WGS84 spherical mercator
 var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+var resolutions = [156543.03390625, 78271.516953125, 39135.7584765625,
+                      19567.87923828125, 9783.939619140625, 4891.9698095703125,
+                      2445.9849047851562, 1222.9924523925781, 611.4962261962891,
+                      305.74811309814453, 152.87405654907226, 76.43702827453613,
+                      38.218514137268066, 19.109257068634033, 9.554628534317017,
+                      4.777314267158508, 2.388657133579254, 1.194328566789627,
+                      0.5971642833948135, 0.25, 0.1, 0.05];
+var serverResolutions = [];
 
 // Get rid of address bar on iphone/ipod
 var fixSize = function() {
@@ -62,6 +70,23 @@ var layerListeners;
  */
 var sampleList = {};
 
+
+/**
+ * Function: getServerResolutions
+ * Given a max zoom level, return the available
+ * resolutions on the server (in this case, in the file system)
+ * 
+ * Parameters:
+ * maxzoom - (int)
+ */
+function getServerResolutions(maxzoom) {
+    myResolutions = [];
+    for (var i = 0; i <= maxzoom; i++) {
+        myResolutions.push(resolutions[i]);
+    }
+    return myResolutions;
+}
+
 /**
  * Function: initMapProperties
  * Get mapProperties for this map from the Android interface and set them.
@@ -79,6 +104,8 @@ function initMapProperties() {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
     mapMaxZoom = initialMapProperties.maxZoomLevel;
+
+    serverResolutions = getServerResolutions(mapMaxZoom);    
 }
 
 /**
@@ -108,7 +135,8 @@ function init() {
         ],
         projection: mapProjection,
         displayProjection: displayProjection, // Spherical Mercator
-        tileSize: new OpenLayers.Size(256, 256)
+        tileSize: new OpenLayers.Size(256, 256), 
+        fractionalZoom: true
     };
 
     // Create map
@@ -116,11 +144,14 @@ function init() {
 
     // Create TMS Overlay (Base map)
     tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "", {
+        resolutions: resolutions,
+        serverResolutions: serverResolutions,
+        transitionEffect: 'resize',
         serviceVersion: '.',
         layername: 'tiles',        
         alpha: true,
         type: 'png',
-        isBaseLayer: true, 
+        isBaseLayer: true,        
         getURL: getURL
     });
 
@@ -187,7 +218,6 @@ function init() {
  * mapOptions - {Object}
  */
 function redrawMap(mapOptions) {
-
     mapName = mapOptions.name;    
     mapProjection = new OpenLayers.Projection(mapOptions.projection); // Default: Web Mercator    
     mapBounds = new OpenLayers.Bounds(mapOptions.minY, mapOptions.minX, mapOptions.maxY, mapOptions.maxX);
@@ -195,7 +225,9 @@ function redrawMap(mapOptions) {
     mapMinZoom = mapOptions.minZoomLevel;
     mapMaxZoom = mapOptions.maxZoomLevel;
 
-    map.setOptions({restrictedExtent: extent});    
+    map.setOptions({restrictedExtent: extent});
+
+    serverResolutions = getServerResolutions(mapMaxZoom);
 
     tmsOverlay.redraw();
 }
@@ -214,16 +246,18 @@ function getURL(bounds) {
     var x = Math.round((bounds.left - this.tileOrigin.lon) / (res * this.tileSize.w));
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
-        
+
     var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;    
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
         url = this.selectUrl(path, url);
     }
-    if (mapBounds.intersectsBounds(bounds) && (z >= mapMinZoom) && (z <= mapMaxZoom)) {        
+
+    if (mapBounds.intersectsBounds(bounds)) {
         return url + path;
-    } else {
+    }
+    else {
         return emptyTileURL;
     }
 }

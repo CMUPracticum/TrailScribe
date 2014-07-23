@@ -15,6 +15,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 
@@ -25,10 +27,8 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private DownloadReceiver mDownloadReceiver; 
 	private AsyncTaskCompleteListener<Boolean> mTaskCompletedCallback;
 	private ArrayList<Long> mPendingDownloads = new ArrayList<Long>();
-	private ArrayList<SyncItem> mDownloads;
 	private String mDownloadDirectory;
-	private SyncItem mCurrentItem = null;
-
+	private SyncItem mCurrentDownload = null;
 
 	public Downloader (ArrayList<SyncItem> mSyncItems, Context context, String downloadDirectory, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
 		this.mSyncItems	 = mSyncItems;
@@ -38,7 +38,6 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		this.mDownloadProgressDialog = downloadProgressDialog;
 		this.mDownloadDirectory = downloadDirectory;
         this.mContext.registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        
 	}
 	
 	@Override
@@ -65,22 +64,19 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	@Override
 	protected void onPostExecute(Void result) 
 	{
-		//close the progress dialog
+		this.mContext.unregisterReceiver(mDownloadReceiver);
 		if(mDownloadProgressDialog!= null){
 			mDownloadProgressDialog.dismiss();
 		}
-		this.mContext.unregisterReceiver(mDownloadReceiver);
 		boolean success = true;
-//		if(this.mPendingDownloads.size() != 0){
-//			success = false;
-//		}
+		if(this.mPendingDownloads.size() != 0){
+			success = false;
+		}
 		this.mTaskCompletedCallback.onTaskCompleted(success);
-
 	}
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		mDownloads = new ArrayList<SyncItem>();
 		for (SyncItem item: mSyncItems){
 			int subStringIndex = item.getFilename().lastIndexOf("/") +1;
 	    	String mapFileName = item.getFilename().substring(subStringIndex);
@@ -93,24 +89,42 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			    DownloadManager.STATUS_PAUSED|
 			    DownloadManager.STATUS_PENDING|
 			    DownloadManager.STATUS_RUNNING|
-			    DownloadManager.STATUS_SUCCESSFUL);
-			Cursor cur = downloadManager.query(query);
-			int col = cur.getColumnIndex(
+			    DownloadManager.STATUS_SUCCESSFUL|
+			    DownloadManager.STATUS_FAILED);
+			
+			Cursor cursor = downloadManager.query(query);
+			int pathNameColumn = cursor.getColumnIndex(
 			    DownloadManager.COLUMN_LOCAL_FILENAME);
-			for(cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
-			    isDownloading = isDownloading || (mapFileName == cur.getString(col));
+			for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+			    isDownloading = isDownloading || (mapFileName == cursor.getString(pathNameColumn));
 			}
-			cur.close();
+			cursor.close();
 				
 			// Download the file if it is not already downloaded
 			if (!isDownloading) {
-			    startDownload(item, mapFileName, downloadManager);
-			    mDownloads.add(item);
+				if (isInternetConnectionAvailable() == true){
+					startDownload(item, mapFileName, downloadManager);
+				}
+				else {
+					if(mDownloadProgressDialog!= null){
+						mDownloadProgressDialog.dismiss();
+					}
+					this.mTaskCompletedCallback.onTaskCompleted(false);
+				}
 	   		}
 		}
 		return null;
 	}
 	
+	private boolean isInternetConnectionAvailable() {
+		ConnectivityManager cm =
+		        (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		 
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+		return (activeNetwork != null &&
+		                      activeNetwork.isConnectedOrConnecting());
+	}
+
 	private void verifyDirectory(String directory) {
 		File file = new File(directory); 
 		if(!file.isDirectory()) { 
@@ -121,6 +135,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private void startDownload(SyncItem item, String mapFileName,
 			final DownloadManager downloadManager) {
 		Uri source = Uri.parse(item.getFilename());
+		
 		String folderName = null;
 		if(item instanceof Map){
 			folderName = "maps";
@@ -131,7 +146,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		String directory = this.mDownloadDirectory + folderName + "/"+ item.getName()+ "/";
 		verifyDirectory(directory);
 		Uri destination = Uri.fromFile(new File(directory + mapFileName));
-		mCurrentItem = item;
+		mCurrentDownload = item;
 		
 		DownloadManager.Request request = 
 		    new DownloadManager.Request(source);
@@ -176,33 +191,32 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	
 	protected void onProgressUpdate(Integer... progress) {
 		mDownloadProgressDialog.setProgress(progress[0]);
-        if(mDownloads != null) {
-        	mDownloadProgressDialog.setMessage("Synchronizing " + this.mCurrentItem.getName() + ". Item "+ (mDownloads.size()+1) + "/" + this.mSyncItems.size());
+        if(mPendingDownloads != null) {
+        	mDownloadProgressDialog.setMessage("Synchronizing " + this.mCurrentDownload.getName() + ". Item "+ (mPendingDownloads.size()) + "/" + this.mSyncItems.size());
         }
         
         
    }
 	
 	class DownloadReceiver extends BroadcastReceiver{
-		
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-	        long receivedID = intent.getLongExtra(
-	            DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
-	        DownloadManager mgr = (DownloadManager)
-	            context.getSystemService(Context.DOWNLOAD_SERVICE);
-	 
-	        DownloadManager.Query query = new DownloadManager.Query();
-	        query.setFilterById(receivedID);
-	        Cursor cur = mgr.query(query);
-	        int index = cur.getColumnIndex(
-	            DownloadManager.COLUMN_STATUS);
-	        if(cur.moveToFirst()) {
-	        	if(cur.getInt(index) == DownloadManager.STATUS_SUCCESSFUL){
-	        		//mPendingDownloads.remove(receivedID);
-	        	}
-	        }
-	        cur.close();
+	    	long receivedID = intent.getLongExtra(
+		            DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
+		        DownloadManager mgr = (DownloadManager)
+		            context.getSystemService(Context.DOWNLOAD_SERVICE);
+
+		        DownloadManager.Query query = new DownloadManager.Query();
+		        query.setFilterById(receivedID);
+		        Cursor cursor = mgr.query(query);
+		        int status = cursor.getColumnIndex(
+		            DownloadManager.COLUMN_STATUS);
+		        if(cursor.moveToFirst()) {
+		        	if(cursor.getInt(status) == DownloadManager.STATUS_SUCCESSFUL){
+		        		mPendingDownloads.remove(receivedID);
+		        	}
+		        }
+		        cursor.close();
 	    }
 	}
 }

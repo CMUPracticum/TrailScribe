@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
 import edu.cmu.sv.trailscribe.dao.KmlDataSource;
@@ -20,6 +21,7 @@ import edu.cmu.sv.trailscribe.model.data.SyncItem;
 import edu.cmu.sv.trailscribe.utils.Decompressor;
 import edu.cmu.sv.trailscribe.utils.Downloader;
 
+@SuppressWarnings("rawtypes") // Suppressing warning given this class listens to 2 different AsyncTasks
 public class SynchronizationCenterActivity 
     extends BaseActivity implements AsyncTaskCompleteListener {
 
@@ -35,11 +37,15 @@ public class SynchronizationCenterActivity
 		private ArrayAdapter<SyncItem> mAdapter;
 		private String downloadDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
 	  
-    @Override
+	@SuppressWarnings("unchecked") // Suppressing warning given this class listens to 2 different AsyncTasks
+	@Override
     public void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
           mSyncProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.synchronizing), true, true);
       	  mDownloadProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
+      	  setContentView(R.layout.activity_sync_center);
+      	  mListView = (ListView) findViewById(R.id.sync_list);
+      	  setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
       	  mUnzippingProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
           mController = new SynchronizationCenterController(this);
           mController.execute();
@@ -58,28 +64,45 @@ public class SynchronizationCenterActivity
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onTaskCompleted(Object result) {
+		if (mSyncProgressDialog != null){
+            mSyncProgressDialog.dismiss();
+		}
+		
+		// Handle any error related to synchronization results
+		if(result == null){
+			Toast.makeText(this,
+				     "There was an error during the synchronization process with TrailScribe backend. Please try again",
+				     Toast.LENGTH_LONG).show();
+		}
+		// Response from backend. Items to sync.
 		if (result instanceof ArrayList<?>){
 			mSyncItems = (ArrayList<SyncItem>) result;
-			
-			if (mSyncProgressDialog != null){
-	            mSyncProgressDialog.dismiss();
-			}
-			
-			setContentView(R.layout.activity_sync_center);
-			mListView = (ListView) findViewById(R.id.sync_list);
-	
-            setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 			mAdapter = new ArrayAdapter<SyncItem>(SynchronizationCenterActivity.this,
 	           android.R.layout.simple_list_item_1, android.R.id.text1, mSyncItems);
-	 
-	         // Assign adapter to ListView
 	         mListView.setAdapter(mAdapter); 
 		}
+		
+		// Response from downloader. 
 		else if(result instanceof Boolean){
+			if (mDownloadProgressDialog != null){
+				mDownloadProgressDialog.dismiss();
+			}
 			boolean downloadResult = (Boolean) result;
 			if(downloadResult == true){
 	            	new UnzipTask().execute();
-	            }
+	        }
+			else{
+				mController.cancel(true);
+				runOnUiThread(new Runnable() 
+				{
+				   public void run() 
+				   {
+					   Toast.makeText(SynchronizationCenterActivity.this,
+							   "There was an error during the synchronization process with TrailScribe backend. Please try again",
+							   Toast.LENGTH_LONG).show();    
+				   }
+				}); 
+			}
 		}
 	}
 	
@@ -90,7 +113,6 @@ public class SynchronizationCenterActivity
 	}
 	
 	private class UnzipTask extends AsyncTask<Void, Integer, Void>{
-
 		@Override
 		protected void onPreExecute() 
 		{
