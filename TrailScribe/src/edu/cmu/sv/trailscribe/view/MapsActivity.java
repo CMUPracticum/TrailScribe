@@ -19,6 +19,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,16 +36,11 @@ import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
-import edu.cmu.sv.trailscribe.model.Sample;
 import edu.cmu.sv.trailscribe.utils.JsonHelper;
 import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
-import edu.cmu.sv.trailscribe.model.Map;
-
-// TODO: Remove these and serialize MapDataSource with JsonHelper
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import edu.cmu.sv.trailscribe.model.data.Map;
+import edu.cmu.sv.trailscribe.model.data.Sample;
 
 public class MapsActivity extends BaseActivity 
     implements OnClickListener, SensorEventListener, OnNavigationListener {
@@ -178,7 +174,17 @@ public class MapsActivity extends BaseActivity
 	}
 	
 	private void setSpinner() {
-	    mBaseMaps = StorageSystemHelper.getBaseMapsFromStorage();
+	    MapDataSource dataSource = new MapDataSource(mDBHelper);
+	    ArrayList<Map> mapsInDatabase = (ArrayList<Map>) dataSource.getAll();
+	    HashSet<String> mapsInStorage = StorageSystemHelper.getBaseMapsFromStorage();
+	    
+//	    Only populate maps that are in both device database and device storage
+	    mBaseMaps = new ArrayList<String>();
+	    for (int i = 0; i < mapsInDatabase.size(); i++) {
+	        if (mapsInStorage.contains(mapsInDatabase.get(i).getName())) {
+	            mBaseMaps.add(mapsInDatabase.get(i).getName());
+	        }
+	    }
 	    
 //      Add the title of the spinner to the head of the list, will be ignored if it is selected
         mBaseMaps.add(0, getResources().getString(R.string.map_display_basemap));
@@ -223,41 +229,34 @@ public class MapsActivity extends BaseActivity
 	}
 	
 	@JavascriptInterface
-	public String getCurrentMap() {		
-		
-		MapDataSource dataSource = new MapDataSource(mDBHelper);		
-		List<Map> maps = dataSource.getAll();
-		
-		// First request for base map
+	public String getCurrentMap() throws Exception {		
+//	    First request for base map
 		if (mSelectedMapPosition == -1) {
 			mSelectedMapPosition = 1; // By default, show the first map as base map
-			// TODO: What happens when there are no maps
 		}
 		
-		// Find selected map from database based on selected map name
-		// TODO: Select the map from dataSource, do not fetch all
-		// Warning: Case not handled: If a map is in the file system but not in the database
+//		Show error message if there is no map on the device
+		if (mBaseMaps.size() == 0) {
+            String errorMessage = "There are no map on the device. Download maps in Sync Center";
+            Log.e(MSG_TAG, errorMessage);
+            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+            throw new Exception(errorMessage);		    
+		}
+		
+		MapDataSource dataSource = new MapDataSource(mDBHelper);
+		
+//		Find selected map from database based on selected map name
 		String selectedMapName = mBaseMaps.get(mSelectedMapPosition);
 		Map currentMap = null;
-		for (int i = 0; i < maps.size(); i++) {			
-			if (maps.get(i).getName().equals(selectedMapName)) {
-				currentMap = maps.get(i);
-				break;
-			}
+		currentMap = dataSource.get(selectedMapName);
+		
+		if (currentMap == null) {
+		    String errorMessage = "Selected map is not found in database";
+		    Log.e(MSG_TAG, errorMessage);
+		    throw new Exception(errorMessage);
 		}
 
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("{'map': {");		
-		buffer.append(currentMap.toString());
-		buffer.append("}}");
-
-		JSONObject currentMapObj = null;
-		try {
-			currentMapObj = new JSONObject(buffer.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return currentMapObj.toString();		
+		return JsonHelper.getCurrentMapJson(currentMap);		
 	}
 	
 	@JavascriptInterface
@@ -269,19 +268,10 @@ public class MapsActivity extends BaseActivity
 	public String getSample(String id) {
 	    SampleDataSource dataSource = new SampleDataSource(mDBHelper);
 	    
-//	    TODO Implement search in data source
-        ArrayList<Sample> samples = (ArrayList<Sample>) dataSource.getAll();
-        Sample sample = null;
-        for (int i = 0; i < samples.size(); i++) {
-            if (samples.get(i).getId() == Long.parseLong(id)) {
-                sample = samples.get(i);
-                break;
-            }
-        }
+        ArrayList<Sample> samples = new ArrayList<Sample>();
+        Sample sample = dataSource.get(Long.parseLong(id));
         
         if (sample == null) return new String();
-        
-        samples = new ArrayList<Sample>();
         samples.add(sample);
 	    
         return JsonHelper.getSamplesJson(samples);
@@ -310,7 +300,7 @@ public class MapsActivity extends BaseActivity
 	public String getPositionHistory() {
 		LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 		
-		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();
+		List<edu.cmu.sv.trailscribe.model.data.Location> locations = dataSource.getAll();
 		return JsonHelper.getPositionHistoryJson(locations);
 	}
 	

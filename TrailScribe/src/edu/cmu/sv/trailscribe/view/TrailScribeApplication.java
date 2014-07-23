@@ -106,8 +106,8 @@ public class TrailScribeApplication extends Application implements LocationListe
 
         mTime.setToNow();
         
-        edu.cmu.sv.trailscribe.model.Location loc = 
-                new edu.cmu.sv.trailscribe.model.Location(
+        edu.cmu.sv.trailscribe.model.data.Location loc = 
+                new edu.cmu.sv.trailscribe.model.data.Location(
                         (int) (Math.random() * Integer.MAX_VALUE), mTime.format2445(), 
                         mLocation.getLongitude(), mLocation.getLatitude(), mLocation.getAltitude(), 
                         0, 0, 0);

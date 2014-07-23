@@ -7,9 +7,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import edu.cmu.sv.trailscribe.model.Kml;
-import edu.cmu.sv.trailscribe.model.Map;
-import edu.cmu.sv.trailscribe.model.SyncItems;
+import edu.cmu.sv.trailscribe.model.data.Kml;
+import edu.cmu.sv.trailscribe.model.data.Map;
+import edu.cmu.sv.trailscribe.model.data.SyncItems;
 
 public class SyncItemSerializer implements JsonSerializer<SyncItems>{
 

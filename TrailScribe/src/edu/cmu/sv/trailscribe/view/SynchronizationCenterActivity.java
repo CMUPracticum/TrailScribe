@@ -14,9 +14,9 @@ import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
 import edu.cmu.sv.trailscribe.dao.KmlDataSource;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.Kml;
-import edu.cmu.sv.trailscribe.model.Map;
-import edu.cmu.sv.trailscribe.model.SyncItem;
+import edu.cmu.sv.trailscribe.model.data.Kml;
+import edu.cmu.sv.trailscribe.model.data.Map;
+import edu.cmu.sv.trailscribe.model.data.SyncItem;
 import edu.cmu.sv.trailscribe.utils.Decompressor;
 import edu.cmu.sv.trailscribe.utils.Downloader;
 

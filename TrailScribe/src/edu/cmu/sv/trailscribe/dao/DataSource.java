@@ -60,7 +60,7 @@ public abstract class DataSource<T> {
         open();
         
         Cursor cursor = database.query(table, allColumns, 
-                DBHelper.KEY_ID + "=?", new String[] { Long.toString(id) }, 
+                DBHelper.KEY_ID + "=?", new String[] {Long.toString(id)}, 
                 null, null, null, null);
         T data = null;
         if (cursor != null) {
@@ -75,6 +75,27 @@ public abstract class DataSource<T> {
         close();
         return data;
     }
+    
+    public abstract T get(String name);
+    protected T getHelper(String table, String[] allColumns, String name) {
+        open();
+        
+        Cursor cursor = database.query(table, allColumns, 
+                DBHelper.NAME + "=?", new String[] {name}, 
+                null, null, null, null);
+        T data = null;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                data = cursorToData(cursor);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        
+        close();
+        return data;
+    }    
 	
 	public abstract List<T> getAll();
     protected List<T> getAllHelper(String table, String[] allColumns) {

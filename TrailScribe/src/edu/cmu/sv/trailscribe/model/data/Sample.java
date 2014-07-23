@@ -1,71 +1,68 @@
-package edu.cmu.sv.trailscribe.model;
-
-
-
+package edu.cmu.sv.trailscribe.model.data;
 
 public class Sample {
-	private long id;
-	private long userId;
-	private long mapId;
-	private long expeditionId;
+	private long mId;
+	private long mUserId;
+	private long mMapId;
+	private long mExpeditionId;
 	private double x;
 	private double y;
 	private double z;
-	private String name;
-	private String description;
-	private String time;
-	private String customField;
-	private String lastModified;
+	private String mName;
+	private String mDescription;
+	private String mTime;
+	private String mCustomField;
+	private String mLastModified;
 
 	public Sample(
 			long id, String name, String description, String time, 
 			double x, double y, double z,
 			String customField, String lastModified, 
 			long userId, long mapId, long expeditionId) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.time = time;
+		this.mId = id;
+		this.mName = name;
+		this.mDescription = description;
+		this.mTime = time;
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.customField = customField;
-		this.lastModified = lastModified;
-		this.userId = userId;
-		this.mapId = mapId;
-		this.expeditionId = expeditionId;
+		this.mCustomField = customField;
+		this.mLastModified = lastModified;
+		this.mUserId = userId;
+		this.mMapId = mapId;
+		this.mExpeditionId = expeditionId;
 	}
 	
 	public long getId() {
-		return this.id;
+		return this.mId;
 	}
 	
 	public void setId(long id) {
-		this.id = id;
+		this.mId = id;
 	}
 	
 	public String getName() {
-		return this.name;
+		return this.mName;
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		this.mName = name;
 	}
 	
 	public String getDescription() {
-		return this.description;
+		return this.mDescription;
 	}
 	
 	public void setDescription(String description) {
-		this.description = description;
+		this.mDescription = description;
 	}
 	
 	public String getTime() {
-		return this.time;
+		return this.mTime;
 	}
 	
 	public void setTime(String time) {
-		this.time = time;
+		this.mTime = time;
 	}
 	
 	public double getX() {
@@ -93,43 +90,43 @@ public class Sample {
 	}
 	
 	public String getCustomField() {
-		return this.customField;
+		return this.mCustomField;
 	}
 	
 	public void setCustomField(String customField) {
-		this.customField = customField;
+		this.mCustomField = customField;
 	}
 	
 	public String getLastModified() {
-		return this.lastModified;
+		return this.mLastModified;
 	}
 	
 	public void setLastModified(String lastModified) {
-		this.lastModified = lastModified;
+		this.mLastModified = lastModified;
 	}
 	
 	public long getUserId() {
-		return this.userId;
+		return this.mUserId;
 	}
 	
 	public void setUserId(long userId) {
-		this.userId = userId;
+		this.mUserId = userId;
 	}
 	
 	public long getMapId() {
-		return this.mapId;
+		return this.mMapId;
 	}
 	
 	public void setMapId(long mapId) {
-		this.mapId = mapId;
+		this.mMapId = mapId;
 	}
 	
 	public long getExpeditionId() {
-		return this.expeditionId;
+		return this.mExpeditionId;
 	}
 	
 	public void setExpeditionId(long expeditionId) {
-		this.expeditionId = expeditionId;
+		this.mExpeditionId = expeditionId;
 	}
 
     /**

@@ -1,6 +1,6 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.model.data;
 
-public class Map extends SyncItem{
+public class Map extends SyncItem {
 	private String mDescription;
 	private String mProjection;
 	private int mMinZoomLevel;
@@ -103,19 +103,6 @@ public class Map extends SyncItem{
 		this.mLastModified = mLastModified;
 	}
 	
-	@Override
-	public String toString(){
-		return new String("'projection':'" + this.getProjection() + "'," + 
-						  "'name':'" + this.getName() + "'," + 
-						  "'minZoomLevel':'" + this.getMinZoomLevel() + "'," +  
-						  "'maxZoomLevel':'" + this.getMaxZoomLevel() + "'," +  
-						  "'minX':'" + this.getMinX() + "'," +  
-						  "'maxX':'" + this.getMaxX() + "'," +  
-						  "'minY':'" + this.getMinY() + "'," +  
-						  "'maxY':'" + this.getMaxY() + "'"
-						  );
-	}
-	
 	public String getDescription() {
 		return mDescription;
 	}
@@ -139,4 +126,24 @@ public class Map extends SyncItem{
 	public String getName(){
 		return super.getName();
 	}
+	
+    @Override
+    public String toString(){
+        return this.getName();
+    }
+    
+    @Override
+    public String toJson() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("'projection':'").append(this.getProjection()).append("', ");
+        buffer.append("'name':'").append(this.getName()).append("', ");
+        buffer.append("'minZoomLevel':'").append(this.getMinZoomLevel()).append("', ");
+        buffer.append("'maxZoomLevel':'").append(this.getMaxZoomLevel()).append("', ");
+        buffer.append("'minX':'").append(this.getMinX()).append("', ");
+        buffer.append("'maxX':'").append(this.getMaxX()).append("', ");
+        buffer.append("'minY':'").append(this.getMinY()).append("', ");
+        buffer.append("'maxY':'").append(this.getMaxY()).append("'");
+    
+        return buffer.toString();
+    }
 }

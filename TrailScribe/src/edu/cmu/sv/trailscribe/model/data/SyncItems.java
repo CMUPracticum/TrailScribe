@@ -1,10 +1,8 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.model.data;
 
 import java.util.ArrayList;
 
 public class SyncItems {
-//  TODO: Implement toString() to print the class in Json format
-    
 //	private Hashtable<Long, Map> maps;
 //	private Hashtable<Long, Kml> kmls;
 	

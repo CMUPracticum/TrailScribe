@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.Kml;
-import edu.cmu.sv.trailscribe.model.Map;
-import edu.cmu.sv.trailscribe.model.SyncItem;
+import edu.cmu.sv.trailscribe.model.data.Kml;
+import edu.cmu.sv.trailscribe.model.data.Map;
+import edu.cmu.sv.trailscribe.model.data.SyncItem;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;

@@ -1,42 +1,42 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.model.data;
 
-public class Location {
-	private long id;
-	private String time;	
+public class Location implements DataModel {
+	private long mId;
+	private String mTime;	
 	private double x;
 	private double y;
 	private double z;
-	private long userId;
-	private long mapId;
-	private long expeditionId;
+	private long mUserId;
+	private long mMapId;
+	private long mExpeditionId;
 	
 	public Location(
 			long id, String time, double x, double y, double z,
 			long userId, long mapId, long expeditionId) {
-		this.id = id;
-		this.time = time;
+		this.mId = id;
+		this.mTime = time;
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.userId = userId;
-		this.mapId = mapId;
-		this.expeditionId = expeditionId;
+		this.mUserId = userId;
+		this.mMapId = mapId;
+		this.mExpeditionId = expeditionId;
 	}
 	
 	public long getId() {
-		return this.id;
+		return this.mId;
 	}
 	
 	public void setId(long id) {
-		this.id = id;
+		this.mId = id;
 	}
 	
 	public String getTime() {
-		return this.time;
+		return this.mTime;
 	}
 	
 	public void setTime(String time) {
-		this.time = time;
+		this.mTime = time;
 	}
 	
 	public double getX() {
@@ -64,34 +64,39 @@ public class Location {
 	}
 	
 	public long getUserId() {
-		return this.userId;
+		return this.mUserId;
 	}
 	
 	public void setUserId(long userId) {
-		this.userId = userId;
+		this.mUserId = userId;
 	}
 	
 	public long getMapId() {
-		return this.mapId;
+		return this.mMapId;
 	}
 	
 	public void setMapId(long mapId) {
-		this.mapId = mapId;
+		this.mMapId = mapId;
 	}
 	
 	public long getExpeditionId() {
-		return this.expeditionId;
+		return this.mExpeditionId;
 	}
 	
 	public void setExpeditionId(long expeditionId) {
-		this.expeditionId = expeditionId;
+		this.mExpeditionId = expeditionId;
 	}
 	
-    /**
-     * @return the object is Json format. For example, "'id':'0', 'userId':'0'"
-     */
     @Override
     public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(this.getX()).append(",").append(this.getY());
+    
+        return buffer.toString();
+    }
+
+    @Override
+    public String toJson() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("'id':'").append(this.getId()).append("', ");
         buffer.append("'time':'").append(this.getTime()).append("', ");

@@ -5,7 +5,7 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.model.data.Sample;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class SampleDataSource extends DataSource<Sample> {
@@ -102,6 +102,11 @@ public class SampleDataSource extends DataSource<Sample> {
     @Override
     public Sample get(long id) {
         return getHelper(DBHelper.TABLE_SAMPLE, allColumns, id);
+    }
+    
+    @Override
+    public Sample get(String name) {
+        return getHelper(DBHelper.TABLE_SAMPLE, allColumns, name);
     }
     
 	@Override

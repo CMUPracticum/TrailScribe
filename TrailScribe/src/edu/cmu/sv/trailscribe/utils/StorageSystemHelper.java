@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import android.content.Context;
@@ -117,11 +118,11 @@ public class StorageSystemHelper {
     /**
      * @return path of every base map under /sdcard/trailscribe/maps/
      */
-    public static ArrayList<String> getBaseMapsFromStorage() {
+    public static HashSet<String> getBaseMapsFromStorage() {
         final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "maps/";
         List<String> fileNames = StorageSystemHelper.getFolders(overlayDirectory);
         
-        ArrayList<String> baseMaps = new ArrayList<String>();
+        HashSet<String> baseMaps = new HashSet<String>();
         for (String fileName : fileNames) {
             baseMaps.add(fileName);
         }

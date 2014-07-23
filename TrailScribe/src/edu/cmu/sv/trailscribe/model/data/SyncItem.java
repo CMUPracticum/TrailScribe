@@ -1,6 +1,6 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.model.data;
 
-public abstract class SyncItem {
+public abstract class SyncItem implements DataModel {
 	private long mId;
 	private String mName;
 	private String mFileName;
@@ -24,9 +24,14 @@ public abstract class SyncItem {
 	public void setFilename(String fileName){
 		this.mFileName = fileName;
 	}
-	
+
     @Override
     public String toString() {
+        return this.getName();
+    }
+	
+    @Override
+    public String toJson() {
         StringBuffer buffer = new StringBuffer();
         
         buffer.append("'id':'").append(this.getId()).append("', ");
@@ -35,5 +40,4 @@ public abstract class SyncItem {
         
         return buffer.toString();
     }
-
 }
