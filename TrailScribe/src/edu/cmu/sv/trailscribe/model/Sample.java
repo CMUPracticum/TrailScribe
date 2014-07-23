@@ -1,5 +1,8 @@
 package edu.cmu.sv.trailscribe.model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 
 public class Sample {
@@ -129,5 +132,26 @@ public class Sample {
 	
 	public void setExpeditionId(long expeditionId) {
 		this.expeditionId = expeditionId;
+	}
+	
+	@Override
+	public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{");
+        buffer.append("'id':'").append(this.getId()).append("', ");
+        buffer.append("'userId':'").append(this.getUserId()).append("', ");
+        buffer.append("'mapId':'").append(this.getMapId()).append("', ");
+        buffer.append("'expeditionId':'").append(this.getExpeditionId()).append("', ");
+        buffer.append("'x':'").append(this.getX()).append("', ");
+        buffer.append("'y':'").append(this.getY()).append("', ");
+        buffer.append("'z':'").append(this.getZ()).append("', ");
+        buffer.append("'name':'").append(this.getName()).append("', ");
+        buffer.append("'description':'").append(this.getDescription()).append("', ");
+        buffer.append("'time':'").append(this.getTime()).append("', ");
+        buffer.append("'customField':'").append(this.getCustomField()).append("', ");
+        buffer.append("'lastModified':'").append(this.getLastModified()).append("'");
+        buffer.append("}");
+        
+        return buffer.toString();
 	}
 }

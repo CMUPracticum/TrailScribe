@@ -114,6 +114,36 @@ public class StorageSystemHelper {
         return true;
     }
     
+    /**
+     * @return path of every base map under /sdcard/trailscribe/maps/
+     */
+    public static ArrayList<String> getBaseMapsFromStorage() {
+        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "maps/";
+        List<String> fileNames = StorageSystemHelper.getFolders(overlayDirectory);
+        
+        ArrayList<String> baseMaps = new ArrayList<String>();
+        for (String fileName : fileNames) {
+            baseMaps.add(fileName);
+        }
+        
+        return baseMaps;
+    }
+    
+    /**
+     * @return path of every overlay under /sdcard/trailscribe/kmls/
+     */
+    public static ArrayList<String> getOverlaysFromStorage() {
+        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "kmls/";
+        List<String> fileNames = StorageSystemHelper.getFiles(overlayDirectory);
+        
+        ArrayList<String> overlays = new ArrayList<String>();
+        for (String fileName : fileNames) {
+            overlays.add(fileName);
+        }
+        
+        return overlays;
+    }
+    
     private static void copyFile(
             AssetManager assetManager, String sourceDirectory, String targetDirectory) {
         InputStream in = null;
