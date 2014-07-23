@@ -187,8 +187,8 @@ public class MapsActivity extends BaseActivity
         mBaseMaps.toArray(basemaps);
 
 //      Create spinner adapter, then add the adapter and the listener to the action bar
-        mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);
-        mActionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
+        mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);        
+        mActionBar.setListNavigationCallbacks(mSpinnerAdapter, this);        
 	}
 	
 	private void updateCoordinateTextView() {
@@ -197,7 +197,9 @@ public class MapsActivity extends BaseActivity
 	        return;
 	    }
 	    
-	    mCoordinateTextView.setText(mLocation.getLatitude() + "," + mLocation.getLongitude());
+	    mCoordinateTextView.setText("Speed: " + mLocation.getSpeed() + " m/s, Lat: " + 
+	    							mLocation.getLatitude() + ", Lng: " + 
+	    							mLocation.getLongitude());	    
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
