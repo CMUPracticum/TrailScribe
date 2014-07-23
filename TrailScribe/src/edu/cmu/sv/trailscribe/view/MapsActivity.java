@@ -41,6 +41,8 @@ import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.Sample;
 import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
+import edu.cmu.sv.trailscribe.dao.MapDataSource;
+import edu.cmu.sv.trailscribe.model.Map;
 
 
 public class MapsActivity extends BaseActivity 
@@ -78,6 +80,7 @@ public class MapsActivity extends BaseActivity
 //	Base Map
 	private ArrayList<String> mBaseMaps;
 	private SpinnerAdapter mSpinnerAdapter;
+	private int mSelectedMapPosition = -1; // position of the map that was selected in the spinner
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -218,6 +221,44 @@ public class MapsActivity extends BaseActivity
 	}
 	
 	@JavascriptInterface
+	public String getCurrentMap() {		
+		
+		MapDataSource dataSource = new MapDataSource(mDBHelper);		
+		List<Map> maps = dataSource.getAll();
+		
+		// First request for base map
+		if (mSelectedMapPosition == -1) {
+			mSelectedMapPosition = 1; // By default, show the first map as base map
+			// TODO: What happens when there are no maps
+		}
+		
+		// Find selected map from database based on selected map name
+		// TODO: Select the map from dataSource, do not fetch all
+		// Warning: Case not handled: If a map is in the file system but not in the database
+		String selectedMapName = mBaseMaps.get(mSelectedMapPosition);
+		Map currentMap = null;
+		for (int i = 0; i < maps.size(); i++) {			
+			if (maps.get(i).getName().equals(selectedMapName)) {
+				currentMap = maps.get(i);
+				break;
+			}
+		}
+
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("{'map': {");		
+		buffer.append(currentMap.toString());
+		buffer.append("}}");
+
+		JSONObject currentMapObj = null;
+		try {
+			currentMapObj = new JSONObject(buffer.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return currentMapObj.toString();		
+	}
+	
+	@JavascriptInterface
 	public String getOrientation() {
 	    //Log.d(MSG_TAG, "getOrientation");
         StringBuffer buffer = new StringBuffer();
@@ -290,7 +331,7 @@ public class MapsActivity extends BaseActivity
 	public String getPositionHistory() {
 		LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 		
-		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();
+		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();		
 		
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("{'points':[");
@@ -482,15 +523,17 @@ public class MapsActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(int position, long itemId) {
         if (position == 0) {
-//          Ignore if title of the spinner is selected
             return true;
         }
         
-//      TODO: call webview
-        Toast.makeText(MapsActivity.this, "Position=" + position, Toast.LENGTH_SHORT).show();
+        mSelectedMapPosition = position;
+        
+        MessageToWebview message = MessageToWebview.ChangeBaseMap;
+        setLayers(message);
+        
         return true;        
     }
-    
+        
     private class KMLSelectorBuilder extends AlertDialog.Builder {
         private HashSet<Integer> mSelectedItems;
         private String[] mOverlayNames;
@@ -554,7 +597,8 @@ public class MapsActivity extends BaseActivity
 		HidePositionHistory("HidePositionHistory"),
 		DisplayKML("DisplayKML"),
 		HideKML("HideKML"),
-		PanToCurrentLocation("PanToCurrentLocation");
+		PanToCurrentLocation("PanToCurrentLocation"), 
+		ChangeBaseMap("ChangeBaseMap");
 		
 		private final String message;
 		MessageToWebview(String message) {

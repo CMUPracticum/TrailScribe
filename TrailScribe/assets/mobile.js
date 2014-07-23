@@ -18,8 +18,8 @@ var mapBounds;
 var extent;
 var mapMinZoom;
 var mapMaxZoom;
-var mapProjection;
-var displayProjection;
+var mapProjection; 
+var displayProjection = new OpenLayers.Projection("EPSG:4326"); // display projection is always WGS84 spherical mercator
 var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
 
@@ -66,15 +66,14 @@ var layerListeners;
  */
 function initMapProperties() {
 
-    // TO DO: Get map properties from Java
+    var initialMapProperties = getCurrentMapFromJava();
 
-    mapName = "basemap";  
-    mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
-    displayProjection = new OpenLayers.Projection("EPSG:4326");
-    mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
+    mapName = initialMapProperties.name;    
+    mapProjection = new OpenLayers.Projection(initialMapProperties.projection); // Default: Web Mercator    
+    mapBounds = new OpenLayers.Bounds(initialMapProperties.minY, initialMapProperties.minX, initialMapProperties.maxY, initialMapProperties.maxX);
     extent = mapBounds.transform(displayProjection, mapProjection);
-    mapMinZoom = 11;
-    mapMaxZoom = 15;
+    mapMinZoom = initialMapProperties.minZoomLevel;
+    mapMaxZoom = initialMapProperties.maxZoomLevel;
 }
 
 /**
@@ -90,23 +89,23 @@ function init() {
     // Initialize map properties
     initMapProperties();
 
-    // Set Map options    
+    // Map options
     var options = {
-            div: "map",
-            theme: null,
-            controls: [
-                new OpenLayers.Control.Attribution(),
-                new OpenLayers.Control.TouchNavigation({
-                    dragPanOptions: {
-                        enableKinetic: true
-                    }
-                }),                
-            ],
-            projection: mapProjection,
-            displayProjection: displayProjection, // Spherical Mercator
-            tileSize: new OpenLayers.Size(256, 256)
-        };
-    
+        div: "map",
+        theme: null,
+        controls: [
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.TouchNavigation({
+                dragPanOptions: {
+                    enableKinetic: true
+                }
+            }),                
+        ],
+        projection: mapProjection,
+        displayProjection: displayProjection, // Spherical Mercator
+        tileSize: new OpenLayers.Size(256, 256)
+    };
+
     // Create map
     map = new OpenLayers.Map(options);
 
@@ -177,22 +176,21 @@ function init() {
 /**
  * Function: redrawMap
  * This function redraws the base map (TMS overlay layer)
- * based on the selection of the user.
+ * given an Object with the new map options.
  *
  * Parameters:
- * -
+ * mapOptions - {Object}
  */
-function redrawMap() {
+function redrawMap(mapOptions) {
 
-    // TO DO: Get map properties from Java
-
-    mapName = "map1";
-    mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
-    displayProjection = new OpenLayers.Projection("EPSG:4326");
-    mapBounds = new OpenLayers.Bounds(-122.134491212, 37.368043856, -121.998776839, 37.4690932857);
+    mapName = mapOptions.name;    
+    mapProjection = new OpenLayers.Projection(mapOptions.projection); // Default: Web Mercator    
+    mapBounds = new OpenLayers.Bounds(mapOptions.minY, mapOptions.minX, mapOptions.maxY, mapOptions.maxX);
     extent = mapBounds.transform(displayProjection, mapProjection);
-    mapMinZoom = 11;
-    mapMaxZoom = 17;
+    mapMinZoom = mapOptions.minZoomLevel;
+    mapMaxZoom = mapOptions.maxZoomLevel;
+
+    map.setOptions({restrictedExtent: extent});    
 
     tmsOverlay.redraw();
 }
@@ -212,7 +210,7 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
         
-    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;    
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
@@ -372,6 +370,9 @@ function setLayers(msg) {
             var points = getPointsFromJava(msg);
             map.panTo(new OpenLayers.LonLat(points[0].x, points[0].y));
             break;
+        case "ChangeBaseMap":
+        	redrawMap(getCurrentMapFromJava());
+        	break;
         default:
             break;
     }
@@ -428,11 +429,29 @@ function displayKML(kml) {
 }
 
 /**
+ * Function getCurrentMapFromJava
+ * Get the current base map name based 
+ * on user selection
+ * 
+ * Parameters:
+ * - 
+ */
+function getCurrentMapFromJava() {
+
+	var currentMap = android.getCurrentMap();
+	currentMap = JSON.parse(currentMap);
+	currentMap = currentMap.map;
+
+	return currentMap;	
+}
+
+/**
  * Function: getKMLsFromJava
  * Given a message, summon the correct Android/Java method 
  * to get a list of KML files. 
  *
  * Parameters:
+ * -
  */
 function getKMLsFromJava() {
     var kmls = android.getKMLs();
@@ -555,11 +574,8 @@ function getLinesFromJava(msg) {
         var pointFeature = new OpenLayers.Feature.Vector(point, null, line_style);
         pointFeatures.push(pointFeature);
         pointList.push(point);
-
-console.log(point.x + "," + point.y);
     }
-    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), 
-    null, line_style);
+    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), null, line_style);
     pointFeatures.push(lineFeature);
 
     return lineFeature;
