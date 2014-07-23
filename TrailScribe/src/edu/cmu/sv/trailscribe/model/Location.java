@@ -86,5 +86,21 @@ public class Location {
 	public void setExpeditionId(long expeditionId) {
 		this.expeditionId = expeditionId;
 	}
-
+	
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{");
+        buffer.append("'id':'").append(this.getId()).append("', ");
+        buffer.append("'time':'").append(this.getTime()).append("', ");
+        buffer.append("'x':'").append(this.getX()).append("', ");
+        buffer.append("'y':'").append(this.getY()).append("', ");
+        buffer.append("'z':'").append(this.getZ()).append("', ");
+        buffer.append("'userId':'").append(this.getUserId()).append("', ");
+        buffer.append("'mapId':'").append(this.getMapId()).append("', ");
+        buffer.append("'expeditionId':'").append(this.getExpeditionId()).append("', ");
+        buffer.append("}");
+    
+    return buffer.toString();
+    }
 }

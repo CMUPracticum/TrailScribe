@@ -5,9 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
@@ -22,7 +19,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,9 +36,14 @@ import edu.cmu.sv.trailscribe.controller.MapsController;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.utils.JsonHelper;
 import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.Map;
+
+// TODO: Remove these and serialize MapDataSource with JsonHelper
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class MapsActivity extends BaseActivity 
@@ -177,7 +178,8 @@ public class MapsActivity extends BaseActivity
 	}
 	
 	private void setSpinner() {
-	    getBaseMapsFromStorage();
+	    mBaseMaps = StorageSystemHelper.getBaseMapsFromStorage();
+	    
 //      Add the title of the spinner to the head of the list, will be ignored if it is selected
         mBaseMaps.add(0, getResources().getString(R.string.map_display_basemap));
         
@@ -260,20 +262,29 @@ public class MapsActivity extends BaseActivity
 	
 	@JavascriptInterface
 	public String getOrientation() {
-	    //Log.d(MSG_TAG, "getOrientation");
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("{'orientation':[");
-        buffer.append("{'azimuth':'").append(mAzimuth).append("'}");
-        buffer.append("]}'");
-        
-        JSONObject orientation = null;
-        try {
-            orientation = new JSONObject(buffer.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
+	    return JsonHelper.getOrientationJson(mAzimuth);
+	}
+	
+	@JavascriptInterface()
+	public String getSample(String id) {
+	    SampleDataSource dataSource = new SampleDataSource(mDBHelper);
+	    
+//	    TODO Implement search in data source
+        ArrayList<Sample> samples = (ArrayList<Sample>) dataSource.getAll();
+        Sample sample = null;
+        for (int i = 0; i < samples.size(); i++) {
+            if (samples.get(i).getId() == Long.parseLong(id)) {
+                sample = samples.get(i);
+                break;
+            }
         }
         
-        return orientation.toString();
+        if (sample == null) return new String();
+        
+        samples = new ArrayList<Sample>();
+        samples.add(sample);
+	    
+        return JsonHelper.getSamplesJson(samples);
 	}
 	
 	@JavascriptInterface
@@ -281,29 +292,7 @@ public class MapsActivity extends BaseActivity
 		SampleDataSource dataSource = new SampleDataSource(mDBHelper);
 		
 		List<Sample> samples = dataSource.getAll();
-		
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("{'points':[");
-		for (int i = 0; i < samples.size(); i++) {
-			Sample sample = samples.get(i);
-			
-			buffer.append("{'x':'").append(sample.getX()).append("', ");
-			buffer.append("'y':'").append(sample.getY()).append("'}");
-			
-			if (i != samples.size() - 1) {
-				buffer.append(", ");
-			}
-		}
-		buffer.append("]}'");
-		
-		JSONObject mapPoints = null;
-		try {
-			mapPoints = new JSONObject(buffer.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return mapPoints.toString();
+		return JsonHelper.getSamplesJson(samples);
 	}
 	
 	@JavascriptInterface
@@ -314,69 +303,20 @@ public class MapsActivity extends BaseActivity
 	        throw new Exception("Current location is not available");
 	    }
 	    
-		JSONObject mapPoints = null;
-		
-		try {
-			double la = mLocation.getLatitude();
-			double lng = mLocation.getLongitude();
-			mapPoints = new JSONObject("{'points':[{'x':'" + lng + "', 'y':'" + la + "'}]}'");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return mapPoints.toString();
-	}	
+	    return JsonHelper.getCurrentLocationJson(mLocation);
+	}
 	
 	@JavascriptInterface
 	public String getPositionHistory() {
 		LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 		
-		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();		
-		
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("{'points':[");
-		for (int i = 0; i < locations.size(); i++) {
-		    edu.cmu.sv.trailscribe.model.Location locationHistory = locations.get(i);
-			
-			buffer.append("{'x':'").append(locationHistory.getX()).append("',");
-			buffer.append("'y':'").append(locationHistory.getY()).append("'}");
-			
-			if (i != locations.size() - 1) {
-				buffer.append(", ");
-			}
-		}
-		buffer.append("]}'");
-		
-		JSONObject mapPoints = null;
-		try {
-			mapPoints = new JSONObject(buffer.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return mapPoints.toString();
+		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();
+		return JsonHelper.getPositionHistoryJson(locations);
 	}
 	
     @JavascriptInterface
     public String getKMLs() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("{'kmls':[");
-        for (int i = 0; i < mSelectedOverlayNames.size(); i++) {
-            buffer.append("{'path':'").append(mSelectedOverlayNames.get(i)).append("'}");
-            
-            if (i != mSelectedOverlayNames.size() - 1) {
-                buffer.append(", ");
-            }
-        }
-        buffer.append("]}'");
-        
-        JSONObject overlays = null;
-        try {
-            overlays = new JSONObject(buffer.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        
-        return overlays.toString();
+        return JsonHelper.getSelectedKmlJson(mSelectedOverlayNames);
     }
 	
 	@Override
@@ -484,33 +424,13 @@ public class MapsActivity extends BaseActivity
         setLayers(message);
     }
     
-    private void getBaseMapsFromStorage() {
-        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "maps/";
-        List<String> fileNames = StorageSystemHelper.getFolders(overlayDirectory);
-        
-        mBaseMaps = new ArrayList<String>();
-        for (String fileName : fileNames) {
-            mBaseMaps.add(fileName);
-        }
-    }
-    
-    private void getOverlaysFromStorage() {
-        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "kmls/";
-        List<String> fileNames = StorageSystemHelper.getFiles(overlayDirectory);
-        
-        mOverlays = new ArrayList<String>();
-        for (String fileName : fileNames) {
-            mOverlays.add(fileName);
-        }
-    }
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         //Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
     }
     
     private void createKMLSelector() {
-        getOverlaysFromStorage();
+        mOverlays = StorageSystemHelper.getOverlaysFromStorage();
         
         String[] overlayNames = new String[mOverlays.size()];
         mOverlays.toArray(overlayNames);

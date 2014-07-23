@@ -58,6 +58,11 @@ var selectControl;
 var layerListeners;
 
 /**
+ * Samples
+ */
+var sampleList = {};
+
+/**
  * Function: initMapProperties
  * Get mapProperties for this map from the Android interface and set them.
  *
@@ -259,31 +264,40 @@ function onPopupClose(evt) {
 function onFeatureSelect(evt) {
     feature = evt.feature;
 
-    var lon = feature.geometry.getBounds().getCenterLonLat().lon;
-    var lat = feature.geometry.getBounds().getCenterLonLat().lat;
+    // Sample id is stored in attributes of the feature
+    var points = android.getSample(feature.attributes);
+    var sample = 0;
+
+    points = JSON.parse(points);
+    for (data in points['points']) {
+        if (points['points'][data].id == feature.attributes) {
+            sample = points['points'][data];
+            break;
+        }
+    }
+
     var html = '';
-
-//  TODO: Samples are currently hardcoded, remove the hard-coded part after the demo
-    if (lon == -13587628.769185 && lat == 4496469.2098323) {
-        html = '<div class="markerContent">Carnegie Mellon University</div><div>37.410418, -122.059746</div><center><img src="./lib/openlayers/img/demo/cmu_bldg23.jpg" alt="cmu_bldg23" width="120" height="80"></center>';
-
-    } else if (lon == -13587311.508636 && lat == 4496342.7978354) {
-        html = '<div class="markerContent">Pool</div><div>37.409516, -122.056896</div><center><img src="./lib/openlayers/img/demo/swimming_pool.jpg" alt="swimming_pool" width="120" height="80"></center>';
-    } else if (lon == -13587014.730874 && lat == 4496600.1081161) {
-        html = '<div class="markerContent">Moffett Field Historical Society Museum</div><div>37.411352, -122.054230</div><center><img src="./lib/openlayers/img/demo/moffett_field_museum.jpg" alt="moffett_field_museum" width="120" height="80"></center>';
-    } else if (lon == -13587010.834692 && lat == 4496785.5267868) {
-        html = '<div class="markerContent">Hangar 1</div><div>37.412675, -122.054195</div><center><img src="./lib/openlayers/img/demo/hangar_one.jpg" alt="hangar_one" width="120" height="80"></center>';
+    if (sample == 0) {
+        // If no sample with id = feature.attributes is found
+        html += '<div class="markerContent">Error: Cannot find sample information from database</div>';        
     } else {
-        html = '<div class="markerContent">default popup</div>';
+        var name = sample.name;
+        var description = sample.description;
+        var x = sample.x;
+        var y = sample.y;
+        html += '<div class="markerContent">' + name + '</div>';
+        html += '<div>' + description + '</div>';
+        html += '<div>' + '(' + y + ',' + x + ')' + '</div>';
+
+        // Image of the samples are stored in:
+        // file:///sdcard/trailscribe/samples/<sample.name>/
+        // In the order of 1.jpg, 2.jpg, 3.jpg, etc.
+        var imagePath = 'file:///sdcard/trailscribe/samples/' + name + '/1.jpg';
+        html += '<center><img src="' + imagePath + '" alt="sample_image" width="120" height="80"></center>'
     }
 
     popup = new OpenLayers.Popup.FramedCloud("pop",
-          feature.geometry.getBounds().getCenterLonLat(),
-          null,
-          html,
-          null,
-          true,
-          onPopupClose);
+          feature.geometry.getBounds().getCenterLonLat(), null, html, null, true, onPopupClose);
 
     feature.popup = popup;
     popup.feature = feature;
@@ -494,6 +508,11 @@ function getPointsFromJava(msg) {
         var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
         point = point.transform(map.displayProjection, map.projection);
         pointList.push(point);
+
+        // Store a sample's id to a map
+        if (msg == "DisplaySamples") {
+            sampleList[point.toShortString()] = points['points'][data].id;
+        }
     }
 
     return pointList;
@@ -534,8 +553,13 @@ function getPointFeatures(msg) {
     var pointFeatures = [];
     for(var i = 0; i < points.length; i++){
         var pointFeature = new OpenLayers.Feature.Vector(points[i], null, marker_style);
+
         if (msg == "DisplayCurrentLocation") {
             pointFeature.style.rotation = azimuth;
+        } else if (msg == "DisplaySamples") {
+            // Put the sample's id to the feature's attribute.
+            // It is used to identify different samples when pop-up is triggered.
+            pointFeature.attributes = sampleList[points[i].toShortString()];
         }
 
         pointFeatures.push(pointFeature);

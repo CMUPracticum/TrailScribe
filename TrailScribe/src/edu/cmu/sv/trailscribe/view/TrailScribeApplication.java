@@ -45,7 +45,11 @@ public class TrailScribeApplication extends Application implements LocationListe
 		mTime = new Time();
 		
 //		Create necessary folders in the external storage system
-		StorageSystemHelper.createFolder();
+		StorageSystemHelper.createDefaultFolders();
+		
+//		TODO: Remove when feature to add/sync samples is implemented
+//		Copy sample images to external storage system
+		StorageSystemHelper.copyAssetToDevice(this, "assets", STORAGE_PATH);
 		
 		setLocationManager();
 	}

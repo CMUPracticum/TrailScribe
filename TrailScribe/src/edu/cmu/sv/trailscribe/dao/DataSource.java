@@ -9,7 +9,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 public abstract class DataSource {
-	private static final String MSG_TAG = "DataSource";
+    protected static final String MSG_TAG = "DataSource";
 	
 	// Database fields
 	protected static SQLiteDatabase database;
@@ -42,7 +42,9 @@ public abstract class DataSource {
 
 	public abstract boolean delete(Object data);
 	protected void deleteHelper(String table, long id) {
+	    open();
 	    database.delete(table, DBHelper.KEY_ID + " = " + id, null);
+	    close();
 	}
 
 	@SuppressWarnings("rawtypes")
