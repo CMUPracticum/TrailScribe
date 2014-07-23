@@ -2,6 +2,7 @@ package edu.cmu.sv.trailscribe.model;
 
 
 
+
 public class Sample {
 	private long id;
 	private long userId;
@@ -129,5 +130,27 @@ public class Sample {
 	
 	public void setExpeditionId(long expeditionId) {
 		this.expeditionId = expeditionId;
+	}
+
+    /**
+     * @return the object is Json format. For example, "'id':'0', 'userId':'0'"
+     */
+	@Override
+	public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("'id':'").append(this.getId()).append("', ");
+        buffer.append("'userId':'").append(this.getUserId()).append("', ");
+        buffer.append("'mapId':'").append(this.getMapId()).append("', ");
+        buffer.append("'expeditionId':'").append(this.getExpeditionId()).append("', ");
+        buffer.append("'x':'").append(this.getX()).append("', ");
+        buffer.append("'y':'").append(this.getY()).append("', ");
+        buffer.append("'z':'").append(this.getZ()).append("', ");
+        buffer.append("'name':'").append(this.getName()).append("', ");
+        buffer.append("'description':'").append(this.getDescription()).append("', ");
+        buffer.append("'time':'").append(this.getTime()).append("', ");
+        buffer.append("'customField':'").append(this.getCustomField()).append("', ");
+        buffer.append("'lastModified':'").append(this.getLastModified()).append("'");
+        
+        return buffer.toString();
 	}
 }

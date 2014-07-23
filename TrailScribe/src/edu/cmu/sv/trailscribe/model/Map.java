@@ -27,7 +27,7 @@ public class Map extends SyncItem{
 		mMinX = minX;
 		mMinY = minY;
 		mMaxX = maxX;
-		mMinY = minY;
+		mMaxY = maxY;
 		mLastModified = lastModified;
 	}
 
@@ -105,7 +105,15 @@ public class Map extends SyncItem{
 	
 	@Override
 	public String toString(){
-		return this.getName();
+		return new String("'projection':'" + this.getProjection() + "'," + 
+						  "'name':'" + this.getName() + "'," + 
+						  "'minZoomLevel':'" + this.getMinZoomLevel() + "'," +  
+						  "'maxZoomLevel':'" + this.getMaxZoomLevel() + "'," +  
+						  "'minX':'" + this.getMinX() + "'," +  
+						  "'maxX':'" + this.getMaxX() + "'," +  
+						  "'minY':'" + this.getMinY() + "'," +  
+						  "'maxY':'" + this.getMaxY() + "'"
+						  );
 	}
 	
 	public String getDescription() {

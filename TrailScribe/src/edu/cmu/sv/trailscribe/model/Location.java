@@ -86,5 +86,22 @@ public class Location {
 	public void setExpeditionId(long expeditionId) {
 		this.expeditionId = expeditionId;
 	}
-
+	
+    /**
+     * @return the object is Json format. For example, "'id':'0', 'userId':'0'"
+     */
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("'id':'").append(this.getId()).append("', ");
+        buffer.append("'time':'").append(this.getTime()).append("', ");
+        buffer.append("'x':'").append(this.getX()).append("', ");
+        buffer.append("'y':'").append(this.getY()).append("', ");
+        buffer.append("'z':'").append(this.getZ()).append("', ");
+        buffer.append("'userId':'").append(this.getUserId()).append("', ");
+        buffer.append("'mapId':'").append(this.getMapId()).append("', ");
+        buffer.append("'expeditionId':'").append(this.getExpeditionId()).append("', ");
+    
+        return buffer.toString();
+    }
 }
