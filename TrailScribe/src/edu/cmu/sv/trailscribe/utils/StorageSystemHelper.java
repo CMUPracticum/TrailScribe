@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import android.content.Context;
@@ -15,8 +16,10 @@ import android.util.Log;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class StorageSystemHelper {
-    private static final String MSG_TAG = "StorageSystemHelper";
+//  SD card folders the application needs, will be created in createFolder()
     public static final String[] folders = {"maps", "tiles", "kmls", "samples"};
+    
+    private static final String MSG_TAG = "StorageSystemHelper";
     
     public static void createDefaultFolders() {
         for (String folder : folders) {
@@ -76,7 +79,7 @@ public class StorageSystemHelper {
     }
     
     /**
-     * Copy assets files to device storage recursively.
+     * Copy assets files to device storage, recursively.
      * 
      * @param context
      * @param sourceDirectory directory of the assets to be copied.
@@ -117,11 +120,11 @@ public class StorageSystemHelper {
     /**
      * @return path of every base map under /sdcard/trailscribe/maps/
      */
-    public static ArrayList<String> getBaseMapsFromStorage() {
+    public static HashSet<String> getBaseMapsFromStorage() {
         final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "maps/";
         List<String> fileNames = StorageSystemHelper.getFolders(overlayDirectory);
         
-        ArrayList<String> baseMaps = new ArrayList<String>();
+        HashSet<String> baseMaps = new HashSet<String>();
         for (String fileName : fileNames) {
             baseMaps.add(fileName);
         }

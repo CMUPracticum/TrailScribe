@@ -5,7 +5,7 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import edu.cmu.sv.trailscribe.model.Location;
+import edu.cmu.sv.trailscribe.model.data.Location;
 
 public class LocationDataSource extends DataSource<Location> {
 	private String[] allColumns = {
@@ -18,7 +18,7 @@ public class LocationDataSource extends DataSource<Location> {
 	}
 	
 	public LocationDataSource(DBHelper dbHelper) {
-		super (dbHelper);
+		super(dbHelper);
 	}
 	
 	@Override
@@ -51,6 +51,12 @@ public class LocationDataSource extends DataSource<Location> {
     public Location get(long id) {
         return getHelper(DBHelper.TABLE_LOCATION, allColumns, id);
     }
+    
+    @Override
+    public Location get(String name) {
+//      Location does not have a name, so this query will always return null
+        return getHelper(DBHelper.TABLE_LOCATION, allColumns, name);
+    }    
     
 	@Override
 	public List<Location> getAll() {

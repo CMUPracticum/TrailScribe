@@ -5,12 +5,13 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import edu.cmu.sv.trailscribe.model.Kml;
+import edu.cmu.sv.trailscribe.model.data.Kml;
 
 public class KmlDataSource extends DataSource<Kml> {
 	private String[] allColumns = {
 			DBHelper.KEY_ID, DBHelper.NAME,  
-			DBHelper.FILENAME, DBHelper.LAST_MODIFIED };
+			DBHelper.FILENAME, DBHelper.LAST_MODIFIED
+	};
 	
 	public KmlDataSource(Context context) {
 		super(context);
@@ -46,6 +47,11 @@ public class KmlDataSource extends DataSource<Kml> {
     @Override
     public Kml get(long id) {
         return getHelper(DBHelper.TABLE_KML, allColumns, id);
+    }
+    
+    @Override
+    public Kml get(String name) {
+        return getHelper(DBHelper.TABLE_KML, allColumns, name);
     }    
     
 	@Override

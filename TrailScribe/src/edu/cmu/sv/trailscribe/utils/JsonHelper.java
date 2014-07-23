@@ -6,7 +6,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.location.Location;
-import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.model.data.Map;
+import edu.cmu.sv.trailscribe.model.data.Sample;
 
 public class JsonHelper {
 
@@ -30,6 +31,28 @@ public class JsonHelper {
         }
         
         return orientation.toString();
+    }
+    
+    /**
+     * Given the currently selected map, return it in Json format
+     * 
+     * @param map
+     * @return map in Json format 
+     */
+    public static String getCurrentMapJson(Map map) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("{'map':{");      
+        buffer.append(map.toJson());
+        buffer.append("}}");
+        
+        JSONObject mapInJson = null;
+        try {
+            mapInJson = new JSONObject(buffer.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        return mapInJson.toString();
     }
     
     /**
@@ -81,11 +104,12 @@ public class JsonHelper {
     /**
      * @return the every past location in database in Json format
      */
-    public static String getPositionHistoryJson(List<edu.cmu.sv.trailscribe.model.Location> locations) {
+    public static String getPositionHistoryJson(
+            List<edu.cmu.sv.trailscribe.model.data.Location> locations) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{'points':[");
         for (int i = 0; i < locations.size(); i++) {
-            edu.cmu.sv.trailscribe.model.Location location = locations.get(i);
+            edu.cmu.sv.trailscribe.model.data.Location location = locations.get(i);
             
             buffer.append("{");
             buffer.append(location.toString());

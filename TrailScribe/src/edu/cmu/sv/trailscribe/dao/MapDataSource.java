@@ -5,14 +5,15 @@ import java.util.List;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.data.Map;
 
 public class MapDataSource extends DataSource<Map> {
 	private String[] allColumns = {
 			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.PROJECTION, 
 			DBHelper.MIN_ZOOM_LEVEL, DBHelper.MAX_ZOOM_LEVEL, 
 			DBHelper.MIN_X, DBHelper.MIN_Y, DBHelper.MAX_X, DBHelper.MAX_Y, 
-			DBHelper.FILENAME, DBHelper.LAST_MODIFIED };
+			DBHelper.FILENAME, DBHelper.LAST_MODIFIED
+	};
 	
 	public MapDataSource(Context context) {
 		super(context);
@@ -56,6 +57,11 @@ public class MapDataSource extends DataSource<Map> {
     @Override
     public Map get(long id) {
         return getHelper(DBHelper.TABLE_MAP, allColumns, id);
+    }
+    
+    @Override
+    public Map get(String name) {
+        return getHelper(DBHelper.TABLE_MAP, allColumns, name);
     }    
 
 	@Override

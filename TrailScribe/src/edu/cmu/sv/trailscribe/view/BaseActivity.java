@@ -13,8 +13,9 @@ import android.support.v4.widget.DrawerLayout;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.dao.DBHelper;
 
+//  Location-related actions such as saving to database is handled by TrailScribeApplication.
+//  Activities implement LocationListener just to make sure activities are aware of location changes.  
 public class BaseActivity extends Activity implements LocationListener {
-	
 	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Default", "default", R.color.blue);
 	public static String MSG_TAG = "BaseActivity";
 	
@@ -59,8 +60,10 @@ public class BaseActivity extends Activity implements LocationListener {
 	
 	private void setLocation() {
         mLocationManager = mApplication.getLocationManager();
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, (android.location.LocationListener) this);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
+        mLocationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, 0, 0, (android.location.LocationListener) this);
+        mLocationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
         
         mLocation = mApplication.getLocation();
 	}
@@ -69,7 +72,6 @@ public class BaseActivity extends Activity implements LocationListener {
 	    mActionBar = getActionBar();
         mActionBar.setTitle("");
         mActionBar.setIcon(R.drawable.icon_trailscribe);
-        
         mActionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor(color)));
 	}
 

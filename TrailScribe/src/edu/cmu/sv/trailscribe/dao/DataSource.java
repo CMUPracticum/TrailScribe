@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 public abstract class DataSource<T> {
     protected static final String MSG_TAG = "DataSource";
 	
-	// Database fields
+//  Database fields
 	protected static SQLiteDatabase database;
 	protected static DBHelper dbHelper;
 	
@@ -42,6 +42,7 @@ public abstract class DataSource<T> {
 	}
 
 	public abstract boolean delete(T data);
+	
 	protected void deleteHelper(String table, long id) {
 	    open();
 	    database.delete(table, DBHelper.KEY_ID + " = " + id, null);
@@ -55,12 +56,18 @@ public abstract class DataSource<T> {
         close();
     }
 
+    /**
+     * Get row from table by id
+     * 
+     * @param table
+     * @param id
+     */
 	public abstract T get(long id);
     protected T getHelper(String table, String[] allColumns, long id) {
         open();
         
         Cursor cursor = database.query(table, allColumns, 
-                DBHelper.KEY_ID + "=?", new String[] { Long.toString(id) }, 
+                DBHelper.KEY_ID + "=?", new String[] {Long.toString(id)}, 
                 null, null, null, null);
         T data = null;
         if (cursor != null) {
@@ -75,6 +82,33 @@ public abstract class DataSource<T> {
         close();
         return data;
     }
+    
+    /**
+     * Get row from table by name. Note that some tables do not have a 'name' column
+     * 
+     * @param table
+     * @param id
+     */
+    public abstract T get(String name);
+    protected T getHelper(String table, String[] allColumns, String name) {
+        open();
+        
+        Cursor cursor = database.query(table, allColumns, 
+                DBHelper.NAME + "=?", new String[] {name}, 
+                null, null, null, null);
+        T data = null;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                data = cursorToData(cursor);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        
+        close();
+        return data;
+    }    
 	
 	public abstract List<T> getAll();
     protected List<T> getAllHelper(String table, String[] allColumns) {
