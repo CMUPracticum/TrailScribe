@@ -70,7 +70,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 
 		// Handle any error related to synchronization results
 		if(result == null){
-			showMessage("There was an error during the synchronization process with TrailScribe backend. Please try again");
+			showMessage(getResources().getString(R.string.connection_error));		
 		}
 		// Response from backend. Items to sync.
 		if (result instanceof ArrayList<?>){
@@ -79,7 +79,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 					android.R.layout.simple_list_item_1, android.R.id.text1, mSyncItems);
 			mListView.setAdapter(mAdapter); 
 			if(mSyncItems.size() == 0){
-				showMessage("TrailScribe is up to date");
+				showMessage(getResources().getString(R.string.up_to_date));
 			}
 		}
 
@@ -95,7 +95,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			}
 			else{
 				mController.cancel(true);
-				showMessage("There was an error during the synchronization process with TrailScribe backend. Please try again");
+				showMessage(getResources().getString(R.string.connection_error));
 			}
 		}
 		//Response from Decompressor
@@ -104,7 +104,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			if(successCode == Decompressor.DECOMPRESSION_SUCCESS){
 				mAdapter.clear();
 				mAdapter.notifyDataSetChanged();
-				showMessage("TrailScribe is up to date");
+				showMessage(getResources().getString(R.string.up_to_date));
 			}
 		}
 	}
