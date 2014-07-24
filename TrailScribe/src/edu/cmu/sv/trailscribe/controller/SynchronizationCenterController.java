@@ -17,7 +17,6 @@ import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.data.Kml;
 import edu.cmu.sv.trailscribe.model.data.Map;
 import edu.cmu.sv.trailscribe.model.data.SyncItem;
-import edu.cmu.sv.trailscribe.model.data.SyncItems;
 import edu.cmu.sv.trailscribe.utils.BackendFacade;
 import edu.cmu.sv.trailscribe.utils.SyncItemSerializer;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
