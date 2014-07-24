@@ -27,6 +27,11 @@ public class StorageSystemHelper {
         }
     }
     
+    public static boolean verifyDirectory(String directory){
+    	File file = new File(directory); 
+		return file.isDirectory();
+    }
+    
     /**
      * @param directory For example, "/sdcard/trailscribe/maps/"
      * @return list of every file under that directory, recursively
@@ -147,6 +152,47 @@ public class StorageSystemHelper {
         return overlays;
     }
     
+    public static void createFolder(String path) {
+        File directory = new File(path);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+    }
+
+	public static void removeFile(String filePath) {
+		File zipFile = new File(filePath);
+		if(zipFile !=null){
+			zipFile.delete();
+		}
+	}
+	
+	public static void removeDirectoryContent(String directory){
+		File dir = new File(directory);
+		if(dir.isDirectory()){
+			for (File file: dir.listFiles()){
+				deleteRecursive(file);
+			}
+		}
+	}
+	
+	private static void deleteRecursive(File dir)
+	{
+	    if (dir.isDirectory())
+	    {
+	    	for (File currentFile : dir.listFiles()){
+	            if (currentFile.isDirectory())
+	            {
+	            	deleteRecursive(currentFile);
+	            }
+	            else
+	            {
+	            	currentFile.delete();
+	            }
+	        }
+	    }
+	    dir.delete();
+	}
+    
     private static void copyFile(
             AssetManager assetManager, String sourceDirectory, String targetDirectory) {
         InputStream in = null;
@@ -172,11 +218,4 @@ public class StorageSystemHelper {
             Log.e(MSG_TAG, e.getMessage());
         }   
     }
-    
-    private static void createFolder(String path) {
-        File directory = new File(path);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-    }    
 }

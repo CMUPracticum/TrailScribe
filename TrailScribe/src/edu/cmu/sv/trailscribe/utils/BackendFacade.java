@@ -10,7 +10,6 @@ import java.net.URL;
 
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class BackendFacade extends AsyncTask <String, Void, String>{
 	private String urlParameters;	

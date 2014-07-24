@@ -2,7 +2,6 @@ package edu.cmu.sv.trailscribe.utils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -41,10 +40,9 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 	}
 
 	private void verifyDirectory(String directory) {
-		File file = new File(mDecompressingDirectory + directory); 
-		if(!file.isDirectory()) { 
-			file.mkdirs(); 
-		} 
+		if (!StorageSystemHelper.verifyDirectory(mDecompressingDirectory + directory)){
+			StorageSystemHelper.createFolder(mDecompressingDirectory + directory);
+		}
 	}
 
 	private void removeZipFile() {
@@ -55,10 +53,7 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 		}
 
 		if(extension.equals("zip")){
-			File zipFile = new File(this.mCompressedFileFullPath);
-			if(zipFile !=null){
-				zipFile.delete();
-			}
+			StorageSystemHelper.removeFile(this.mCompressedFileFullPath);
 		}
 	}
 

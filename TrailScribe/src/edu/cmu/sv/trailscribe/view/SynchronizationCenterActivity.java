@@ -70,9 +70,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 
 		// Handle any error related to synchronization results
 		if(result == null){
-			Toast.makeText(this,
-					"There was an error during the synchronization process with TrailScribe backend. Please try again",
-					Toast.LENGTH_LONG).show();
+			showMessage("There was an error during the synchronization process with TrailScribe backend. Please try again");
 		}
 		// Response from backend. Items to sync.
 		if (result instanceof ArrayList<?>){
@@ -80,6 +78,9 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			mAdapter = new ArrayAdapter<SyncItem>(SynchronizationCenterActivity.this,
 					android.R.layout.simple_list_item_1, android.R.id.text1, mSyncItems);
 			mListView.setAdapter(mAdapter); 
+			if(mSyncItems.size() == 0){
+				showMessage("TrailScribe is up to date");
+			}
 		}
 
 		// Response from downloader. 
@@ -94,26 +95,30 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			}
 			else{
 				mController.cancel(true);
-				runOnUiThread(new Runnable() 
-				{
-					public void run() 
-					{
-						Toast.makeText(SynchronizationCenterActivity.this,
-								"There was an error during the synchronization process with TrailScribe backend. Please try again",
-								Toast.LENGTH_LONG).show();    
-					}
-				}); 
+				showMessage("There was an error during the synchronization process with TrailScribe backend. Please try again");
 			}
 		}
+		//Response from Decompressor
 		else if(result instanceof Integer){
 			int successCode = (Integer) result;
 			if(successCode == Decompressor.DECOMPRESSION_SUCCESS){
 				mAdapter.clear();
 				mAdapter.notifyDataSetChanged();
+				showMessage("TrailScribe is up to date");
 			}
 		}
 	}
-
+	
+	private void showMessage(final String message){
+		runOnUiThread(new Runnable() 
+		{
+			public void run() 
+			{
+				Toast.makeText(SynchronizationCenterActivity.this, message, Toast.LENGTH_LONG).show();    
+			}
+		}); 
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void onSyncAll(View v){
 		new Downloader(mSyncItems, SynchronizationCenterActivity.this, baseDirectory,
