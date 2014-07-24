@@ -72,6 +72,14 @@ var sampleList = {};
 
 
 /**
+ * Current position of the user
+ */
+var currentPosition = {
+    lon: 0.0,
+    lat: 0.0
+};
+
+/**
  * Function: getServerResolutions
  * Given a max zoom level, return the available
  * resolutions on the server (in this case, in the file system)
@@ -206,7 +214,10 @@ function init() {
 
     // Zoom to extent
     map.zoomToExtent(extent);
-    map.setOptions({restrictedExtent: extent});    
+    map.setOptions({restrictedExtent: extent});
+
+    // Get the user's position
+    updateCurrentPosition();
 }
 
 /**
@@ -310,28 +321,9 @@ function onFeatureSelect(evt) {
         }
     }
 
-    var html = '';
-    if (sample == 0) {
-        // If no sample with id = feature.attributes is found
-        html += '<div class="markerContent">Error: Cannot find sample information from database</div>';        
-    } else {
-        var name = sample.name;
-        var description = sample.description;
-        var x = sample.x;
-        var y = sample.y;
-        html += '<div class="markerContent">' + name + '</div>';
-        html += '<div>' + description + '</div>';
-        html += '<div>' + '(' + y + ',' + x + ')' + '</div>';
+    var html = getPopupHtmlForSample(sample);
 
-        // Image of the samples are stored in:
-        // file:///sdcard/trailscribe/samples/<sample.name>/
-        // In the order of 1.jpg, 2.jpg, 3.jpg, etc.
-        var imagePath = 'file:///sdcard/trailscribe/samples/' + name + '/1.jpg';
-        html += '<center><img src="' + imagePath + '" alt="sample_image" width="120" height="80"></center>'
-    }
-
-    popup = new OpenLayers.Popup.FramedCloud("pop",
-          feature.geometry.getBounds().getCenterLonLat(), null, html, null, true, onPopupClose);
+    popup = new OpenLayers.Popup.FramedCloud("pop", feature.geometry.getBounds().getCenterLonLat(), null, html, null, true, onPopupClose);
 
     feature.popup = popup;
     popup.feature = feature;
@@ -356,6 +348,44 @@ function onFeatureUnselect(evt) {
 }
 
 /**
+ * Function: getPopupHtmlForSample
+ * Given a sample object, return the HTML content
+ * for the popup div
+ * 
+ * Parameters:
+ * sample - {Object}
+ */
+function getPopupHtmlForSample(sample) {
+
+    var html = "";
+
+    // If no sample with id = feature.attributes is found
+    if (sample == 0) {
+        html += '<div class="markerContent">Error: Cannot find sample information from database</div>';
+    }
+    else {
+        var name = sample.name;
+        var description = sample.description;
+        var x = sample.x;
+        var y = sample.y;
+        
+        // Image of the samples are stored in: file:///sdcard/trailscribe/samples/<sample.name>/
+        // In the order of 1.jpg, 2.jpg, 3.jpg, etc. We just preview the first image
+        var imagePath = 'file:///sdcard/trailscribe/samples/' + name + '/1.jpg';
+
+        html += '<div class="markerContent">';
+        html += '<div><b>' + name + '</b></div>'
+        html += '<div>' + description + '</div>';
+        html += '<div>' + '(Lat: ' + y + ', Lng: ' + x + ')' + '</div>';
+        html += '<div>Distance to target: <b>' + getDistance(currentPosition.lon, currentPosition.lat, x, y) + '</b></div>';
+        html += '<img src="' + imagePath + '" alt="sample_image" width="120" height="80">'
+        html += '</div>';
+    }
+
+    return html;
+}
+
+/**
  * Function: getKmlUrl
  * Given a kml file name, find the location on device for the kml file.
  * 
@@ -367,6 +397,48 @@ function onFeatureUnselect(evt) {
  */
 function getKmlUrl(kml) {    
     return "file:///sdcard/trailscribe" + "/kmls/" + kml;
+}
+
+
+/**
+ * Function: updateCurrentPosition
+ * Given a set of points, update the current location
+ * of the user
+ *
+ * Parameters:
+ * points - {JSON.Object}
+ */
+function updateCurrentPosition(points) {
+
+    if (points == null) {
+        points = android.getCurrentLocation();
+    }
+
+    var coordinates = JSON.parse(points);
+    
+    currentPosition.lat = coordinates['points'][0].y;
+    currentPosition.lon = coordinates['points'][0].x;
+}
+
+/**
+ * Function: getDistance
+ * Given two geographic coordinates, return the distance 
+ * between them over the WGS84 ellipsoid.
+ * Return value is in meters if it is less then 1000, 
+ * otherwise in kilometers
+ *
+ * Parameters:
+ * x1, y1 - x and y coordinates of the first point
+ * x2, y2 - x and y coordinates of the second point
+ */
+function getDistance(x1, y1, x2, y2) {
+
+    var p1 = { lon: x1, lat: y1 };
+    var p2 = { lon: x2, lat: y2 };
+
+    var distance = OpenLayers.Util.distVincenty(p1, p2);
+
+    return (distance < 1) ? (distance * 1000).toFixed(2) + " m" : distance.toFixed(2) + " km";
 }
 
 /**
@@ -528,6 +600,7 @@ function getPointsFromJava(msg) {
             break;
         case "DisplayCurrentLocation":
             points = android.getCurrentLocation();
+            updateCurrentPosition(points);
             break;
         case "PanToCurrentLocation":
             points = android.getCurrentLocation();
