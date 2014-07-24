@@ -175,21 +175,26 @@ public class MapsActivity extends BaseActivity
 	    updateCoordinateTextView();
 	}
 	
-	private void setSpinner() {
-	    MapDataSource dataSource = new MapDataSource(mDBHelper);
-	    ArrayList<Map> mapsInDatabase = (ArrayList<Map>) dataSource.getAll();
-	    HashSet<String> mapsInStorage = StorageSystemHelper.getBaseMapsFromStorage();
-	    
-//	    Only populate maps that are in both device database and device storage
-	    mBaseMaps = new ArrayList<String>();
-	    for (int i = 0; i < mapsInDatabase.size(); i++) {
-	        if (mapsInStorage.contains(mapsInDatabase.get(i).getName())) {
-	            mBaseMaps.add(mapsInDatabase.get(i).getName());
-	        }
-	    }
-	    
+	private void setBaseMaps() {
+        MapDataSource dataSource = new MapDataSource(mDBHelper);
+        ArrayList<Map> mapsInDatabase = (ArrayList<Map>) dataSource.getAll();
+        HashSet<String> mapsInStorage = StorageSystemHelper.getBaseMapsFromStorage();
+        
+//      Only populate maps that are in both device database and device storage
+        mBaseMaps = new ArrayList<String>();
+        for (int i = 0; i < mapsInDatabase.size(); i++) {
+            if (mapsInStorage.contains(mapsInDatabase.get(i).getName())) {
+                mBaseMaps.add(mapsInDatabase.get(i).getName());
+            }
+        }
+        
 //      Add the title of the spinner to the head of the list, will be ignored if it is selected
         mBaseMaps.add(0, getResources().getString(R.string.map_display_basemap));
+	    
+	}
+	
+	private void setSpinner() {
+	    setBaseMaps();
         
         String[] basemaps = new String[mBaseMaps.size()];
         mBaseMaps.toArray(basemaps);
@@ -239,11 +244,12 @@ public class MapsActivity extends BaseActivity
 			mSelectedMapPosition = 1; // By default, show the first map as base map
 		}
 		
-//		Show error message if there is no map on the device
-		if (mBaseMaps.size() == 0) {
+		setBaseMaps();
+//		Show error message if there is no map on the device, the only item in mBaseMaps is the title
+		if (mBaseMaps.size() == 1) {
             String errorMessage = "There are no map on the device. Download maps in Sync Center";
             Log.e(MSG_TAG, errorMessage);
-            Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
             throw new Exception(errorMessage);		    
 		}
 		

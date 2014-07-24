@@ -65,7 +65,7 @@ public class JsonHelper {
             Sample sample = samples.get(i);
             
             buffer.append("{");
-            buffer.append(sample.toString());
+            buffer.append(sample.toJson());
             buffer.append("}");
             
             if (i != samples.size() - 1) {
@@ -112,7 +112,7 @@ public class JsonHelper {
             edu.cmu.sv.trailscribe.model.data.Location location = locations.get(i);
             
             buffer.append("{");
-            buffer.append(location.toString());
+            buffer.append(location.toJson());
             buffer.append("}");
             
             if (i != locations.size() - 1) {
