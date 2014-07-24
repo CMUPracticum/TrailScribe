@@ -25,6 +25,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private Context mContext;
 	private ProgressDialog mDownloadProgressDialog;
 	private DownloadReceiver mDownloadReceiver; 
+	private NetworkReceiver mNetworkReceiver;
 	private AsyncTaskCompleteListener<Boolean> mTaskCompletedCallback;
 	private ArrayList<Long> mPendingDownloads = new ArrayList<Long>();
 	private String mDownloadDirectory;
@@ -36,9 +37,11 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		this.mContext = context;
 		this.mTaskCompletedCallback = callback;
 		this.mDownloadReceiver = new DownloadReceiver();
+		this.mNetworkReceiver = new NetworkReceiver();
 		this.mDownloadProgressDialog = downloadProgressDialog;
 		this.mDownloadDirectory = downloadDirectory;
 		this.mContext.registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+		this.mContext.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 	}
 
 	@Override
@@ -219,5 +222,16 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			}
 			cursor.close();
 		}
+	}
+	
+	
+	class NetworkReceiver extends BroadcastReceiver{
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(isInternetConnectionAvailable() == false){
+				mTaskCompletedCallback.onTaskCompleted(false);
+			}
+		}
+		
 	}
 }
