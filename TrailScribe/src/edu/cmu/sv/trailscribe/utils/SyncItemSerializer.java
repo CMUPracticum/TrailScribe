@@ -35,5 +35,5 @@ public class SyncItemSerializer implements JsonSerializer<SyncItems>{
 		syncItems.add("kmls", kmlsJo);
 		return syncItems;
 	}
-		
+
 }
