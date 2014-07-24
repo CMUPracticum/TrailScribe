@@ -1,6 +1,6 @@
 package edu.cmu.sv.trailscribe.model.data;
 
-public class Sample {
+public class Sample implements DataModel {
 	private long mId;
 	private long mUserId;
 	private long mMapId;
@@ -129,8 +129,14 @@ public class Sample {
 		this.mExpeditionId = expeditionId;
 	}
 
+
+    @Override
+    public String toString() {
+        return this.getName();
+    }
+	
 	@Override
-	public String toString() {
+	public String toJson() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("'id':'").append(this.getId()).append("', ");
         buffer.append("'userId':'").append(this.getUserId()).append("', ");

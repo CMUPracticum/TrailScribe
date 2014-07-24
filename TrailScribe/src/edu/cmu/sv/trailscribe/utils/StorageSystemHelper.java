@@ -12,6 +12,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.os.Environment;
 import android.util.Log;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
@@ -22,6 +23,7 @@ public class StorageSystemHelper {
     private static final String MSG_TAG = "StorageSystemHelper";
     
     public static void createDefaultFolders() {
+        createFolder(Environment.getExternalStorageDirectory() + "/trailscribe");
         for (String folder : folders) {
             createFolder(TrailScribeApplication.STORAGE_PATH + folder);
         }

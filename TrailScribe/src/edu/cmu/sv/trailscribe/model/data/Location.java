@@ -105,7 +105,7 @@ public class Location implements DataModel {
         buffer.append("'z':'").append(this.getZ()).append("', ");
         buffer.append("'userId':'").append(this.getUserId()).append("', ");
         buffer.append("'mapId':'").append(this.getMapId()).append("', ");
-        buffer.append("'expeditionId':'").append(this.getExpeditionId()).append("', ");
+        buffer.append("'expeditionId':'").append(this.getExpeditionId()).append("'");
     
         return buffer.toString();
     }
