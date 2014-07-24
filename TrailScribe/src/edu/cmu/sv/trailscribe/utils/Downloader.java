@@ -69,6 +69,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	protected void onPostExecute(Void result) 
 	{
 		this.mContext.unregisterReceiver(mDownloadReceiver);
+		this.mContext.unregisterReceiver(mNetworkReceiver);
 		if(mDownloadProgressDialog!= null){
 			mDownloadProgressDialog.dismiss();
 		}
@@ -130,28 +131,22 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	}
 
 	private void verifyDirectory(String directory) {
-		File file = new File(directory); 
-		if(!file.isDirectory()) { 
-			file.mkdirs(); 
-		} 
+		if (!StorageSystemHelper.verifyDirectory(directory)){
+			StorageSystemHelper.createFolder(directory);
+		}
+		else{
+			StorageSystemHelper.removeDirectoryContent(directory);
+		}
 	}
 
 	private void startDownload(SyncItem item, String mapFileName,
 			final DownloadManager downloadManager) {
 		Uri source = Uri.parse(item.getFilename());
-
-		String folderName = null;
-		if(item instanceof Map){
-			folderName = "maps";
-		}
-		else if(item instanceof Kml){
-			folderName = "kmls";
-		}
+		String folderName = getFolderNameBaseOnItemType(item);
 		String directory = this.mDownloadDirectory + folderName + "/"+ item.getName()+ "/";
 		verifyDirectory(directory);
+		
 		Uri destination = Uri.fromFile(new File(directory + mapFileName));
-		mCurrentDownload = item;
-
 		DownloadManager.Request request = 
 				new DownloadManager.Request(source);
 		request.setTitle(item.getName());
@@ -163,34 +158,52 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		final long id = downloadManager.enqueue(request);
 		mPendingDownloads.add(id);
 		mAmountOfDownloads ++;
+		mCurrentDownload = item;
+
 		boolean downloading = true;
 		while (downloading) {
-
-			DownloadManager.Query q = new DownloadManager.Query();
-			q.setFilterById(id);
-
-			Cursor cursor = downloadManager.query(q);
-			cursor.moveToFirst();
-			int bytes_downloaded = cursor.getInt(cursor
-					.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-			int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-
-			if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-				downloading = false;
-			}
-
-			final int dl_progress = (int) ((double)bytes_downloaded / (double)bytes_total * 100f);
-			((Activity)mContext).runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-
-					publishProgress((int) dl_progress);
-
-				}
-			});
-			cursor.close();
+			downloading = writeFile(downloadManager, id, downloading);
 		}  
+	}
+
+	private String getFolderNameBaseOnItemType(SyncItem item) {
+		String folderName = null;
+		if(item instanceof Map){
+			folderName = "maps";
+		}
+		else if(item instanceof Kml){
+			folderName = "kmls";
+		}
+		return folderName;
+	}
+
+	private boolean writeFile(final DownloadManager downloadManager,
+			final long id, boolean downloading) {
+		DownloadManager.Query q = new DownloadManager.Query();
+		q.setFilterById(id);
+
+		Cursor cursor = downloadManager.query(q);
+		cursor.moveToFirst();
+		int bytes_downloaded = cursor.getInt(cursor
+				.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+		int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+
+		if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+			downloading = false;
+		}
+
+		final int dl_progress = (int) ((double)bytes_downloaded / (double)bytes_total * 100f);
+		((Activity)mContext).runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				publishProgress((int) dl_progress);
+
+			}
+		});
+		cursor.close();
+		return downloading;
 	}
 
 	protected void onProgressUpdate(Integer... progress) {

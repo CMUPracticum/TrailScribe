@@ -31,4 +31,6 @@
     <string name="synchronizing">Synchronizing...</string>
 	<string name="uncompressing">Uncompressing...</string>
 	<string name="sync_all">Sync All</string>
+	<string name="connection_error">Connection lost. Please check your intentet connection and try again</string>
+	<string name="up_to_date">TrailScribe is up to date</string>
 </resources>
