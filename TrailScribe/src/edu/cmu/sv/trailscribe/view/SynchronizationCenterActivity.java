@@ -109,6 +109,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 		}
 	}
 	
+	// Method to display messages in a toast
 	private void showMessage(final String message){
 		runOnUiThread(new Runnable() 
 		{
@@ -119,6 +120,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 		}); 
 	}
 	
+	//This method is invoked whenever the SyncAll button is clicked
 	@SuppressWarnings("unchecked")
 	public void onSyncAll(View v){
 		new Downloader(mSyncItems, SynchronizationCenterActivity.this, baseDirectory,

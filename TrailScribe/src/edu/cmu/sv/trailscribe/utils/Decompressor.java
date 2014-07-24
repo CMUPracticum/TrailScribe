@@ -28,33 +28,10 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 	public static final int DECOMPRESSION_SUCCESS = 0;
 	public static final int DECOMPRESSION_ERROR = -1;
 
-	public Decompressor(String zipFile, String location) { 
-		mCompressedFileFullPath = zipFile; 
-		mDecompressingDirectory = location; 
-	} 
-
 	public Decompressor(ArrayList<SyncItem> syncItems, String baseDirectory, AsyncTaskCompleteListener<Integer> callback) {
 		this.mSyncItems = syncItems;
 		this.mBaseDirectory = baseDirectory;
 		this.mTaskCompletedCallback = callback;
-	}
-
-	private void verifyDirectory(String directory) {
-		if (!StorageSystemHelper.verifyDirectory(mDecompressingDirectory + directory)){
-			StorageSystemHelper.createFolder(mDecompressingDirectory + directory);
-		}
-	}
-
-	private void removeZipFile() {
-		String extension = "";
-		int i = this.mCompressedFileFullPath.lastIndexOf('.');
-		if (i >= 0) {
-			extension = this.mCompressedFileFullPath.substring(i+1);
-		}
-
-		if(extension.equals("zip")){
-			StorageSystemHelper.removeFile(this.mCompressedFileFullPath);
-		}
 	}
 
 	@Override
@@ -73,6 +50,24 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 			decompress();
 		}
 		return null;
+	}
+	
+	private void verifyDirectory(String directory) {
+		if (!StorageSystemHelper.verifyDirectory(mDecompressingDirectory + directory)){
+			StorageSystemHelper.createFolder(mDecompressingDirectory + directory);
+		}
+	}
+
+	private void removeZipFile() {
+		String extension = "";
+		int i = this.mCompressedFileFullPath.lastIndexOf('.');
+		if (i >= 0) {
+			extension = this.mCompressedFileFullPath.substring(i+1);
+		}
+
+		if(extension.equals("zip")){
+			StorageSystemHelper.removeFile(this.mCompressedFileFullPath);
+		}
 	}
 
 	private void decompress() {
@@ -100,22 +95,26 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 			removeZipFile();
 		} catch(Exception e) {
 			e.printStackTrace();
+			// Current version will return error if at least one file failed in decompressing
 			mSuccessFlag = DECOMPRESSION_ERROR;
 		}
 	}
 
 	@Override
 	protected void onPostExecute(Void result) 
-	{	
-		for(SyncItem item: mSyncItems)
-			if(item instanceof Map){
-				MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
-				mapsDs.add((Map) item);
-			}
-			else if(item instanceof Kml){
-				KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
-				kmlsDs.add((Kml) item);
-			}
+	{
+		// If everything went ok, update database with items already downloaded
+		if(mSuccessFlag == DECOMPRESSION_SUCCESS){
+			for(SyncItem item: mSyncItems)
+				if(item instanceof Map){
+					MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
+					mapsDs.add((Map) item);
+				}
+				else if(item instanceof Kml){
+					KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
+					kmlsDs.add((Kml) item);
+				}
+		}
 		this.mTaskCompletedCallback.onTaskCompleted(mSuccessFlag);
 	}
 }

@@ -152,6 +152,11 @@ public class StorageSystemHelper {
         return overlays;
     }
     
+    /**
+     * Create a folder in the file system if it does not exist
+     * 
+     * @param path The absolute path of the folder to be created
+     */
     public static void createFolder(String path) {
         File directory = new File(path);
         if (!directory.exists()) {
@@ -159,6 +164,11 @@ public class StorageSystemHelper {
         }
     }
 
+    /**
+     * Remove a file from the file system
+     * 
+     * @param filePath The absolute path of the file to be removed
+     */
 	public static void removeFile(String filePath) {
 		File zipFile = new File(filePath);
 		if(zipFile !=null){
@@ -166,6 +176,11 @@ public class StorageSystemHelper {
 		}
 	}
 	
+	/**
+     * Remove the content of a directory in the file system, without removing the directory itself
+     * 
+     * @param directory The directory whose content need to be removed 
+     */
 	public static void removeDirectoryContent(String directory){
 		File dir = new File(directory);
 		if(dir.isDirectory()){

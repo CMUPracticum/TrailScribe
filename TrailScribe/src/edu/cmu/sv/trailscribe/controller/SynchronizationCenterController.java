@@ -91,13 +91,16 @@ public class SynchronizationCenterController
 
 	@Override
 	protected Void doInBackground(String... params) {
-		List<Map> maps = mMapsDataSource.getAll();
-		List<Kml> kmls = mKmlsDataSource.getAll();
+//		List<Map> maps = mMapsDataSource.getAll();
+//		List<Kml> kmls = mKmlsDataSource.getAll();
+		List<SyncItem> syncItems = new ArrayList<SyncItem>();
+		syncItems.addAll(mMapsDataSource.getAll());
+		syncItems.addAll(mKmlsDataSource.getAll());
 	
 		GsonBuilder gson = new GsonBuilder();
-		gson.registerTypeAdapter(SyncItems.class, new SyncItemSerializer());
-        String json = gson.create().toJson(new SyncItems((ArrayList<Map>)maps, (ArrayList<Kml>)kmls));
-        
+		gson.registerTypeAdapter(ArrayList.class, new SyncItemSerializer());
+        String json = gson.create().toJson(syncItems);
+		
 		BackendFacade backend = new BackendFacade(endpoint, this, json);
 		backend.execute();
 		return null;
