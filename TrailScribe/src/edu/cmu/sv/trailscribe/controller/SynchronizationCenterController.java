@@ -22,20 +22,24 @@ import edu.cmu.sv.trailscribe.utils.SyncItemSerializer;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class SynchronizationCenterController 
-	extends AsyncTask<String, Void, Void> implements AsyncTaskCompleteListener<String>{
-	
+extends AsyncTask<String, Void, Void> implements AsyncTaskCompleteListener<String>{
+
 	private final String endpoint = "http://trail-scribe.mlep.net/sync/";
 	private AsyncTaskCompleteListener<ArrayList<SyncItem>> mTaskCompletedCallback;
 	MapDataSource mMapsDataSource = new MapDataSource(TrailScribeApplication.mDBHelper);
 	KmlDataSource mKmlsDataSource = new KmlDataSource(TrailScribeApplication.mDBHelper);
-	
+	BackendFacade mBackendFacade;
+
 	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<SyncItem>> callback){
 		this.mTaskCompletedCallback = callback;
 	}
-	
+
 	// This method is invoked by the BackendFacade once the response from the backend is available
 	@Override
 	public void onTaskCompleted(String syncResult) {
+		if(mBackendFacade != null){
+			mBackendFacade.cancel(true);
+		}
 		ArrayList<SyncItem> itemsToSync = null;
 
 		JsonParser jsonParser = new JsonParser();
@@ -48,7 +52,7 @@ public class SynchronizationCenterController
 			for (JsonElement item:syncResultJson) {
 				String model = item.getAsJsonObject().get("model").getAsString();
 				JsonObject syncItemJsonArray = item.getAsJsonObject().get("fields").getAsJsonObject();
-				
+
 				// Parsing maps and kmls differently given their attributes are not quite the same
 				if(model.equals("sync_center.map")){
 					itemsToSync.add(parseMapInformation(item, syncItemJsonArray));
@@ -93,13 +97,13 @@ public class SynchronizationCenterController
 		List<SyncItem> syncItems = new ArrayList<SyncItem>();
 		syncItems.addAll(mMapsDataSource.getAll());
 		syncItems.addAll(mKmlsDataSource.getAll());
-	
+
 		GsonBuilder gson = new GsonBuilder();
 		gson.registerTypeAdapter(ArrayList.class, new SyncItemSerializer());
-        String json = gson.create().toJson(syncItems);
-		
-		BackendFacade backend = new BackendFacade(endpoint, this, json);
-		backend.execute();
+		String json = gson.create().toJson(syncItems);
+
+		mBackendFacade = (BackendFacade) new BackendFacade(endpoint, this, json);
+		mBackendFacade.execute();
 		return null;
 	}
 }

@@ -31,6 +31,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	private ProgressDialog mDecompressProgressDialog; 
 	private ArrayAdapter<SyncItem> mAdapter;
 	private String baseDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
+	private Downloader mDownloader; 
 
 	@SuppressWarnings("unchecked") // Suppressing warning given this class listens to 2 different AsyncTasks
 	@Override
@@ -63,10 +64,18 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 		//close the progress dialogs
 
 		if (mSyncProgressDialog != null){
-			mSyncProgressDialog.dismiss();
+			try{
+				mSyncProgressDialog.dismiss();
+			}catch (IllegalArgumentException e) {
+                // "Sync Dialog dismissed after view stopped"
+			}
 		}
 		if(mDecompressProgressDialog!= null){
-			mDecompressProgressDialog.dismiss();
+			try{
+				mDecompressProgressDialog.dismiss();
+			}catch (IllegalArgumentException e) {
+                // "Decompress dialog dismissed after view stopped"
+			}
 		}
 
 		// Handle any error related to synchronization results
@@ -95,7 +104,9 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 				new Decompressor (mSyncItems, baseDirectory, SynchronizationCenterActivity.this).execute();
 			}
 			else{
-				mController.cancel(true);
+				if(mDownloader != null){
+					mDownloader.cancel(true);
+				}
 				showMessage(getResources().getString(R.string.connection_error));
 			}
 		}
@@ -125,7 +136,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	//This method is invoked whenever the SyncAll button is clicked
 	@SuppressWarnings("unchecked")
 	public void onSyncAll(View v){
-		new Downloader(mSyncItems, SynchronizationCenterActivity.this, baseDirectory,
+		mDownloader = (Downloader)new Downloader(mSyncItems, SynchronizationCenterActivity.this, baseDirectory,
 				mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
 	}
 }
