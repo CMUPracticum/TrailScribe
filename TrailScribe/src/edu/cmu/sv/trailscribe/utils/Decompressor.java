@@ -38,26 +38,34 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 	protected Void doInBackground(Void... params) {
 		for (SyncItem item: mSyncItems){
 			String mapFileName = item.getFilename().substring(item.getFilename().lastIndexOf("/") +1);
-			String folderName = null;
-			if(item instanceof Map){
-				folderName = "maps";
-			}
-			else if(item instanceof Kml){
-				folderName = "kmls";
-			}
+			String folderName = getFolderNameBasedOnItemType(item);
 			mCompressedFileFullPath =  mBaseDirectory + folderName + "/"+ item.getName() + "/" + mapFileName;
 			mDecompressingDirectory = mBaseDirectory + folderName + "/" + item.getName() + "/";
 			decompress();
 		}
 		return null;
 	}
+
+	// Determine the folder name for decompressing based on the item type (maps/kmls)
+	private String getFolderNameBasedOnItemType(SyncItem item) {
+		String folderName = null;
+		if(item instanceof Map){
+			folderName = "maps";
+		}
+		else if(item instanceof Kml){
+			folderName = "kmls";
+		}
+		return folderName;
+	}
 	
+	//Check the directory actually exists before decompressing
 	private void verifyDirectory(String directory) {
 		if (!StorageSystemHelper.verifyDirectory(mDecompressingDirectory + directory)){
 			StorageSystemHelper.createFolder(mDecompressingDirectory + directory);
 		}
 	}
 
+	// Removing compressed files after compression
 	private void removeZipFile() {
 		String extension = "";
 		int i = this.mCompressedFileFullPath.lastIndexOf('.');
@@ -69,7 +77,8 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 			StorageSystemHelper.removeFile(this.mCompressedFileFullPath);
 		}
 	}
-
+	
+	// Decompress file
 	private void decompress() {
 		try{ 
 			FileInputStream fileInputStream = new FileInputStream(mCompressedFileFullPath); 

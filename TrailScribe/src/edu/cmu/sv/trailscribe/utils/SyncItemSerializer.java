@@ -13,7 +13,13 @@ import edu.cmu.sv.trailscribe.model.data.Map;
 import edu.cmu.sv.trailscribe.model.data.SyncItem;
 
 public class SyncItemSerializer implements JsonSerializer<ArrayList<SyncItem>>{
-
+	
+	 /**
+     * Serializes an array of SyncItems in the way the TrailScribe server expects 
+     * 
+     * @param items Sync items already in the device, either maps or kmls
+     * @return syncItems a String representing the serialized items, grouped by their types (maps, kmls) 
+     */
 	@Override
 	public JsonElement serialize(ArrayList<SyncItem> items, Type type,
 			JsonSerializationContext context) {

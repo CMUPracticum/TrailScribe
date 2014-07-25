@@ -60,10 +60,11 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onTaskCompleted(Object result) {
+		//close the progress dialogs
+
 		if (mSyncProgressDialog != null){
 			mSyncProgressDialog.dismiss();
 		}
-		//close the progress dialog
 		if(mDecompressProgressDialog!= null){
 			mDecompressProgressDialog.dismiss();
 		}
@@ -83,7 +84,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			}
 		}
 
-		// Response from downloader. 
+		// Response from downloader. If success, start uncompressing
 		else if(result instanceof Boolean){
 			if (mDownloadProgressDialog != null){
 				mDownloadProgressDialog.dismiss();
@@ -98,6 +99,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 				showMessage(getResources().getString(R.string.connection_error));
 			}
 		}
+		
 		//Response from Decompressor
 		else if(result instanceof Integer){
 			int successCode = (Integer) result;
@@ -109,7 +111,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 		}
 	}
 	
-	// Method to display messages in a toast
+	// Helper method to display messages in a toast
 	private void showMessage(final String message){
 		runOnUiThread(new Runnable() 
 		{

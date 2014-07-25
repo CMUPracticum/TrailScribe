@@ -90,8 +90,6 @@ public class SynchronizationCenterController
 
 	@Override
 	protected Void doInBackground(String... params) {
-//		List<Map> maps = mMapsDataSource.getAll();
-//		List<Kml> kmls = mKmlsDataSource.getAll();
 		List<SyncItem> syncItems = new ArrayList<SyncItem>();
 		syncItems.addAll(mMapsDataSource.getAll());
 		syncItems.addAll(mKmlsDataSource.getAll());

@@ -85,6 +85,8 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		for (SyncItem item: mSyncItems){
 			int subStringIndex = item.getFilename().lastIndexOf("/") +1;
 			String mapFileName = item.getFilename().substring(subStringIndex);
+			
+			//Using Android DownloadManager to handle downloads
 			final DownloadManager downloadManager = (DownloadManager) 
 					mContext.getSystemService(Context.DOWNLOAD_SERVICE);
 			boolean isDownloading = false;
@@ -107,6 +109,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 
 			// Download the file if it is not already downloaded
 			if (!isDownloading) {
+				// Check for connectivity
 				if (isInternetConnectionAvailable() == true){
 					startDownload(item, mapFileName, downloadManager);
 				}
@@ -114,13 +117,14 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 					if(mDownloadProgressDialog!= null){
 						mDownloadProgressDialog.dismiss();
 					}
+					// Notify listener about the error on the download
 					this.mTaskCompletedCallback.onTaskCompleted(false);
 				}
 			}
 		}
 		return null;
 	}
-
+	
 	private boolean isInternetConnectionAvailable() {
 		ConnectivityManager cm =
 				(ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -129,7 +133,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		return (activeNetwork != null &&
 				activeNetwork.isConnectedOrConnecting());
 	}
-
+	
 	private void verifyDirectory(String directory) {
 		if (!StorageSystemHelper.verifyDirectory(directory)){
 			StorageSystemHelper.createFolder(directory);
@@ -144,6 +148,8 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		Uri source = Uri.parse(item.getFilename());
 		String folderName = getFolderNameBaseOnItemType(item);
 		String directory = this.mDownloadDirectory + folderName + "/"+ item.getName()+ "/";
+		
+		//Verify the directory prior to download. Clear its content if it is already there
 		verifyDirectory(directory);
 		
 		Uri destination = Uri.fromFile(new File(directory + mapFileName));
@@ -154,10 +160,13 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		request.setNotificationVisibility(DownloadManager
 				.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 		request.allowScanningByMediaScanner();
-
 		final long id = downloadManager.enqueue(request);
+		
+		// Keeping the pending downloads in a list. The list is being cleared as soon as downloads finish successfully
 		mPendingDownloads.add(id);
+		// This counter helps in displaying the progress bar
 		mAmountOfDownloads ++;
+		// The current item helps in displaying the name in the progress bar  
 		mCurrentDownload = item;
 
 		boolean downloading = true;
@@ -193,13 +202,12 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		}
 
 		final int dl_progress = (int) ((double)bytes_downloaded / (double)bytes_total * 100f);
-		((Activity)mContext).runOnUiThread(new Runnable() {
 
+		// Publishing download progress
+		((Activity)mContext).runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-
 				publishProgress((int) dl_progress);
-
 			}
 		});
 		cursor.close();
@@ -214,7 +222,8 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 
 
 	}
-
+	
+	// This receiver is being invoked when the download is complete
 	class DownloadReceiver extends BroadcastReceiver{
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -237,7 +246,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		}
 	}
 	
-	
+	// This receiver is being invoked when the there is a change in the network status
 	class NetworkReceiver extends BroadcastReceiver{
 		@Override
 		public void onReceive(Context context, Intent intent) {
