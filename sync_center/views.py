@@ -12,7 +12,7 @@ from django.utils.timezone import utc
 # Imports from app
 from sync_center.models import Map, KML
 from trailscribe import settings
-from utility import util
+from sync_center import util
 
 
 def map_list(request):

@@ -2,7 +2,7 @@
 from django.test import TestCase
 
 # Imports from app
-from utility import util
+from sync_center import util
 from sync_center.models import Map, KML
 
 
