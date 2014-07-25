@@ -374,7 +374,6 @@ public class MapsActivity extends BaseActivity
             } else {
 //              Message to webview will be sent after positive button in the selector is clicked 
                 createKMLSelector();
-                mKmlButton.setBackgroundResource(R.drawable.button_kml_toggle);
                 return;
             }
 			break;
@@ -451,7 +450,7 @@ public class MapsActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(int position, long itemId) {
         if (position == 0) {
-//          Ignore when tile of the spinner is selected
+//          Ignore when title of the spinner is selected
             return true;
         }
         
@@ -496,12 +495,20 @@ public class MapsActivity extends BaseActivity
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mIsDisplayKML = true;
+//              Do nothing when nothing is selected
+                if (mSelectedItems.size() == 0) {
+                    mNegativeListener.onClick(dialog, which);
+                    return;
+                }
                 
                 List<String> selectedItemNames = new ArrayList<String>();
                 for (Integer item : mSelectedItems) {
                     selectedItemNames.add(mOverlayNames[item.intValue()]);
                 }
+
+//              Set states of the button
+                mIsDisplayKML = true;
+                mKmlButton.setBackgroundResource(R.drawable.button_kml_toggle);
                 
                 displayOverlays(selectedItemNames);
             }
@@ -511,9 +518,9 @@ public class MapsActivity extends BaseActivity
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//              Restore image and state
-                mKmlButton.setBackgroundResource(R.drawable.button_kml);
+//              Set states of the button
                 mIsDisplayKML = false;
+                mKmlButton.setBackgroundResource(R.drawable.button_kml);
             }
         };
         
