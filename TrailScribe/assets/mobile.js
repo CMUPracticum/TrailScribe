@@ -137,8 +137,10 @@ function init() {
             new OpenLayers.Control.Attribution(),
             new OpenLayers.Control.TouchNavigation({
                 dragPanOptions: {
-                    enableKinetic: true
-                }
+                    enableKinetic: true, 
+                    kineticInterval: 10,
+                    interval: 10
+                }                
             }),                
         ],
         projection: mapProjection,
@@ -706,7 +708,9 @@ function getLinesFromJava(msg) {
         pointFeatures.push(pointFeature);
         pointList.push(point);
     }
-    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), null, line_style);
+    var line = new OpenLayers.Geometry.LineString(pointList);
+    line = line.simplify();
+    var lineFeature = new OpenLayers.Feature.Vector(line, null, line_style);    
     pointFeatures.push(lineFeature);
 
     return lineFeature;
