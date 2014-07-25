@@ -59,7 +59,10 @@ if [ -f "./tmp/"$2"_tiles.zip" ]; then
     rm -f "./tmp/"$2"_tiles.zip"
 fi
 
-zip -9 -q -r --exclude='tilemapresource.xml' './tmp/'$2'_tiles.zip' './tmp/tiles/.'
+#zip -9 -q -r --exclude='tilemapresource.xml' './tmp/'$2'_tiles.zip' './tmp/tiles/.'
+cd 'tmp'
+zip -9 -q -r --exclude=tiles/tilemapresource.xml $2'_tiles.zip' './tiles'
+cd '..'
 mv './tmp/'$2'_tiles.zip' '../media/map/'$2'_tiles.zip'
 echo "Zip created at: '../media/map/"$2"_tiles.zip'"
 echo
