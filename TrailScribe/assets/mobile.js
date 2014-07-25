@@ -13,14 +13,23 @@
  * Map and OpenLayers Properties
  */
 var map;
+var mapName;
 var mapBounds;
 var extent;
 var mapMinZoom;
 var mapMaxZoom;
-var mapProjection;
-var displayProjection;
+var mapProjection; 
+var displayProjection = new OpenLayers.Projection("EPSG:4326"); // display projection is always WGS84 spherical mercator
 var emptyTileURL = "./lib/openlayers/img/none.png";
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+var resolutions = [156543.03390625, 78271.516953125, 39135.7584765625,
+                      19567.87923828125, 9783.939619140625, 4891.9698095703125,
+                      2445.9849047851562, 1222.9924523925781, 611.4962261962891,
+                      305.74811309814453, 152.87405654907226, 76.43702827453613,
+                      38.218514137268066, 19.109257068634033, 9.554628534317017,
+                      4.777314267158508, 2.388657133579254, 1.194328566789627,
+                      0.5971642833948135, 0.25, 0.1, 0.05];
+var serverResolutions = [];
 
 // Get rid of address bar on iphone/ipod
 var fixSize = function() {
@@ -57,10 +66,34 @@ var selectControl;
 var layerListeners;
 
 /**
- * Global boolean to determine
- * whether we should pan to current location
+ * Samples
  */
-var panToCurrentLocation = true;
+var sampleList = {};
+
+
+/**
+ * Current position of the user
+ */
+var currentPosition = {
+    lon: 0.0,
+    lat: 0.0
+};
+
+/**
+ * Function: getServerResolutions
+ * Given a max zoom level, return the available
+ * resolutions on the server (in this case, in the file system)
+ * 
+ * Parameters:
+ * maxzoom - (int)
+ */
+function getServerResolutions(maxzoom) {
+    myResolutions = [];
+    for (var i = 0; i <= maxzoom; i++) {
+        myResolutions.push(resolutions[i]);
+    }
+    return myResolutions;
+}
 
 /**
  * Function: initMapProperties
@@ -69,13 +102,18 @@ var panToCurrentLocation = true;
  * Parameters:
  * initMapProperties - {JSON String}
  */
-function initMapProperties(mapProperties) {    
-    mapProjection = new OpenLayers.Projection("EPSG:900913"); // Default: Web Mercator
-    displayProjection = new OpenLayers.Projection("EPSG:4326");
-    mapBounds = new OpenLayers.Bounds(-122.134518893, 37.3680027864, -121.998720996, 37.4691074792);
+function initMapProperties() {
+
+    var initialMapProperties = getCurrentMapFromJava();
+
+    mapName = initialMapProperties.name;    
+    mapProjection = new OpenLayers.Projection(initialMapProperties.projection); // Default: Web Mercator    
+    mapBounds = new OpenLayers.Bounds(initialMapProperties.minY, initialMapProperties.minX, initialMapProperties.maxY, initialMapProperties.maxX);
     extent = mapBounds.transform(displayProjection, mapProjection);
-    mapMinZoom = 11;
-    mapMaxZoom = 15;
+    mapMinZoom = initialMapProperties.minZoomLevel;
+    mapMaxZoom = initialMapProperties.maxZoomLevel;
+
+    serverResolutions = getServerResolutions(mapMaxZoom);    
 }
 
 /**
@@ -91,33 +129,37 @@ function init() {
     // Initialize map properties
     initMapProperties();
 
-    // Set Map options    
+    // Map options
     var options = {
-            div: "map",
-            theme: null,
-            controls: [
-                new OpenLayers.Control.Attribution(),
-                new OpenLayers.Control.TouchNavigation({
-                    dragPanOptions: {
-                        enableKinetic: true
-                    }
-                }),                
-            ],
-            projection: mapProjection,
-            displayProjection: displayProjection, // Spherical Mercator
-            tileSize: new OpenLayers.Size(256, 256)
-        };
-    
+        div: "map",
+        theme: null,
+        controls: [
+            new OpenLayers.Control.Attribution(),
+            new OpenLayers.Control.TouchNavigation({
+                dragPanOptions: {
+                    enableKinetic: true
+                }
+            }),                
+        ],
+        projection: mapProjection,
+        displayProjection: displayProjection, // Spherical Mercator
+        tileSize: new OpenLayers.Size(256, 256), 
+        fractionalZoom: true
+    };
+
     // Create map
     map = new OpenLayers.Map(options);
 
     // Create TMS Overlay (Base map)
     tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "", {
+        resolutions: resolutions,
+        serverResolutions: serverResolutions,
+        transitionEffect: 'resize',
         serviceVersion: '.',
         layername: 'tiles',        
         alpha: true,
         type: 'png',
-        isBaseLayer: true, 
+        isBaseLayer: true,        
         getURL: getURL
     });
 
@@ -172,7 +214,33 @@ function init() {
 
     // Zoom to extent
     map.zoomToExtent(extent);
-    map.setOptions({restrictedExtent: extent});    
+    map.setOptions({restrictedExtent: extent});
+
+    // Get the user's position
+    updateCurrentPosition();
+}
+
+/**
+ * Function: redrawMap
+ * This function redraws the base map (TMS overlay layer)
+ * given an Object with the new map options.
+ *
+ * Parameters:
+ * mapOptions - {Object}
+ */
+function redrawMap(mapOptions) {
+    mapName = mapOptions.name;    
+    mapProjection = new OpenLayers.Projection(mapOptions.projection); // Default: Web Mercator    
+    mapBounds = new OpenLayers.Bounds(mapOptions.minY, mapOptions.minX, mapOptions.maxY, mapOptions.maxX);
+    extent = mapBounds.transform(displayProjection, mapProjection);
+    mapMinZoom = mapOptions.minZoomLevel;
+    mapMaxZoom = mapOptions.maxZoomLevel;
+
+    map.setOptions({restrictedExtent: extent});
+
+    serverResolutions = getServerResolutions(mapMaxZoom);
+
+    tmsOverlay.redraw();
 }
 
 /**
@@ -189,16 +257,18 @@ function getURL(bounds) {
     var x = Math.round((bounds.left - this.tileOrigin.lon) / (res * this.tileSize.w));
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
-        
-    var path = "file:///sdcard/trailscribe/maps/basemap" + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;
+
+    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;    
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
         url = this.selectUrl(path, url);
     }
-    if (mapBounds.intersectsBounds(bounds) && (z >= mapMinZoom) && (z <= mapMaxZoom)) {        
+
+    if (mapBounds.intersectsBounds(bounds)) {
         return url + path;
-    } else {
+    }
+    else {
         return emptyTileURL;
     }
 }
@@ -239,31 +309,21 @@ function onPopupClose(evt) {
 function onFeatureSelect(evt) {
     feature = evt.feature;
 
-    var lon = feature.geometry.getBounds().getCenterLonLat().lon;
-    var lat = feature.geometry.getBounds().getCenterLonLat().lat;
-    var html = '';
+    // Sample id is stored in attributes of the feature
+    var points = android.getSample(feature.attributes);
+    var sample = 0;
 
-//  TODO: Samples are currently hardcoded, remove the hard-coded part after the demo
-    if (lon == -13587628.769185 && lat == 4496469.2098323) {
-        html = '<div class="markerContent">Carnegie Mellon University</div><div>37.410418, -122.059746</div><center><img src="./lib/openlayers/img/demo/cmu_bldg23.jpg" alt="cmu_bldg23" width="120" height="80"></center>';
-
-    } else if (lon == -13587311.508636 && lat == 4496342.7978354) {
-        html = '<div class="markerContent">Pool</div><div>37.409516, -122.056896</div><center><img src="./lib/openlayers/img/demo/swimming_pool.jpg" alt="swimming_pool" width="120" height="80"></center>';
-    } else if (lon == -13587014.730874 && lat == 4496600.1081161) {
-        html = '<div class="markerContent">Moffett Field Historical Society Museum</div><div>37.411352, -122.054230</div><center><img src="./lib/openlayers/img/demo/moffett_field_museum.jpg" alt="moffett_field_museum" width="120" height="80"></center>';
-    } else if (lon == -13587010.834692 && lat == 4496785.5267868) {
-        html = '<div class="markerContent">Hangar 1</div><div>37.412675, -122.054195</div><center><img src="./lib/openlayers/img/demo/hangar_one.jpg" alt="hangar_one" width="120" height="80"></center>';
-    } else {
-        html = '<div class="markerContent">default popup</div>';
+    points = JSON.parse(points);
+    for (data in points['points']) {
+        if (points['points'][data].id == feature.attributes) {
+            sample = points['points'][data];
+            break;
+        }
     }
 
-    popup = new OpenLayers.Popup.FramedCloud("pop",
-          feature.geometry.getBounds().getCenterLonLat(),
-          null,
-          html,
-          null,
-          true,
-          onPopupClose);
+    var html = getPopupHtmlForSample(sample);
+
+    popup = new OpenLayers.Popup.FramedCloud("pop", feature.geometry.getBounds().getCenterLonLat(), null, html, null, true, onPopupClose);
 
     feature.popup = popup;
     popup.feature = feature;
@@ -288,6 +348,44 @@ function onFeatureUnselect(evt) {
 }
 
 /**
+ * Function: getPopupHtmlForSample
+ * Given a sample object, return the HTML content
+ * for the popup div
+ * 
+ * Parameters:
+ * sample - {Object}
+ */
+function getPopupHtmlForSample(sample) {
+
+    var html = "";
+
+    // If no sample with id = feature.attributes is found
+    if (sample == 0) {
+        html += '<div class="markerContent">Error: Cannot find sample information from database</div>';
+    }
+    else {
+        var name = sample.name;
+        var description = sample.description;
+        var x = sample.x;
+        var y = sample.y;
+        
+        // Image of the samples are stored in: file:///sdcard/trailscribe/samples/<sample.name>/
+        // In the order of 1.jpg, 2.jpg, 3.jpg, etc. We just preview the first image
+        var imagePath = 'file:///sdcard/trailscribe/samples/' + name + '/1.jpg';
+
+        html += '<div class="markerContent">';
+        html += '<div><b>' + name + '</b></div>'
+        html += '<div>' + description + '</div>';
+        html += '<div>' + '(Lat: ' + y + ', Lng: ' + x + ')' + '</div>';
+        html += '<div>Distance to target: <b>' + getDistance(currentPosition.lon, currentPosition.lat, x, y) + '</b></div>';
+        html += '<img src="' + imagePath + '" alt="sample_image" width="120" height="80">'
+        html += '</div>';
+    }
+
+    return html;
+}
+
+/**
  * Function: getKmlUrl
  * Given a kml file name, find the location on device for the kml file.
  * 
@@ -299,6 +397,48 @@ function onFeatureUnselect(evt) {
  */
 function getKmlUrl(kml) {    
     return "file:///sdcard/trailscribe" + "/kmls/" + kml;
+}
+
+
+/**
+ * Function: updateCurrentPosition
+ * Given a set of points, update the current location
+ * of the user
+ *
+ * Parameters:
+ * points - {JSON.Object}
+ */
+function updateCurrentPosition(points) {
+
+    if (points == null) {
+        points = android.getCurrentLocation();
+    }
+
+    var coordinates = JSON.parse(points);
+    
+    currentPosition.lat = coordinates['points'][0].y;
+    currentPosition.lon = coordinates['points'][0].x;
+}
+
+/**
+ * Function: getDistance
+ * Given two geographic coordinates, return the distance 
+ * between them over the WGS84 ellipsoid.
+ * Return value is in meters if it is less then 1000, 
+ * otherwise in kilometers
+ *
+ * Parameters:
+ * x1, y1 - x and y coordinates of the first point
+ * x2, y2 - x and y coordinates of the second point
+ */
+function getDistance(x1, y1, x2, y2) {
+
+    var p1 = { lon: x1, lat: y1 };
+    var p2 = { lon: x2, lat: y2 };
+
+    var distance = OpenLayers.Util.distVincenty(p1, p2);
+
+    return (distance < 1) ? (distance * 1000).toFixed(2) + " m" : distance.toFixed(2) + " km";
 }
 
 /**
@@ -317,43 +457,42 @@ function getKmlUrl(kml) {
 function setLayers(msg) {
     switch (msg) {
         case "DisplaySamples":            
-            sampleLayer.addFeatures(getPointsFromJava(msg));
+            sampleLayer.addFeatures(getPointFeatures(msg));
             break;
         case "HideSamples":            
             hideLayer(sampleLayer);
             break;
         case "DisplayCurrentLocation":            
-            coordinates = getPointsFromJava(msg);
-            currentLocationLayer.addFeatures(coordinates);            
-            if (panToCurrentLocation) {
-                panToCurrentLocation = false;
-                // Pan to location
-                //map.panTo(coordinates[0].geometry.point);
-            }
+            currentLocationLayer.addFeatures(getPointFeatures(msg));
             break;
         case "HideCurrentLocation":            
             hideLayer(currentLocationLayer);
-            //panToCurrentLocation = true;
             break;            
 		case "DisplayPositionHistory":
-            positionHistoryLayer.addFeatures(getLinesFromJava(msg));            
+            positionHistoryLayer.addFeatures(getLinesFromJava(msg));
 			break;			
 		case "HidePositionHistory":			
             hideLayer(positionHistoryLayer);
 			break;
         case "DisplayKML":
             var kmlPaths = getKMLsFromJava();
-            var index;
-            for (index = 0; index < kmlPaths.length; ++index) {
-                displayKML(kmlPaths[index]);
+            for (var i = 0; i < kmlPaths.length; i++) {
+                displayKML(kmlPaths[i]);
             }
             break;
         case "HideKML":
-            for (index = 0; index < kmlLayers.length; ++index) {
-                map.removeLayer(kmlLayers[index]);            
+            for (var i = 0; i < kmlLayers.length; i++) {
+                map.removeLayer(kmlLayers[i]);            
             }
             kmlLayers = [];
             break;
+        case "PanToCurrentLocation":
+            var points = getPointsFromJava(msg);
+            map.panTo(new OpenLayers.LonLat(points[0].x, points[0].y));
+            break;
+        case "ChangeBaseMap":
+        	redrawMap(getCurrentMapFromJava());
+        	break;
         default:
             break;
     }
@@ -410,11 +549,29 @@ function displayKML(kml) {
 }
 
 /**
+ * Function getCurrentMapFromJava
+ * Get the current base map name based 
+ * on user selection
+ * 
+ * Parameters:
+ * - 
+ */
+function getCurrentMapFromJava() {
+
+	var currentMap = android.getCurrentMap();
+	currentMap = JSON.parse(currentMap);
+	currentMap = currentMap.map;
+
+	return currentMap;	
+}
+
+/**
  * Function: getKMLsFromJava
  * Given a message, summon the correct Android/Java method 
  * to get a list of KML files. 
  *
  * Parameters:
+ * -
  */
 function getKMLsFromJava() {
     var kmls = android.getKMLs();
@@ -431,29 +588,67 @@ function getKMLsFromJava() {
 
 /**
  * Function: getPointsFromJava
+ * Summon the correct Android/Java method and return the point of current coordinates.
+ *
+ * Parameters:
+ */
+function getPointsFromJava(msg) {
+    var points;
+    switch (msg) {
+        case "DisplaySamples":
+            points = android.getSamples();
+            break;
+        case "DisplayCurrentLocation":
+            points = android.getCurrentLocation();
+            updateCurrentPosition(points);
+            break;
+        case "PanToCurrentLocation":
+            points = android.getCurrentLocation();
+            break;
+        default:
+            return;
+    }
+
+    points = JSON.parse(points);
+    var pointList = [];
+    for (data in points['points']) {
+        var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
+        point = point.transform(map.displayProjection, map.projection);
+        pointList.push(point);
+
+        // Store a sample's id to a map
+        if (msg == "DisplaySamples") {
+            sampleList[point.toShortString()] = points['points'][data].id;
+        }
+    }
+
+    return pointList;
+}
+
+/**
+ * Function: getPointFeatures
  * Given a message, summon the correct Android/Java method 
  * to get a list of vector points. 
  *
  * Parameters:
  * msg - {String}
  */
-function getPointsFromJava(msg) {
+function getPointFeatures(msg) {
     var points;
     var marker_style;
     var azimuth = -1;
 
     switch (msg) {
         case "DisplaySamples":
-            points = android.getSamples();
+            points = getPointsFromJava(msg);
             marker_style = marker_red;
             break;
         case "DisplayCurrentLocation":
-            points = android.getCurrentLocation();
+            points = getPointsFromJava(msg);
             marker_style = style_current_location;
             
             var orientation = android.getOrientation();
             orientation = JSON.parse(orientation);
-
             for (data in orientation['orientation']) {
                 azimuth = orientation['orientation'][data].azimuth;
             }
@@ -462,20 +657,19 @@ function getPointsFromJava(msg) {
             return;
     }
 
-    points = JSON.parse(points);
-    //var pointList = [];
     var pointFeatures = [];
-    for(data in points['points']){
-	    var point = new OpenLayers.Geometry.Point(points['points'][data].x, points['points'][data].y);		
-        point = point.transform(map.displayProjection, map.projection);
-        var pointFeature = new OpenLayers.Feature.Vector(point, null, marker_style);
+    for(var i = 0; i < points.length; i++){
+        var pointFeature = new OpenLayers.Feature.Vector(points[i], null, marker_style);
 
         if (msg == "DisplayCurrentLocation") {
             pointFeature.style.rotation = azimuth;
+        } else if (msg == "DisplaySamples") {
+            // Put the sample's id to the feature's attribute.
+            // It is used to identify different samples when pop-up is triggered.
+            pointFeature.attributes = sampleList[points[i].toShortString()];
         }
 
         pointFeatures.push(pointFeature);
-        //pointList.push(point);
     }
 
     return pointFeatures;
@@ -512,8 +706,7 @@ function getLinesFromJava(msg) {
         pointFeatures.push(pointFeature);
         pointList.push(point);
     }
-    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), 
-    null, line_style);
+    var lineFeature = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString(pointList), null, line_style);
     pointFeatures.push(lineFeature);
 
     return lineFeature;

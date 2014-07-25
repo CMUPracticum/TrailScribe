@@ -5,9 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
@@ -39,14 +36,17 @@ import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
-import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.utils.JsonHelper;
 import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
-
+import edu.cmu.sv.trailscribe.dao.MapDataSource;
+import edu.cmu.sv.trailscribe.model.data.Map;
+import edu.cmu.sv.trailscribe.model.data.Sample;
 
 public class MapsActivity extends BaseActivity 
     implements OnClickListener, SensorEventListener, OnNavigationListener {
 	
-	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("Maps", "Display map and layers", R.color.green);
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme(
+	        "Maps", "Display map and layers", R.color.green);
 	public static String MSG_TAG = "MapsActivity";
 
 //	Controllers
@@ -78,6 +78,7 @@ public class MapsActivity extends BaseActivity
 //	Base Map
 	private ArrayList<String> mBaseMaps;
 	private SpinnerAdapter mSpinnerAdapter;
+	private int mSelectedMapPosition = -1; // position of the map that was selected in the spinner
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -122,6 +123,7 @@ public class MapsActivity extends BaseActivity
 	    mActionBar.setIcon(R.drawable.button_settings);
 	    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_layout);
 	    
+//	    Define the listen of the navigation drawer
 	    mDrawerToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, 
                 R.drawable.icon_trailscribe, R.string.map_display_tools, R.string.map_hide_tools) {
@@ -137,11 +139,12 @@ public class MapsActivity extends BaseActivity
             }
         };
 
-        mActionBar.setDisplayHomeAsUpEnabled(true);
-        mActionBar.setHomeButtonEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
         
 //      Create spinner in action bar 
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setHomeButtonEnabled(true);
         
         setSpinner();
 	}
@@ -165,7 +168,6 @@ public class MapsActivity extends BaseActivity
 		mCurrentLocationButton.setOnClickListener(this);
 		mPositionHistoryButton.setOnClickListener(this);
 		mKmlButton.setOnClickListener(this);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 	
 	private void setTextView() {
@@ -173,17 +175,33 @@ public class MapsActivity extends BaseActivity
 	    updateCoordinateTextView();
 	}
 	
-	private void setSpinner() {
-	    getBaseMapsFromStorage();
+	private void setBaseMaps() {
+        MapDataSource dataSource = new MapDataSource(mDBHelper);
+        ArrayList<Map> mapsInDatabase = (ArrayList<Map>) dataSource.getAll();
+        HashSet<String> mapsInStorage = StorageSystemHelper.getBaseMapsFromStorage();
+        
+//      Only populate maps that are in both device database and device storage
+        mBaseMaps = new ArrayList<String>();
+        for (int i = 0; i < mapsInDatabase.size(); i++) {
+            if (mapsInStorage.contains(mapsInDatabase.get(i).getName())) {
+                mBaseMaps.add(mapsInDatabase.get(i).getName());
+            }
+        }
+        
 //      Add the title of the spinner to the head of the list, will be ignored if it is selected
         mBaseMaps.add(0, getResources().getString(R.string.map_display_basemap));
+	    
+	}
+	
+	private void setSpinner() {
+	    setBaseMaps();
         
         String[] basemaps = new String[mBaseMaps.size()];
         mBaseMaps.toArray(basemaps);
 
 //      Create spinner adapter, then add the adapter and the listener to the action bar
-        mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);
-        mActionBar.setListNavigationCallbacks(mSpinnerAdapter, this);
+        mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);        
+        mActionBar.setListNavigationCallbacks(mSpinnerAdapter, this);        
 	}
 	
 	private void updateCoordinateTextView() {
@@ -192,7 +210,9 @@ public class MapsActivity extends BaseActivity
 	        return;
 	    }
 	    
-	    mCoordinateTextView.setText(mLocation.getLatitude() + "," + mLocation.getLongitude());
+	    mCoordinateTextView.setText("Speed: " + mLocation.getSpeed() + " m/s, Lat: " + 
+	    							mLocation.getLatitude() + ", Lng: " + 
+	    							mLocation.getLongitude());	    
 	}
 	
 	@SuppressLint("SetJavaScriptEnabled")
@@ -204,9 +224,9 @@ public class MapsActivity extends BaseActivity
 		mWebView.getSettings().setUseWideViewPort(false);
 		mWebView.setWebViewClient(new WebViewClient());
 		
-		// Setting to give OpenLayers access to local KML files
-		// Sets whether JavaScript running in the context of a file scheme URL should be allowed to 
-		// access content from any origin.
+//		Setting to give OpenLayers access to local KML files
+//		Sets whether JavaScript running in the context of a file scheme URL should be allowed to 
+//		access content from any origin.
 		mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
 
 		mController = new MapsController();
@@ -218,21 +238,53 @@ public class MapsActivity extends BaseActivity
 	}
 	
 	@JavascriptInterface
+	public String getCurrentMap() throws Exception {		
+//	    First request for base map
+		if (mSelectedMapPosition == -1) {
+			mSelectedMapPosition = 1; // By default, show the first map as base map
+		}
+		
+		setBaseMaps();
+//		Show error message if there is no map on the device, the only item in mBaseMaps is the title
+		if (mBaseMaps.size() == 1) {
+            String errorMessage = "There are no map on the device. Download maps in Sync Center";
+            Log.e(MSG_TAG, errorMessage);
+            Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
+            throw new Exception(errorMessage);		    
+		}
+		
+		MapDataSource dataSource = new MapDataSource(mDBHelper);
+		
+//		Find selected map from database based on selected map name
+		String selectedMapName = mBaseMaps.get(mSelectedMapPosition);
+		Map currentMap = null;
+		currentMap = dataSource.get(selectedMapName);
+		
+		if (currentMap == null) {
+		    String errorMessage = "Selected map is not found in database";
+		    Log.e(MSG_TAG, errorMessage);
+		    throw new Exception(errorMessage);
+		}
+
+		return JsonHelper.getCurrentMapJson(currentMap);		
+	}
+	
+	@JavascriptInterface
 	public String getOrientation() {
-	    //Log.d(MSG_TAG, "getOrientation");
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("{'orientation':[");
-        buffer.append("{'azimuth':'").append(mAzimuth).append("'}");
-        buffer.append("]}'");
+	    return JsonHelper.getOrientationJson(mAzimuth);
+	}
+	
+	@JavascriptInterface()
+	public String getSample(String id) {
+	    SampleDataSource dataSource = new SampleDataSource(mDBHelper);
+	    
+        ArrayList<Sample> samples = new ArrayList<Sample>();
+        Sample sample = dataSource.get(Long.parseLong(id));
         
-        JSONObject orientation = null;
-        try {
-            orientation = new JSONObject(buffer.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        
-        return orientation.toString();
+        if (sample == null) return new String();
+        samples.add(sample);
+	    
+        return JsonHelper.getSamplesJson(samples);
 	}
 	
 	@JavascriptInterface
@@ -240,29 +292,7 @@ public class MapsActivity extends BaseActivity
 		SampleDataSource dataSource = new SampleDataSource(mDBHelper);
 		
 		List<Sample> samples = dataSource.getAll();
-		
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("{'points':[");
-		for (int i = 0; i < samples.size(); i++) {
-			Sample sample = samples.get(i);
-			
-			buffer.append("{'x':'").append(sample.getX()).append("', ");
-			buffer.append("'y':'").append(sample.getY()).append("'}");
-			
-			if (i != samples.size() - 1) {
-				buffer.append(", ");
-			}
-		}
-		buffer.append("]}'");
-		
-		JSONObject mapPoints = null;
-		try {
-			mapPoints = new JSONObject(buffer.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return mapPoints.toString();
+		return JsonHelper.getSamplesJson(samples);
 	}
 	
 	@JavascriptInterface
@@ -273,69 +303,20 @@ public class MapsActivity extends BaseActivity
 	        throw new Exception("Current location is not available");
 	    }
 	    
-		JSONObject mapPoints = null;
-		
-		try {
-			double la = mLocation.getLatitude();
-			double lng = mLocation.getLongitude();
-			mapPoints = new JSONObject("{'points':[{'x':'" + lng + "', 'y':'" + la + "'}]}'");
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return mapPoints.toString();
-	}	
+	    return JsonHelper.getCurrentLocationJson(mLocation);
+	}
 	
 	@JavascriptInterface
 	public String getPositionHistory() {
 		LocationDataSource dataSource = new LocationDataSource(mDBHelper);
 		
-		List<edu.cmu.sv.trailscribe.model.Location> locations = dataSource.getAll();
-		
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("{'points':[");
-		for (int i = 0; i < locations.size(); i++) {
-		    edu.cmu.sv.trailscribe.model.Location locationHistory = locations.get(i);
-			
-			buffer.append("{'x':'").append(locationHistory.getX()).append("',");
-			buffer.append("'y':'").append(locationHistory.getY()).append("'}");
-			
-			if (i != locations.size() - 1) {
-				buffer.append(", ");
-			}
-		}
-		buffer.append("]}'");
-		
-		JSONObject mapPoints = null;
-		try {
-			mapPoints = new JSONObject(buffer.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return mapPoints.toString();
+		List<edu.cmu.sv.trailscribe.model.data.Location> locations = dataSource.getAll();
+		return JsonHelper.getPositionHistoryJson(locations);
 	}
 	
     @JavascriptInterface
     public String getKMLs() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("{'kmls':[");
-        for (int i = 0; i < mSelectedOverlayNames.size(); i++) {
-            buffer.append("{'path':'").append(mSelectedOverlayNames.get(i)).append("'}");
-            
-            if (i != mSelectedOverlayNames.size() - 1) {
-                buffer.append(", ");
-            }
-        }
-        buffer.append("]}'");
-        
-        JSONObject overlays = null;
-        try {
-            overlays = new JSONObject(buffer.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        
-        return overlays.toString();
+        return JsonHelper.getSelectedKmlJson(mSelectedOverlayNames);
     }
 	
 	@Override
@@ -363,6 +344,8 @@ public class MapsActivity extends BaseActivity
 		    } else {
 		        message = MessageToWebview.DisplayCurrentLocation;
 		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location_toggle);
+		        
+		        setLayers(MessageToWebview.PanToCurrentLocation);
 		    }
 		    
 		    mIsDisplayCurrentLocation = !mIsDisplayCurrentLocation;
@@ -380,12 +363,11 @@ public class MapsActivity extends BaseActivity
             mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
 			break;
 		case R.id.maps_kml:
-		    mIsDisplayKML = !mIsDisplayKML;
-		    
 //          Hide KML if it is currently displayed
 			if (mIsDisplayKML) {
                 message = MessageToWebview.HideKML;
                 mKmlButton.setBackgroundResource(R.drawable.button_kml);
+                mIsDisplayKML = false;
             } else {
 //              Message to webview will be sent after positive button in the selector is clicked 
                 createKMLSelector();
@@ -422,14 +404,14 @@ public class MapsActivity extends BaseActivity
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] values = event.values;
+        
+//      Ignore minor rotations
         if (Math.abs(values[0] - mAzimuth) <= 5) {
-//          Ignore minor rotations
             return;
         }
         
         mAzimuth = (int) values[0];
         if (mIsDisplayCurrentLocation) {
-            //Log.d(MSG_TAG, "onSensorChanged: " + mAzimuth);
             setLayers(MessageToWebview.HideCurrentLocation);
             setLayers(MessageToWebview.DisplayCurrentLocation);
         }
@@ -442,33 +424,14 @@ public class MapsActivity extends BaseActivity
         setLayers(message);
     }
     
-    private void getBaseMapsFromStorage() {
-        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "maps/";
-        List<String> fileNames = StorageSystemHelper.getFolders(overlayDirectory);
-        
-        mBaseMaps = new ArrayList<String>();
-        for (String fileName : fileNames) {
-            mBaseMaps.add(fileName);
-        }
-    }
-    
-    private void getOverlaysFromStorage() {
-        final String overlayDirectory = TrailScribeApplication.STORAGE_PATH + "kmls/";
-        List<String> fileNames = StorageSystemHelper.getFiles(overlayDirectory);
-        
-        mOverlays = new ArrayList<String>();
-        for (String fileName : fileNames) {
-            mOverlays.add(fileName);
-        }
-    }
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        //Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
+//      Log.d(MSG_TAG, "Sensor accuracy has changed: " + sensor.getName() + ", " + accuracy);
     }
     
+//  Create the selector dialog for displaying KML layers
     private void createKMLSelector() {
-        getOverlaysFromStorage();
+        mOverlays = StorageSystemHelper.getOverlaysFromStorage();
         
         String[] overlayNames = new String[mOverlays.size()];
         mOverlays.toArray(overlayNames);
@@ -481,15 +444,18 @@ public class MapsActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(int position, long itemId) {
         if (position == 0) {
-//          Ignore if title of the spinner is selected
+//          Ignore when tile of the spinner is selected
             return true;
         }
         
-//      TODO: call webview
-        Toast.makeText(MapsActivity.this, "Position=" + position, Toast.LENGTH_SHORT).show();
+        mSelectedMapPosition = position;
+        
+        MessageToWebview message = MessageToWebview.ChangeBaseMap;
+        setLayers(message);
+        
         return true;        
     }
-    
+        
     private class KMLSelectorBuilder extends AlertDialog.Builder {
         private HashSet<Integer> mSelectedItems;
         private String[] mOverlayNames;
@@ -522,6 +488,8 @@ public class MapsActivity extends BaseActivity
         private DialogInterface.OnClickListener mPositiveListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                mIsDisplayKML = true;
+                
                 List<String> selectedItemNames = new ArrayList<String>();
                 for (Integer item : mSelectedItems) {
                     selectedItemNames.add(mOverlayNames[item.intValue()]);
@@ -552,7 +520,9 @@ public class MapsActivity extends BaseActivity
 		DisplayPositionHistory("DisplayPositionHistory"),
 		HidePositionHistory("HidePositionHistory"),
 		DisplayKML("DisplayKML"),
-		HideKML("HideKML");
+		HideKML("HideKML"),
+		PanToCurrentLocation("PanToCurrentLocation"), 
+		ChangeBaseMap("ChangeBaseMap");
 		
 		private final String message;
 		MessageToWebview(String message) {

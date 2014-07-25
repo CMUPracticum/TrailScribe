@@ -1,6 +1,6 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.model.data;
 
-public class Map extends SyncItem{
+public class Map extends SyncItem {
 	private String mDescription;
 	private String mProjection;
 	private int mMinZoomLevel;
@@ -27,7 +27,7 @@ public class Map extends SyncItem{
 		mMinX = minX;
 		mMinY = minY;
 		mMaxX = maxX;
-		mMinY = minY;
+		mMaxY = maxY;
 		mLastModified = lastModified;
 	}
 
@@ -103,11 +103,6 @@ public class Map extends SyncItem{
 		this.mLastModified = mLastModified;
 	}
 	
-	@Override
-	public String toString(){
-		return this.getName();
-	}
-	
 	public String getDescription() {
 		return mDescription;
 	}
@@ -131,4 +126,24 @@ public class Map extends SyncItem{
 	public String getName(){
 		return super.getName();
 	}
+	
+    @Override
+    public String toString(){
+        return this.getName();
+    }
+    
+    @Override
+    public String toJson() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("'projection':'").append(this.getProjection()).append("', ");
+        buffer.append("'name':'").append(this.getName()).append("', ");
+        buffer.append("'minZoomLevel':'").append(this.getMinZoomLevel()).append("', ");
+        buffer.append("'maxZoomLevel':'").append(this.getMaxZoomLevel()).append("', ");
+        buffer.append("'minX':'").append(this.getMinX()).append("', ");
+        buffer.append("'maxX':'").append(this.getMaxX()).append("', ");
+        buffer.append("'minY':'").append(this.getMinY()).append("', ");
+        buffer.append("'maxY':'").append(this.getMaxY()).append("'");
+    
+        return buffer.toString();
+    }
 }

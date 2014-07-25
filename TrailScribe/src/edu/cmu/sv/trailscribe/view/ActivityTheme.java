@@ -1,30 +1,33 @@
 package edu.cmu.sv.trailscribe.view;
 
 public class ActivityTheme {
-	private String activityName;
-	private String activityDescription;
-	private int activityColor;
+	private String mActivityName;
+	private String mActivityDescription;
+
+//	Color of the action bar in the activity.
+//	It should be defined in /res/values/colors.xml and loaded from getResources()
+	private int mActivityColor;
 	
 	ActivityTheme(String activityName, String activityDescription, int activityColor) {
-		this.activityName = activityName;
-		this.activityDescription = activityDescription;
-		this.activityColor = activityColor;
+		this.mActivityName = activityName;
+		this.mActivityDescription = activityDescription;
+		this.mActivityColor = activityColor;
 	}
 	
 	public String getActivityName() {
-		return this.activityName;
+		return this.mActivityName;
 	}
 	
 	public String getActivityDescription() {
-		return this.activityDescription;
+		return this.mActivityDescription;
 	}
 	
 	public int getActivityColor() {
-		return this.activityColor;
+		return this.mActivityColor;
 	}
 	
 	public void updateActivityDescription() {
-//			TODO
+//	    TODO
 	}
 
 }

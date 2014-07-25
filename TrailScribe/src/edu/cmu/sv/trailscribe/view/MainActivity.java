@@ -19,7 +19,8 @@ import edu.cmu.sv.trailscribe.R;
 
 public class MainActivity extends BaseActivity implements OnItemClickListener {
 
-	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme("MainActivity", "Main page", R.color.blue);
+	public static ActivityTheme ACTIVITY_THEME = new ActivityTheme(
+	        "MainActivity", "Main page", R.color.blue);
 	public static String MSG_TAG = "Main page";
 	
 	@Override
@@ -64,7 +65,8 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 			intent = new Intent(this, SynchronizationCenterActivity.class);
 			break;
 			default:
-				Toast.makeText(getApplicationContext(), "Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, 
+				        "Sorry, the feature is not implemented yet!", Toast.LENGTH_SHORT).show();
 				return;
 		}
 		
@@ -98,5 +100,4 @@ public class MainActivity extends BaseActivity implements OnItemClickListener {
 	       return convertView;
 	   }
 	}
-	
 }

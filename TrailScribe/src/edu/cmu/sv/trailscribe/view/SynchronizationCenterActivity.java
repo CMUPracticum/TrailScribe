@@ -3,42 +3,39 @@ package edu.cmu.sv.trailscribe.view;
 import java.util.ArrayList;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.SynchronizationCenterController;
-import edu.cmu.sv.trailscribe.dao.KmlDataSource;
-import edu.cmu.sv.trailscribe.dao.MapDataSource;
 import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
-import edu.cmu.sv.trailscribe.model.Kml;
-import edu.cmu.sv.trailscribe.model.Map;
-import edu.cmu.sv.trailscribe.model.SyncItem;
+import edu.cmu.sv.trailscribe.model.data.SyncItem;
 import edu.cmu.sv.trailscribe.utils.Decompressor;
 import edu.cmu.sv.trailscribe.utils.Downloader;
 import android.util.Log;
 
+@SuppressWarnings("rawtypes") // Suppressing warning given this class listens to 2 different AsyncTasks
 public class SynchronizationCenterActivity 
-    extends BaseActivity implements AsyncTaskCompleteListener {
+extends BaseActivity implements AsyncTaskCompleteListener {
 
 	public static final ActivityTheme ACTIVITY_THEME = 
-            new ActivityTheme("SyncCenter", "Synchronizes TrailScribe", R.color.red);
-    
-		private ListView mListView;
-		private SynchronizationCenterController mController;
-		private ArrayList<SyncItem> mSyncItems;
-		private ProgressDialog mSyncProgressDialog;
-		private ProgressDialog mDownloadProgressDialog;
-		private ProgressDialog mUnzippingProgressDialog; 
+			new ActivityTheme("SyncCenter", "Synchronizes TrailScribe", R.color.red);
+
+	private ListView mListView;
+	private SynchronizationCenterController mController;
+	private ArrayList<SyncItem> mSyncItems;
+	private ProgressDialog mSyncProgressDialog;
+	private ProgressDialog mDownloadProgressDialog;
+	private ProgressDialog mDecompressProgressDialog; 
+	private ArrayAdapter<SyncItem> mAdapter;
+	private String baseDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
+
     private boolean mapsFetched = false;
     private Runnable mapsFetchedCallback = null;
     private static final String LOG_TAG = "SynchronizationCenterActivity";
-		private ArrayAdapter<SyncItem> mAdapter;
-		private String downloadDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
-	  
 
     public void setMapsFetchedCallback(Runnable callback) {
         mapsFetchedCallback = callback;
@@ -48,122 +45,104 @@ public class SynchronizationCenterActivity
         return mapsFetched;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-          super.onCreate(savedInstanceState);
-          mSyncProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.synchronizing), true, true);
-      	  mDownloadProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
-      	  mUnzippingProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
-          mController = new SynchronizationCenterController(this);
-          mController.execute();
-      }
-	  
-	  @Override
-	  protected void onPause(){
-		  super.onPause();
-	  }
-	  
-	  @Override
-	  protected void onResume(){
-		  super.onResume();
-	  }
-	  
+	@SuppressWarnings("unchecked") // Suppressing warning given this class listens to 2 different AsyncTasks
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_sync_center);
+		mListView = (ListView) findViewById(R.id.sync_list);
+		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
+
+		mSyncProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.synchronizing), true, true);
+		mDownloadProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
+		mDecompressProgressDialog = new ProgressDialog(SynchronizationCenterActivity.this);
+		mController = new SynchronizationCenterController(this);
+		mController.execute();
+	}
+
+	@Override
+	protected void onPause(){
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume(){
+		super.onResume();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onTaskCompleted(Object result) {
+		//close the progress dialogs
+
+		if (mSyncProgressDialog != null){
+			mSyncProgressDialog.dismiss();
+		}
+		if(mDecompressProgressDialog!= null){
+			mDecompressProgressDialog.dismiss();
+		}
+
+		// Handle any error related to synchronization results
+		if(result == null){
+			showMessage(getResources().getString(R.string.connection_error));		
+		}
+		// Response from backend. Items to sync.
 		if (result instanceof ArrayList<?>){
 			mSyncItems = (ArrayList<SyncItem>) result;
-			
-			if (mSyncProgressDialog != null){
-                            try {
-	            mSyncProgressDialog.dismiss();
-                            } catch (Exception e) {
-                                Log.w(LOG_TAG, "Activity ended before task completed");
-                            }
-			}
-			
-			setContentView(R.layout.activity_sync_center);
-			mListView = (ListView) findViewById(R.id.sync_list);
-	
-            setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 			mAdapter = new ArrayAdapter<SyncItem>(SynchronizationCenterActivity.this,
-	           android.R.layout.simple_list_item_1, android.R.id.text1, mSyncItems);
-	 
-	         // Assign adapter to ListView
-	         mListView.setAdapter(mAdapter); 
+					android.R.layout.simple_list_item_1, android.R.id.text1, mSyncItems);
+			mListView.setAdapter(mAdapter); 
+			if(mSyncItems.size() == 0){
+				showMessage(getResources().getString(R.string.up_to_date));
+			}
 		}
+
+		// Response from downloader. If success, start uncompressing
 		else if(result instanceof Boolean){
+			if (mDownloadProgressDialog != null){
+				mDownloadProgressDialog.dismiss();
+			}
 			boolean downloadResult = (Boolean) result;
 			if(downloadResult == true){
-	            	new UnzipTask().execute();
-	            }
-		}
-
-                mapsFetched = true;
-                if (mapsFetchedCallback != null) {
-                    mapsFetchedCallback.run();
-                }
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void onSyncAll(View v){
-		new Downloader(mSyncItems, SynchronizationCenterActivity.this, downloadDirectory,
-				mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
-	}
-	
-	private class UnzipTask extends AsyncTask<Void, Integer, Void>{
-
-		@Override
-		protected void onPreExecute() 
-		{
-			mUnzippingProgressDialog = ProgressDialog.show(SynchronizationCenterActivity.this, "", getResources().getString(R.string.uncompressing), true, true);
+				mDecompressProgressDialog = ProgressDialog.show(this, "", getResources().getString(R.string.uncompressing), true, true);
+				new Decompressor (mSyncItems, baseDirectory, SynchronizationCenterActivity.this).execute();
+			}
+			else{
+				mController.cancel(true);
+				showMessage(getResources().getString(R.string.connection_error));
+			}
 		}
 		
-		@Override
-		protected Void doInBackground(Void... params) 
+		//Response from Decompressor
+		else if(result instanceof Integer){
+			int successCode = (Integer) result;
+			if(successCode == Decompressor.DECOMPRESSION_SUCCESS){
+				mAdapter.clear();
+				mAdapter.notifyDataSetChanged();
+				showMessage(getResources().getString(R.string.up_to_date));
+                                mapsFetched = true;
+                                if (mapsFetchedCallback != null) {
+                                    mapsFetchedCallback.run();
+                                }
+			}
+		}
+	}
+	
+	// Helper method to display messages in a toast
+	private void showMessage(final String message){
+		runOnUiThread(new Runnable() 
 		{
-			//Get the current thread's token
-			synchronized (this) 
+			public void run() 
 			{
-				for (SyncItem item: mSyncItems){
-					int subStringIndex = item.getFilename().lastIndexOf("/") +1;
-	            	String mapFileName = item.getFilename().substring(subStringIndex);
-	            	String folderName = null;
-	        		if(item instanceof Map){
-	        			folderName = "maps";
-	        		}
-	        		else if(item instanceof Kml){
-	        			folderName = "kmls";
-	        		}
-	            	Decompressor decompressor = new Decompressor( downloadDirectory + folderName + "/"+ item.getName() + "/" + mapFileName, downloadDirectory + folderName + "/" + item.getName() + "/");
-	            	decompressor.unzip();
-				}
+				Toast.makeText(SynchronizationCenterActivity.this, message, Toast.LENGTH_LONG).show();    
 			}
-			return null;
-		}
-
-		//after executing the code in the thread
-		@Override
-		protected void onPostExecute(Void result) 
-		{
-			//close the progress dialog
-			if(mUnzippingProgressDialog!= null){
-				mUnzippingProgressDialog.dismiss();
-			}
-			
-			for(SyncItem item: mSyncItems)
-			if(item instanceof Map){
-    			MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
-    			mapsDs.add(item);
-    		}
-    		else if(item instanceof Kml){
-    			KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
-    			kmlsDs.add(item);
-    		}
-			
-			//Check for success
-			mAdapter.clear();
-			mAdapter.notifyDataSetChanged();
-		}
+		}); 
+	}
+	
+	//This method is invoked whenever the SyncAll button is clicked
+	@SuppressWarnings("unchecked")
+	public void onSyncAll(View v){
+		new Downloader(mSyncItems, SynchronizationCenterActivity.this, baseDirectory,
+				mDownloadProgressDialog, SynchronizationCenterActivity.this).execute();
 	}
 }

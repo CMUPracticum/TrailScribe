@@ -1,5 +1,6 @@
 package edu.cmu.sv.trailscribe.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ContentValues;
@@ -8,10 +9,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-public abstract class DataSource {
-	private static final String MSG_TAG = "DataSource";
+public abstract class DataSource<T> {
+    protected static final String MSG_TAG = "DataSource";
 	
-	// Database fields
+//  Database fields
 	protected static SQLiteDatabase database;
 	protected static DBHelper dbHelper;
 	
@@ -31,7 +32,7 @@ public abstract class DataSource {
 		dbHelper.close();
 	}
 
-	public abstract boolean add(Object data);
+	public abstract boolean add(T data);
 	protected boolean addHelper(String table, ContentValues values) {
 		open();
 		boolean success = (database.insert(table, null, values) != -1);
@@ -40,12 +41,94 @@ public abstract class DataSource {
 		return success;
 	}
 
-	public abstract boolean delete(Object data);
+	public abstract boolean delete(T data);
+	
 	protected void deleteHelper(String table, long id) {
+	    open();
 	    database.delete(table, DBHelper.KEY_ID + " = " + id, null);
+	    close();
 	}
+	
+	public abstract boolean deleteAll();
+    protected void deleteAllHelper(String table) {
+        open();
+        database.delete(table, null, null);
+        close();
+    }
 
-	@SuppressWarnings("rawtypes")
-	public abstract List getAll();
-	protected abstract Object cursorToData(Cursor cursor);
+    /**
+     * Get row from table by id
+     * 
+     * @param table
+     * @param id
+     */
+	public abstract T get(long id);
+    protected T getHelper(String table, String[] allColumns, long id) {
+        open();
+        
+        Cursor cursor = database.query(table, allColumns, 
+                DBHelper.KEY_ID + "=?", new String[] {Long.toString(id)}, 
+                null, null, null, null);
+        T data = null;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                data = cursorToData(cursor);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        
+        close();
+        return data;
+    }
+    
+    /**
+     * Get row from table by name. Note that some tables do not have a 'name' column
+     * 
+     * @param table
+     * @param id
+     */
+    public abstract T get(String name);
+    protected T getHelper(String table, String[] allColumns, String name) {
+        open();
+        
+        Cursor cursor = database.query(table, allColumns, 
+                DBHelper.NAME + "=?", new String[] {name}, 
+                null, null, null, null);
+        T data = null;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                data = cursorToData(cursor);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        
+        close();
+        return data;
+    }    
+	
+	public abstract List<T> getAll();
+    protected List<T> getAllHelper(String table, String[] allColumns) {
+        open();
+        
+        Cursor cursor = database.query(table, allColumns, null, null, null, null, null);
+        List<T> list = new ArrayList<T>();
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                list.add(cursorToData(cursor));
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        
+        close();
+        return list;
+	}
+	
+	
+	protected abstract T cursorToData(Cursor cursor);
 }

@@ -22,7 +22,7 @@
 
 		<TextView
 		    android:id="@+id/maps_coordinate"
-		    android:layout_width="640px"
+		    android:layout_width="640dp"
 		    android:layout_height="wrap_content"
 		    android:layout_alignParentRight="true"
 		    android:layout_alignParentBottom="true"
@@ -30,7 +30,7 @@
 		    android:gravity="right"
 		    android:text="@string/map_coordinate"
 		    android:textColor="@color/blue"
-		    android:textSize="18sp" />
+		    android:textSize="16sp" />
 
     </RelativeLayout>
 	
@@ -39,41 +39,41 @@
             android:id="@+id/maps_drawer"
             android:orientation="vertical"
             android:layout_gravity="start|center_horizontal"
-            android:layout_width="196px"
+            android:layout_width="168dp"
             android:layout_height="wrap_content"
-            android:background="@color/panel">
+            android:background="@color/transparent">
             
             <View
                 android:layout_width="fill_parent"
-                android:layout_height="20px"/>
+                android:layout_height="2dp"/>
             
             <Button
                 android:id="@+id/maps_samples"
-                android:layout_width="196px"
-                android:layout_height="196px"
+                android:layout_width="168dp"
+                android:layout_height="168dp"
                 android:background="@drawable/button_samples" />
             <Button
                 android:id="@+id/maps_current_location"
-                android:layout_width="196px"
-                android:layout_height="196px"
-                android:paddingTop="10px"
+                android:layout_width="168dp"
+                android:layout_height="168dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/button_current_location" />
             <Button
                 android:id="@+id/maps_position_history"
-                android:layout_width="196px"
-                android:layout_height="196px"
-                android:paddingTop="10px"
+                android:layout_width="168dp"
+                android:layout_height="168dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/button_position_history" />
             <Button
                 android:id="@+id/maps_kml"
-                android:layout_width="196px"
-                android:layout_height="196px"
-                android:paddingTop="10px"
+                android:layout_width="168dp"
+                android:layout_height="168dp"
+                android:layout_marginTop="2dp"
                 android:background="@drawable/button_kml" />
 
             <View
 				android:layout_width="fill_parent"
-				android:layout_height="20px"/>
+				android:layout_height="2dp"/>
     </LinearLayout>    
     
 </android.support.v4.widget.DrawerLayout>

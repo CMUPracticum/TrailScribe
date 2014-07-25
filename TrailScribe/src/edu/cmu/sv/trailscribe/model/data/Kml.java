@@ -1,4 +1,4 @@
-package edu.cmu.sv.trailscribe.model;
+package edu.cmu.sv.trailscribe.model.data;
 
 public class Kml extends SyncItem {
 	private String mLastModified; 
@@ -37,11 +37,6 @@ public class Kml extends SyncItem {
 		super.setFilename(mFilename);
 	}
 	
-	@Override
-	public String toString(){
-		return this.getName();
-	}
-
 	public String getLastModified() {
 		return mLastModified;
 	}
@@ -49,4 +44,15 @@ public class Kml extends SyncItem {
 	public void setLastModified(String mLastModified) {
 		this.mLastModified = mLastModified;
 	}
+
+    @Override
+    public String toJson() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("'id':'").append(this.getId()).append("', ");
+        buffer.append("'name':'").append(this.getName()).append("', ");
+        buffer.append("'fileName':'").append(this.getFilename()).append("', ");
+        buffer.append("'lastModified':'").append(this.getLastModified()).append("'");
+    
+        return buffer.toString();
+    }
 }
