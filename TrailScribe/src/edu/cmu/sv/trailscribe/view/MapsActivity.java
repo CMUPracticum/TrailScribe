@@ -200,7 +200,8 @@ public class MapsActivity extends BaseActivity
         mBaseMaps.toArray(basemaps);
 
 //      Create spinner adapter, then add the adapter and the listener to the action bar
-        mSpinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);        
+        mSpinnerAdapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_dropdown_item, mBaseMaps);        
         mActionBar.setListNavigationCallbacks(mSpinnerAdapter, this);        
 	}
 	
@@ -343,7 +344,8 @@ public class MapsActivity extends BaseActivity
 		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location);
 		    } else {
 		        message = MessageToWebview.DisplayCurrentLocation;
-		        mCurrentLocationButton.setBackgroundResource(R.drawable.button_current_location_toggle);
+		        mCurrentLocationButton.setBackgroundResource(
+		                R.drawable.button_current_location_toggle);
 		        
 		        setLayers(MessageToWebview.PanToCurrentLocation);
 		    }
@@ -357,7 +359,8 @@ public class MapsActivity extends BaseActivity
                 mPositionHistoryButton.setBackgroundResource(R.drawable.button_position_history);
             } else {
                 message = MessageToWebview.DisplayPositionHistory;
-                mPositionHistoryButton.setBackgroundResource(R.drawable.button_position_history_toggle);
+                mPositionHistoryButton.setBackgroundResource(
+                        R.drawable.button_position_history_toggle);
             }
             
             mIsDisplayPositionHistory = !mIsDisplayPositionHistory;
@@ -387,7 +390,12 @@ public class MapsActivity extends BaseActivity
 	@Override
 	public void onLocationChanged(Location location) {
 	    super.onLocationChanged(location);
-	    
+
+//	    Ignore if location has not changed (more than 3 meters)
+	    if (!mApplication.isLocationChanged()) {
+	        return;
+	    }
+
 	    updateCoordinateTextView();
 		if (mIsDisplayCurrentLocation) {
 		    setLayers(MessageToWebview.HideCurrentLocation);
@@ -484,7 +492,8 @@ public class MapsActivity extends BaseActivity
             }
         };
         
-        private DialogInterface.OnClickListener mPositiveListener = new DialogInterface.OnClickListener() {
+        private DialogInterface.OnClickListener mPositiveListener = 
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mIsDisplayKML = true;
@@ -498,7 +507,8 @@ public class MapsActivity extends BaseActivity
             }
         };
         
-        private DialogInterface.OnClickListener mNegativeListener = new DialogInterface.OnClickListener() {
+        private DialogInterface.OnClickListener mNegativeListener = 
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 //              Restore image and state
