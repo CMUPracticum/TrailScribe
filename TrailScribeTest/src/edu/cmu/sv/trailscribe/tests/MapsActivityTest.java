@@ -11,7 +11,7 @@ import edu.cmu.sv.trailscribe.R;
 import android.test.RenamingDelegatingContext;
 import edu.cmu.sv.trailscribe.dao.DBHelper;
 import edu.cmu.sv.trailscribe.dao.SampleDataSource;
-import edu.cmu.sv.trailscribe.model.Sample;
+import edu.cmu.sv.trailscribe.model.data.Sample;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 import android.location.Location;
 import java.util.concurrent.TimeUnit;
@@ -22,11 +22,9 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
     private static final String WEBVIEW_URL = "file:///android_asset/map.html";
     private static final boolean JAVASCRIPT_ENABLED = true;
     private static final String LOG_TAG = "MapsActivityTest";
-    private static final String SAMPLES_RESULT = "{\"points\":[{\"y\":\"37.410418\",\"x\":\"-122.059746\"},{\"y\":\"37.412675\",\"x\":\"-122.054195\"},{\"y\":\"37.411352\",\"x\":\"-122.05423\"},{\"y\":\"37.409516\",\"x\":\"-122.056896\"},{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"},{\"y\":\"37.410418\",\"x\":\"-122.059746\"},{\"y\":\"37.412675\",\"x\":\"-122.054195\"},{\"y\":\"37.411352\",\"x\":\"-122.05423\"},{\"y\":\"37.409516\",\"x\":\"-122.056896\"}]}";
-    private static final String CURRENT_LOCATION_RESULT = "{\"points\":[{\"y\":\"3.0\",\"x\":\"3.0\"}]}";
-    private static final String POSITION_HISTORY_RESULT = "{\"points\":[{\"y\":\"1.0\",\"x\":\"1.0\"},{\"y\":\"2.0\",\"x\":\"2.0\"}]}";
     private static final String LOC_PROVIDER = "flp";
     private static final String TEST_FILE_PREFIX = "test_";
+    private static final int POSITION_HISTORY_MINIMUM_LENGTH = 13;
 
     private TrailScribeApplication tApplication;
     private MapsActivity tMapsActivity;
@@ -102,9 +100,10 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         tApplication.onLocationChanged(createLocation(1.0, 1.0, 3.0f));
         tApplication.onLocationChanged(createLocation(2.0, 2.0, 3.0f));
 
-        final String actual = tMapsActivity.getPositionHistory();
-        assertEquals("Position history didn't respond to location change correctly",
-                     POSITION_HISTORY_RESULT, actual);
+        final String result = tMapsActivity.getPositionHistory();
+        final String regex = getInstrumentation().getContext()
+            .getString(edu.cmu.sv.trailscribe.tests.R.string.position_history_regex);
+        assertTrue("Position history returned incorrect result", result.matches(regex));
     }
 
     public void testInterface_currentLocation() {
@@ -128,8 +127,10 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         }
         try {
             final String actual = tMapsActivity.getCurrentLocation();
+            final String expected = getInstrumentation().getContext()
+                .getString(edu.cmu.sv.trailscribe.tests.R.string.current_location_result);
             assertEquals("Current location returned incorrect result",
-                         CURRENT_LOCATION_RESULT, actual);
+                         expected, actual);
         } catch (Exception e) {
             fail("Failed to get current location");
         }
@@ -151,8 +152,10 @@ public class MapsActivityTest extends ActivityInstrumentationTestCase2<MapsActiv
         dataSource.add(sample2);
 
         final String actual = tMapsActivity.getSamples();
+        final String expected = getInstrumentation().getContext()
+            .getString(edu.cmu.sv.trailscribe.tests.R.string.samples_result);
         assertEquals("Samples returned incorrect result",
-                     SAMPLES_RESULT, actual);
+                     expected, actual);
     }
 
 }

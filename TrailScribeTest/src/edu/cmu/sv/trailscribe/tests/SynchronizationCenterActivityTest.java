@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import android.database.DataSetObserver;
 import java.util.concurrent.CountDownLatch;
 import android.widget.ArrayAdapter;
-import edu.cmu.sv.trailscribe.model.Map;
+import edu.cmu.sv.trailscribe.model.data.Map;
 import android.util.Log;
 
 public class SynchronizationCenterActivityTest extends ActivityInstrumentationTestCase2<SynchronizationCenterActivity> {
