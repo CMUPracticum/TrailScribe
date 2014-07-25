@@ -26,8 +26,8 @@ public class SynchronizationCenterController
 	
 	private final String endpoint = "http://trail-scribe.mlep.net/sync/";
 	private AsyncTaskCompleteListener<ArrayList<SyncItem>> mTaskCompletedCallback;
-	MapDataSource mMapsDataSource = new MapDataSource(TrailScribeApplication.mDBHelper);
-	KmlDataSource mKmlsDataSource = new KmlDataSource(TrailScribeApplication.mDBHelper);
+	MapDataSource mMapsDataSource = new MapDataSource(TrailScribeApplication.getDBHelper());
+	KmlDataSource mKmlsDataSource = new KmlDataSource(TrailScribeApplication.getDBHelper());
 	
 	public SynchronizationCenterController(AsyncTaskCompleteListener<ArrayList<SyncItem>> callback){
 		this.mTaskCompletedCallback = callback;

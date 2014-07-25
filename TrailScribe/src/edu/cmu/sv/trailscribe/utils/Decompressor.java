@@ -116,11 +116,11 @@ public class Decompressor extends AsyncTask <Void, Void, Void>{
 		if(mSuccessFlag == DECOMPRESSION_SUCCESS){
 			for(SyncItem item: mSyncItems)
 				if(item instanceof Map){
-					MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.mDBHelper);
+					MapDataSource mapsDs = new MapDataSource(TrailScribeApplication.getDBHelper());
 					mapsDs.add((Map) item);
 				}
 				else if(item instanceof Kml){
-					KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.mDBHelper);
+					KmlDataSource kmlsDs = new KmlDataSource(TrailScribeApplication.getDBHelper());
 					kmlsDs.add((Kml) item);
 				}
 		}
