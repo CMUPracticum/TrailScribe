@@ -57,3 +57,6 @@ scripts/config.ini
 scripts/tmp/
 media/
 static/
+
+# OS X specific files
+.DS_Store

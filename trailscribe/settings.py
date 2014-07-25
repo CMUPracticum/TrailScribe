@@ -131,7 +131,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'sync_center'
+    'sync_center',
+    'discover_runner',
 )
 
 # A sample logging configuration. The only tangible logging
