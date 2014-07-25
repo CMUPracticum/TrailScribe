@@ -76,10 +76,18 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 		//close the progress dialogs
 
 		if (mSyncProgressDialog != null){
+                    try {
 			mSyncProgressDialog.dismiss();
+                    } catch (IllegalArgumentException e) {
+                        Log.w(LOG_TAG, "Sync Dialog dismissed after view stopped");
+                    }
 		}
 		if(mDecompressProgressDialog!= null){
+                    try {
 			mDecompressProgressDialog.dismiss();
+                    } catch (IllegalArgumentException e) {
+                        Log.w(LOG_TAG, "Decompress dialog dismissed after view stopped");
+                    }
 		}
 
 		// Handle any error related to synchronization results
@@ -95,6 +103,9 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			if(mSyncItems.size() == 0){
 				showMessage(getResources().getString(R.string.up_to_date));
 			}
+                        if (mapsFetchedCallback != null) {
+                            mapsFetchedCallback.run();
+                        }
 		}
 
 		// Response from downloader. If success, start uncompressing
@@ -121,9 +132,6 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 				mAdapter.notifyDataSetChanged();
 				showMessage(getResources().getString(R.string.up_to_date));
                                 mapsFetched = true;
-                                if (mapsFetchedCallback != null) {
-                                    mapsFetchedCallback.run();
-                                }
 			}
 		}
 	}
