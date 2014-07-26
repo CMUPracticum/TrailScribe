@@ -25,7 +25,7 @@ def map_list(request):
 def kml_list(request):
     kmls = KML.objects.all()
     for kml in kmls:
-        kml.filename = request.build_absolute_url(settings.MEDIA_URL + 'kml/' + kml.filename)
+        kml.filename = request.build_absolute_uri(settings.MEDIA_URL + 'kml/' + kml.filename)
 
     return HttpResponse(serializers.serialize('json', kmls), content_type = "application/json")
 
@@ -43,7 +43,7 @@ def sync_data(request):
 
 
         request_kmls = request_data['kmls']      
-        kml_id_list = util.get_update_id_list('kml', request_maps)
+        kml_id_list = util.get_update_id_list('kml', request_kmls)
         kmls = KML.objects.filter(id__in = kml_id_list)
 
         for kml in kmls:
