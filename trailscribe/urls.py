@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
     url(r'^maps/', map_list),
     url(r'^kmls/', kml_list),
-    url(r'^sync/', sync_data),
+    url(r'^sync/', sync_data, name='sync_data'),
 )
 
 if settings.DEBUG:
