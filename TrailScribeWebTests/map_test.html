@@ -19,16 +19,18 @@
 
     <!-- trailscribe code -->
     <script src="./assets/styles.js"></script>
-    <script src="./assets/mobile.js"></script>
+    <!-- data-cover marks file for code coverage -->
+    <script src="./assets/mobile.js" data-cover></script>
+
+    <!-- testing frameworks -->
+    <script src="./qunit/qunit-1.14.0.js"></script>
+    <script src="./qunit/blanket.min.js"></script>
   </head>
   <body>
     <div id="map" class="olMap" style="display:hidden"></div>
-    <script type="text/javascript">
-      init();
-    </script>
     <div id="qunit"></div>
     <div id="qunit-fixture"></div>
-    <script src="./qunit/qunit-1.14.0.js"></script>
+    <!-- tests themselves -->
     <script src="map_test.js"></script>
   </body>
 </html>

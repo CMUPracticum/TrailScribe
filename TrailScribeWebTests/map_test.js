@@ -1,6 +1,8 @@
 // Note: this code needs to run *after* map init.
 
 QUnit.test("Map init", function(assert) {
+    // run init here so it is included in coverage report
+    init();
     assert.notEqual(map, undefined, "Map properly initialized");
     // the following test is a de-facto check for the existance of sampleLayer,
     // currentLoctationLayer, and positionHistoryLayer
