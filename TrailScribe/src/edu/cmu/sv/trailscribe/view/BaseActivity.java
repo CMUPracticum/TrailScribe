@@ -41,7 +41,7 @@ public class BaseActivity extends Activity implements LocationListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mApplication = (TrailScribeApplication) getApplication();
-		mDBHelper = mApplication.getDBHelper();
+		mDBHelper = TrailScribeApplication.getDBHelper();
 		STORAGE_PATH = TrailScribeApplication.STORAGE_PATH;
 		
 		setLocation();

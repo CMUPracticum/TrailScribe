@@ -25,23 +25,26 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 	private Context mContext;
 	private ProgressDialog mDownloadProgressDialog;
 	private DownloadReceiver mDownloadReceiver; 
-	private NetworkReceiver mNetworkReceiver;
+	private NetworkMonitor mNetworkReceiver;
 	private AsyncTaskCompleteListener<Boolean> mTaskCompletedCallback;
 	private ArrayList<Long> mPendingDownloads = new ArrayList<Long>();
 	private String mDownloadDirectory;
 	private SyncItem mCurrentDownload = null;
 	private int mAmountOfDownloads = 0;
+	final DownloadManager mDownloadManager;
 
 	public Downloader (ArrayList<SyncItem> mSyncItems, Context context, String downloadDirectory, ProgressDialog downloadProgressDialog, AsyncTaskCompleteListener<Boolean> callback){
 		this.mSyncItems	 = mSyncItems;
 		this.mContext = context;
 		this.mTaskCompletedCallback = callback;
 		this.mDownloadReceiver = new DownloadReceiver();
-		this.mNetworkReceiver = new NetworkReceiver();
+		this.mNetworkReceiver = new NetworkMonitor();
 		this.mDownloadProgressDialog = downloadProgressDialog;
 		this.mDownloadDirectory = downloadDirectory;
 		this.mContext.registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		this.mContext.registerReceiver(mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+		mDownloadManager = (DownloadManager) 
+					mContext.getSystemService(Context.DOWNLOAD_SERVICE);
 	}
 
 	@Override
@@ -63,6 +66,15 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		mDownloadProgressDialog.setProgress(0);
 		//Display the progress dialog
 		mDownloadProgressDialog.show();
+		//Register callback for connection events
+		mNetworkReceiver.setCallback(new Runnable() {
+            @Override
+            public void run() {
+            	cancelPendingDownloads();
+            	mTaskCompletedCallback.onTaskCompleted(false);
+            }
+        });
+		
 	}
 
 	@Override
@@ -87,8 +99,6 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			String mapFileName = item.getFilename().substring(subStringIndex);
 			
 			//Using Android DownloadManager to handle downloads
-			final DownloadManager downloadManager = (DownloadManager) 
-					mContext.getSystemService(Context.DOWNLOAD_SERVICE);
 			boolean isDownloading = false;
 
 			DownloadManager.Query query = new DownloadManager.Query();
@@ -99,7 +109,7 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 					DownloadManager.STATUS_SUCCESSFUL|
 					DownloadManager.STATUS_FAILED);
 
-			Cursor cursor = downloadManager.query(query);
+			Cursor cursor = mDownloadManager.query(query);
 			int pathNameColumn = cursor.getColumnIndex(
 					DownloadManager.COLUMN_LOCAL_FILENAME);
 			for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -111,13 +121,13 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 			if (!isDownloading) {
 				// Check for connectivity
 				if (isInternetConnectionAvailable() == true){
-					startDownload(item, mapFileName, downloadManager);
+					startDownload(item, mapFileName, mDownloadManager);
 				}
 				else {
 					if(mDownloadProgressDialog!= null){
 						mDownloadProgressDialog.dismiss();
 					}
-					// Notify listener about the error on the download
+					cancelPendingDownloads();
 					this.mTaskCompletedCallback.onTaskCompleted(false);
 				}
 			}
@@ -246,14 +256,11 @@ public class Downloader extends AsyncTask<Void, Integer, Void> {
 		}
 	}
 	
-	// This receiver is being invoked when the there is a change in the network status
-	class NetworkReceiver extends BroadcastReceiver{
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if(isInternetConnectionAvailable() == false){
-				mTaskCompletedCallback.onTaskCompleted(false);
-			}
+	private void cancelPendingDownloads(){
+		for(Long downloadId: mPendingDownloads){
+			mDownloadManager.remove(downloadId);
 		}
-		
 	}
 }
+
+

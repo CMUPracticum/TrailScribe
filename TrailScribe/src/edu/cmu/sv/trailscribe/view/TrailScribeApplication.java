@@ -20,7 +20,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 	private static Context mContext;
 	
 //	Database
-	public static DBHelper mDBHelper;
+	private static DBHelper mDBHelper;
 
 //  Storage
 	public static final String STORAGE_PATH = 
@@ -53,7 +53,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 		setLocationManager();
 	}
 	
-	public DBHelper getDBHelper() {
+	public static DBHelper getDBHelper() {
 		return mDBHelper;
 	}
 	

@@ -15,6 +15,7 @@ public class BackendFacade extends AsyncTask <String, Void, String>{
 	private String urlParameters;	
 	private String endpoint;
 	private AsyncTaskCompleteListener<String> mTaskCompletedCallback;
+	private NetworkMonitor mNetworkMonitor;
 
 	/**
 	 * @param endpoint URL of the backend to establish the connection
@@ -25,6 +26,15 @@ public class BackendFacade extends AsyncTask <String, Void, String>{
 		this.endpoint = endpoint;
 		this.mTaskCompletedCallback = callback;
 		this.urlParameters = urlParameters;
+		this.mNetworkMonitor = new NetworkMonitor();
+
+		//Register callback for connection events
+		mNetworkMonitor.setCallback(new Runnable() {
+            @Override
+            public void run() {
+            	mTaskCompletedCallback.onTaskCompleted("");
+            }
+        });
 	}
 	
 	 /**
