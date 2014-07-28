@@ -38,10 +38,10 @@ def create_map_metadata(mapname):
         if child.tag == "BoundingBox":
             # In the XML file, the attributes that contains x and y coordinates are switched.
             # They are set correctly in the metadata.bounds dict
-            metadata.bounds['minx'] = float(child.attrib['miny']
-            metadata.bounds['miny'] = float(child.attrib['minx']
-            metadata.bounds['maxx'] = float(child.attrib['maxy']
-            metadata.bounds['maxy'] = float(child.attrib['maxx']
+            metadata.bounds['minx'] = float(child.attrib['miny'])
+            metadata.bounds['miny'] = float(child.attrib['minx'])
+            metadata.bounds['maxx'] = float(child.attrib['maxy'])
+            metadata.bounds['maxy'] = float(child.attrib['maxx'])
 
     zoomLevels = []
     for tileset in root.iter('TileSet'):
