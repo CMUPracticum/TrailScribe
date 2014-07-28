@@ -41,6 +41,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MAX_X = "max_x";
     public static final String MAX_Y = "max_y";
     public static final String FILENAME = "filename";
+    public static final String TYPE = "type";
     
 //  Definition of tables
     private static final String TABLE_MAP_COLUMN_DEFINITION = TABLE_MAP 
@@ -49,7 +50,7 @@ public class DBHelper extends SQLiteOpenHelper {
     		+ MIN_ZOOM_LEVEL + " INTEGER," + MAX_ZOOM_LEVEL + " INTEGER,"
     		+ MIN_X + " INTEGER, " + MIN_Y + " INTEGER, "
     		+ MAX_X + " INTEGER, " + MAX_Y + " INTEGER, "
-    		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + ")";
+    		+ FILENAME + " TEXT," + LAST_MODIFIED + " TEXT" + TYPE + " TEXT" + ")";
     
     private static final String TABLE_KML_COLUMN_DEFINITION = TABLE_KML 
     		+ "(" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + NAME + " TEXT," 
@@ -74,7 +75,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_LOCATION = CREATE_TABLE + TABLE_LOCATION_COLUMN_DEFINITION;
     
 	public DBHelper(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);		
 	}
 
 	@Override
@@ -85,7 +86,10 @@ public class DBHelper extends SQLiteOpenHelper {
 	}
 	
 	@Override
-	public void onOpen(SQLiteDatabase db) {
+	public void onOpen(SQLiteDatabase db) {		
+		
+		// TODO: Fix
+		//db.execSQL("ALTER TABLE MAP ADD COLUMN TYPE TEXT;");		
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MAP_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_KML_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_SAMPLE_COLUMN_DEFINITION);

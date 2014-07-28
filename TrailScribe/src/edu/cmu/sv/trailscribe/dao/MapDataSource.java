@@ -12,7 +12,7 @@ public class MapDataSource extends DataSource<Map> {
 			DBHelper.KEY_ID, DBHelper.NAME, DBHelper.DESCRIPTION, DBHelper.PROJECTION, 
 			DBHelper.MIN_ZOOM_LEVEL, DBHelper.MAX_ZOOM_LEVEL, 
 			DBHelper.MIN_X, DBHelper.MIN_Y, DBHelper.MAX_X, DBHelper.MAX_Y, 
-			DBHelper.FILENAME, DBHelper.LAST_MODIFIED
+			DBHelper.FILENAME, DBHelper.LAST_MODIFIED, DBHelper.TYPE
 	};
 	
 	public MapDataSource(Context context) {
@@ -38,6 +38,7 @@ public class MapDataSource extends DataSource<Map> {
 		values.put(DBHelper.MAX_Y, map.getMaxY());
 		values.put(DBHelper.FILENAME, map.getFilename());
 		values.put(DBHelper.LAST_MODIFIED, map.getLastModified());
+		values.put(DBHelper.TYPE, map.getType());
 		
 		return addHelper(DBHelper.TABLE_MAP, values);
 	}
@@ -83,6 +84,7 @@ public class MapDataSource extends DataSource<Map> {
                 cursor.getDouble(8),
                 cursor.getDouble(9),
                 cursor.getString(10), 
-                cursor.getString(11));
+                cursor.getString(11),
+                cursor.getString(12));
     }
 }

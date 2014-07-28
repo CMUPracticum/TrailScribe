@@ -126,8 +126,9 @@ function initMapProperties() {
     mapBounds = new OpenLayers.Bounds(initialMapProperties.minY, initialMapProperties.minX, initialMapProperties.maxY, initialMapProperties.maxX);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
-    mapMaxZoom = initialMapProperties.maxZoomLevel;
-    tileType = getTileType(mapName);
+    mapMaxZoom = initialMapProperties.maxZoomLevel;    
+    tileType = initMapProperties.type;
+    console.log("Redraw: " + tileType);
     serverResolutions = getServerResolutions(mapMaxZoom);
 }
 
@@ -251,7 +252,9 @@ function redrawMap(mapOptions) {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = mapOptions.minZoomLevel;
     mapMaxZoom = mapOptions.maxZoomLevel;
-    tileType = getTileType(mapName);
+    //tileType = getTileType(mapName);
+    tileType = initMapProperties.type;
+    console.log("Redraw: " + tileType);
     serverResolutions = getServerResolutions(mapMaxZoom);
     
     map.setOptions({restrictedExtent: extent});
