@@ -44,7 +44,7 @@ public class BaseActivity extends Activity implements LocationListener {
 		mDBHelper = TrailScribeApplication.getDBHelper();
 		STORAGE_PATH = TrailScribeApplication.STORAGE_PATH;
 		
-		setLocation();
+		setLocation(this);
 	}
 	
 	@Override
@@ -58,12 +58,12 @@ public class BaseActivity extends Activity implements LocationListener {
 		super.onStop();
     }
 	
-	private void setLocation() {
+	protected void setLocation(LocationListener locationListener) {
         mLocationManager = mApplication.getLocationManager();
         mLocationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 0, 0, (android.location.LocationListener) this);
+                LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         mLocationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
+                LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         
         mLocation = mApplication.getLocation();
 	}

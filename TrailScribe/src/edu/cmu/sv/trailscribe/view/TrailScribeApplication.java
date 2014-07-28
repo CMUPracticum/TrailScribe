@@ -30,7 +30,7 @@ public class TrailScribeApplication extends Application implements LocationListe
 	public static final int MIN_LOCATION_DISTANCE = 3;
     private Location mLocation;
     private LocationManager mLocationManager;
-    private boolean isLocationChanged = false;
+    private boolean isGPSProviderEnabled = false;
     
 //  Time
     
@@ -84,29 +84,21 @@ public class TrailScribeApplication extends Application implements LocationListe
     public void onLocationChanged(Location location) {
         if (location == null) return;
         
+//      Ignore changes from network provider when GPS provider is enabled
+        if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)) {
+            if (isGPSProviderEnabled) {
+                return;
+            }
+        }
+        
+        
 //      Ignore minor changes
         if (mLocation != null && Math.abs(location.distanceTo(mLocation)) <= MIN_LOCATION_DISTANCE) {
-            isLocationChanged = false;
             return;
         }
         
         mLocation = location;
         saveLocationToDatabase();
-        
-//      Change the flag to allow activities to change their location status
-        isLocationChanged = true;
-    }
-    
-//  If location has changed after last request from activities, 
-//  return true to allow activities to change their location status. 
-//  After that, change the flag back to false.
-    public boolean isLocationChanged() {
-        if (isLocationChanged) {
-            isLocationChanged = false;
-            return true;
-        } else {
-            return false;
-        }
     }
     
     private void saveLocationToDatabase() {
@@ -124,12 +116,16 @@ public class TrailScribeApplication extends Application implements LocationListe
 
     @Override
     public void onProviderDisabled(String provider) {
-        Log.d(MSG_TAG, "Location provider is disabled: " + provider);
+        if (provider.equals(LocationManager.GPS_PROVIDER)) {
+            isGPSProviderEnabled = false;
+        }
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        Log.d(MSG_TAG, "Location provider is enabled: " + provider);
+        if (provider.equals(LocationManager.GPS_PROVIDER)) {
+            isGPSProviderEnabled = true;
+        }
 
         requestLocationUpdates();
         saveLocationToDatabase();
@@ -162,5 +158,5 @@ public class TrailScribeApplication extends Application implements LocationListe
         }
         
         Log.d(MSG_TAG, "Provider status has changed:" + provider + ", " + statusMessage);
-    }    
+    }
 }

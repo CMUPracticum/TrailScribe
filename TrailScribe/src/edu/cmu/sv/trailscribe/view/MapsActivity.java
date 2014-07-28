@@ -104,6 +104,7 @@ public class MapsActivity extends BaseActivity
 	private void setView() {
 		setContentView(R.layout.activity_maps);
 
+		setLocation(this);
 		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 		
 		setMap();
@@ -397,13 +398,8 @@ public class MapsActivity extends BaseActivity
 	@Override
 	public void onLocationChanged(Location location) {
 	    super.onLocationChanged(location);
-
-//	    Ignore if location has not changed (more than 3 meters)
-	    if (!mApplication.isLocationChanged()) {
-	        return;
-	    }
-
 	    updateCoordinateTextView();
+	    
 		if (mIsDisplayCurrentLocation) {
 		    setLayers(MessageToWebview.HideCurrentLocation);
 		    setLayers(MessageToWebview.DisplayCurrentLocation);
