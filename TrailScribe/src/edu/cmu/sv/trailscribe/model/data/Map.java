@@ -9,15 +9,14 @@ public class Map extends SyncItem {
 	private double mMaxY; 
 	private double mMaxX;
 	private double mMinY;
-	private String mLastModified;
-	private String mType;
+	private String mLastModified;	
 	
 	public Map(){}
 	public Map(
 			long id, String name, String description, String projection, 
 			int minZoomLevel, int maxZoomLevel, 
 			double minX, double minY, double maxX, double maxY, 
-			String filename, String lastModified, String type) {
+			String filename, String lastModified) {
 		super.setId(id);
 		super.setName(name);
 		super.setFilename(filename);
@@ -29,8 +28,7 @@ public class Map extends SyncItem {
 		mMinY = minY;
 		mMaxX = maxX;
 		mMaxY = maxY;
-		mLastModified = lastModified;
-		mType = type;
+		mLastModified = lastModified;		
 	}
 
 	public int getMaxZoomLevel() {
@@ -129,14 +127,6 @@ public class Map extends SyncItem {
 		return super.getName();
 	}
 	
-	public String getType() {
-		return mType;
-	}
-	
-	public void setType(String mType) {
-		this.mType = mType;
-	}
-	
     @Override
     public String toString(){
         return this.getName();
@@ -152,8 +142,7 @@ public class Map extends SyncItem {
         buffer.append("'minX':'").append(this.getMinX()).append("', ");
         buffer.append("'maxX':'").append(this.getMaxX()).append("', ");
         buffer.append("'minY':'").append(this.getMinY()).append("', ");
-        buffer.append("'maxY':'").append(this.getMaxY()).append("'");
-        buffer.append("'type':'").append(this.getType()).append("'");
+        buffer.append("'maxY':'").append(this.getMaxY()).append("'");        
     
         return buffer.toString();
     }

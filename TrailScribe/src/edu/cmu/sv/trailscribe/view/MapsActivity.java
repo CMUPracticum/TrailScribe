@@ -268,8 +268,7 @@ public class MapsActivity extends BaseActivity
 		    throw new Exception(errorMessage);
 		}
 		
-		String type = getMapTileType(currentMap);
-		currentMap.setType(type);
+		String type = getMapTileType(currentMap);		
 		
 		return JsonHelper.getCurrentMapJson(currentMap);		
 	}
