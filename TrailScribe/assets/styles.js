@@ -79,8 +79,8 @@ for (var i = 0; i < marker_colors.length; i++) {
 
 // Current location style
 style_current_location = OpenLayers.Util.extend({}, defaultStyle);
-style_current_location['externalGraphic'] = "./lib/openlayers/img/location_arrow.png";
-style_current_location['graphicWidth'] = 50;
-style_current_location['graphicHeight'] = 50;
-style_current_location['graphicXOffset'] = -25;
-style_current_location['graphicYOffset'] = -25;
+style_current_location['externalGraphic'] = "./lib/openlayers/img/location_arrow.png"; // Image is 106px x 84px
+style_current_location['graphicWidth'] = 42; 
+style_current_location['graphicHeight'] = 53;
+style_current_location['graphicXOffset'] = -21;
+style_current_location['graphicYOffset'] = -26;
