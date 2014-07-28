@@ -18,6 +18,7 @@ var mapBounds;
 var extent;
 var mapMinZoom;
 var mapMaxZoom;
+var tileType;
 var mapProjection; 
 var displayProjection = new OpenLayers.Projection("EPSG:4326"); // display projection is always WGS84 spherical mercator
 var emptyTileURL = "./lib/openlayers/img/none.png";
@@ -95,6 +96,21 @@ function getServerResolutions(maxzoom) {
     return myResolutions;
 }
 
+
+/** 
+ * TEMPORARY Function: getTileType 
+ * Change tile file extension type given a map name
+ * TODO: Delete this function later! 
+ */
+function getTileType(mapname) {
+    if (mapname == "USGS Imagery+Topo" || mapname == "USGS Imagery Only") {
+        return "jpg";
+    }
+    else {
+        return "png";
+    }
+}
+
 /**
  * Function: initMapProperties
  * Get mapProperties for this map from the Android interface and set them.
@@ -103,7 +119,6 @@ function getServerResolutions(maxzoom) {
  * initMapProperties - {JSON String}
  */
 function initMapProperties() {
-
     var initialMapProperties = getCurrentMapFromJava();
 
     mapName = initialMapProperties.name;    
@@ -112,8 +127,8 @@ function initMapProperties() {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
     mapMaxZoom = initialMapProperties.maxZoomLevel;
-
-    serverResolutions = getServerResolutions(mapMaxZoom);    
+    tileType = getTileType(mapName);
+    serverResolutions = getServerResolutions(mapMaxZoom);
 }
 
 /**
@@ -125,7 +140,6 @@ function initMapProperties() {
  * -
  */
 function init() {
-
     // Initialize map properties
     initMapProperties();
 
@@ -159,8 +173,8 @@ function init() {
         transitionEffect: 'resize',
         serviceVersion: '.',
         layername: 'tiles',        
-        alpha: true,
-        type: 'png',
+        alpha: true,        
+        type: tileType,
         isBaseLayer: true,        
         getURL: getURL
     });
@@ -237,11 +251,10 @@ function redrawMap(mapOptions) {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = mapOptions.minZoomLevel;
     mapMaxZoom = mapOptions.maxZoomLevel;
-
-    map.setOptions({restrictedExtent: extent});
-
+    tileType = getTileType(mapName);
     serverResolutions = getServerResolutions(mapMaxZoom);
-
+    
+    map.setOptions({restrictedExtent: extent});
     tmsOverlay.redraw();
 }
 
@@ -260,7 +273,7 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
 
-    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;    
+    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + tileType;
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
