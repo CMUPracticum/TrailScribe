@@ -127,9 +127,8 @@ function initMapProperties() {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
     mapMaxZoom = initialMapProperties.maxZoomLevel;    
-    //tileType = initMapProperties.type;
-    tileType = getTileType(mapName);
-    console.log("initMapProperties: " + tileType);
+    //tileType = getTileType(mapName);
+    tileType = getCurrentMapTileFormatFromJava();    
     serverResolutions = getServerResolutions(mapMaxZoom);
 }
 
@@ -253,9 +252,8 @@ function redrawMap(mapOptions) {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = mapOptions.minZoomLevel;
     mapMaxZoom = mapOptions.maxZoomLevel;
-    tileType = getTileType(mapName);
-    //tileType = initMapProperties.type;
-    console.log("Redraw: " + tileType);
+    //tileType = getTileType(mapName);
+    tileType = getCurrentMapTileFormatFromJava();    
     serverResolutions = getServerResolutions(mapMaxZoom);
     
     map.setOptions({restrictedExtent: extent});
@@ -420,26 +418,6 @@ function getKmlUrl(kml) {
 
 
 /**
- * Function: updateCurrentPosition
- * Given a set of points, update the current location
- * of the user
- *
- * Parameters:
- * points - {JSON.Object}
- */
-function updateCurrentPosition(points) {
-
-    if (points == null) {
-        points = android.getCurrentLocation();
-    }
-
-    var coordinates = JSON.parse(points);
-    
-    currentPosition.lat = coordinates['points'][0].y;
-    currentPosition.lon = coordinates['points'][0].x;
-}
-
-/**
  * Function: getDistance
  * Given two geographic coordinates, return the distance 
  * between them over the WGS84 ellipsoid.
@@ -568,7 +546,25 @@ function displayKML(kml) {
 }
 
 /**
- * Function getCurrentMapFromJava
+ * Function: updateCurrentPosition
+ * Given a set of points, update the current location
+ * of the user
+ *
+ * Parameters:
+ * points - {JSON.Object}
+ */
+function updateCurrentPosition(points) {
+    if (points == null) {
+        points = android.getCurrentLocation();
+    }
+
+    var coordinates = JSON.parse(points);
+    currentPosition.lat = coordinates['points'][0].y;
+    currentPosition.lon = coordinates['points'][0].x;
+}
+
+/**
+ * Function: getCurrentMapFromJava
  * Get the current base map name based 
  * on user selection
  * 
@@ -576,12 +572,27 @@ function displayKML(kml) {
  * - 
  */
 function getCurrentMapFromJava() {
-
 	var currentMap = android.getCurrentMap();
 	currentMap = JSON.parse(currentMap);
 	currentMap = currentMap.map;
 
 	return currentMap;	
+}
+
+
+/**
+ * Function: getCurrentMapTileFormatFromJava
+ * Get the tile file extension for the current map
+ *
+ * Parameters:
+ * -
+ */
+function getCurrentMapTileFormatFromJava() {
+    var tileFormat = android.getCurrentMapTileType();
+    tileFormat = JSON.parse(tileFormat);
+    tileFormat = tileFormat['format'][0].format;    
+
+    return tileFormat;
 }
 
 /**
