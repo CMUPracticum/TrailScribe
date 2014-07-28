@@ -17,7 +17,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -36,12 +35,12 @@ import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
-import edu.cmu.sv.trailscribe.dao.SampleDataSource;
-import edu.cmu.sv.trailscribe.utils.JsonHelper;
-import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
+import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.data.Map;
 import edu.cmu.sv.trailscribe.model.data.Sample;
+import edu.cmu.sv.trailscribe.utils.JsonHelper;
+import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 
 public class MapsActivity extends BaseActivity 
     implements OnClickListener, SensorEventListener, OnNavigationListener {
@@ -268,20 +267,10 @@ public class MapsActivity extends BaseActivity
 		    throw new Exception(errorMessage);
 		}
 		
-		String type = getMapTileType(currentMap);
+		String type = StorageSystemHelper.getMapTileType(currentMap);
 		currentMap.setType(type);
 		
 		return JsonHelper.getCurrentMapJson(currentMap);		
-	}
-	
-	/**
-	 * TODO: Implement
-	 * Given a map, return the file extension
-	 * @param map
-	 * @return
-	 */
-	private String getMapTileType(Map map) {
-		return "jpg";
 	}
 	
 	@JavascriptInterface

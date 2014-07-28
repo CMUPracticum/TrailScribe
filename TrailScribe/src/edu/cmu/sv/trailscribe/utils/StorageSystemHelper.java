@@ -14,6 +14,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.util.Log;
+import edu.cmu.sv.trailscribe.model.data.Map;
 import edu.cmu.sv.trailscribe.view.TrailScribeApplication;
 
 public class StorageSystemHelper {
@@ -191,18 +192,61 @@ public class StorageSystemHelper {
 			}
 		}
 	}
+
+	/**
+     * TODO: Implement
+     * Given a map, return the file extension 
+     * @param map
+     * @return file extension
+     */
+    public static String getMapTileType(Map map) {
+        ArrayList<String> directories = new ArrayList<String>();
+        directories.add(TrailScribeApplication.STORAGE_PATH + "maps/" + map.getName());
+        
+        return getMapTileTypeHelper(directories);
+    }
+    
+    private static String getMapTileTypeHelper(ArrayList<String> directories) {
+        for (String directory : directories) {
+            File folder = new File(directory);
+            
+            if (!folder.exists()) return new String();
+            
+            if (folder.isFile()) {
+                String filename = folder.getName();
+                int index = filename.length() - 1;
+                
+                while (index > -1) {
+                    if (filename.charAt(index--) == '.') {
+                        break;
+                    }
+                }
+                
+                String fileType = filename.substring(index, filename.length());
+                return fileType;
+            }
+            
+            if (folder.isDirectory()) {
+                ArrayList<String> d = new ArrayList<String>();
+                d.add(directory + "/" + folder.getName());
+                
+                String tileType = getMapTileTypeHelper(d); 
+                if (!tileType.equals(new String())) {
+                    Log.d("", tileType);
+                    return tileType;
+                }
+            }
+        }
+        
+        return new String();
+    }
 	
-	private static void deleteRecursive(File dir)
-	{
-	    if (dir.isDirectory())
-	    {
-	    	for (File currentFile : dir.listFiles()){
-	            if (currentFile.isDirectory())
-	            {
+	private static void deleteRecursive(File dir) {
+	    if (dir.isDirectory()) {
+	    	for (File currentFile : dir.listFiles()) {
+	            if (currentFile.isDirectory()) {
 	            	deleteRecursive(currentFile);
-	            }
-	            else
-	            {
+	            } else {
 	            	currentFile.delete();
 	            }
 	        }

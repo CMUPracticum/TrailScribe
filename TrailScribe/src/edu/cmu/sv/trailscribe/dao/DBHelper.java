@@ -88,8 +88,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {		
 		
-		// TODO: Fix
-		//db.execSQL("ALTER TABLE MAP ADD COLUMN TYPE TEXT;");		
+//	    TODO: Fix
+//		db.execSQL("ALTER TABLE MAP ADD COLUMN TYPE TEXT;");		
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MAP_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_KML_COLUMN_DEFINITION);
 		db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_SAMPLE_COLUMN_DEFINITION);
