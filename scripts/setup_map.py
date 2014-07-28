@@ -10,7 +10,7 @@ import ConfigParser
 class MapMetadata:
     """An object to store map metadata."""
     def __init__(self, name="", projection="EPSG:900913", minZoomLevel=10, 
-                maxZoomLevel=15, bounds=[-180, -90, 180, 90], filename=""):
+                maxZoomLevel=15, bounds={'minx':-180,'miny':-90,'maxx':180,'maxy':90}, filename=""):
         self.name = name
         self.projection = projection
         self.minZoomLevel = minZoomLevel
@@ -35,9 +35,13 @@ def create_map_metadata(mapname):
         if child.tag == "SRS":
             metadata.projection = child.text
 
-        if child.tag == "BoundingBox":      
-            metadata.bounds = [float(child.attrib['miny']), float(child.attrib['minx']), 
-                               float(child.attrib['maxy']), float(child.attrib['maxx'])]
+        if child.tag == "BoundingBox":
+            # In the XML file, the attributes that contains x and y coordinates are switched.
+            # They are set correctly in the metadata.bounds dict
+            metadata.bounds['minx'] = float(child.attrib['miny']
+            metadata.bounds['miny'] = float(child.attrib['minx']
+            metadata.bounds['maxx'] = float(child.attrib['maxy']
+            metadata.bounds['maxy'] = float(child.attrib['maxx']
 
     zoomLevels = []
     for tileset in root.iter('TileSet'):
@@ -114,7 +118,7 @@ def update_db(metadata):
                          "name = %s, projection = %s, min_zoom_level = %s, max_zoom_level = %s, min_y = %s, min_x = %s, "
                          "max_y = %s, max_x = %s, filename = %s, last_modified = now() WHERE name = %s")
                 query_data = (metadata.name, metadata.projection, metadata.minZoomLevel, metadata.maxZoomLevel, 
-                              metadata.bounds[0], metadata.bounds[1], metadata.bounds[2], metadata.bounds[3], metadata.filename, metadata.name)
+                              metadata.bounds['miny'], metadata.bounds['minx'], metadata.bounds['maxy'], metadata.bounds['maxx'], metadata.filename, metadata.name)
             else:
                 print "Operation aborted. Please provide a unique map name and run the script again."
                 sys.exit()
@@ -124,7 +128,7 @@ def update_db(metadata):
                     "(name, projection, min_zoom_level, max_zoom_level, min_y, min_x, max_y, max_x, filename, last_modified) "
                     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())")
             query_data = (metadata.name, metadata.projection, metadata.minZoomLevel, metadata.maxZoomLevel, 
-                          metadata.bounds[0], metadata.bounds[1], metadata.bounds[2], metadata.bounds[3], metadata.filename)
+                          metadata.bounds['miny'], metadata.bounds['minx'], metadata.bounds['maxy'], metadata.bounds['maxx'], metadata.filename)
 
         cursor.execute(query, query_data)
         # Commit
