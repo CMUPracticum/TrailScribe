@@ -123,7 +123,7 @@ function initMapProperties() {
 
     mapName = initialMapProperties.name;    
     mapProjection = new OpenLayers.Projection(initialMapProperties.projection); // Default: Web Mercator    
-    mapBounds = new OpenLayers.Bounds(initialMapProperties.minY, initialMapProperties.minX, initialMapProperties.maxY, initialMapProperties.maxX);
+    mapBounds = new OpenLayers.Bounds(initialMapProperties.minX, initialMapProperties.minY, initialMapProperties.maxX, initialMapProperties.maxY);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
     mapMaxZoom = initialMapProperties.maxZoomLevel;    
@@ -249,7 +249,7 @@ function init() {
 function redrawMap(mapOptions) {
     mapName = mapOptions.name;    
     mapProjection = new OpenLayers.Projection(mapOptions.projection); // Default: Web Mercator    
-    mapBounds = new OpenLayers.Bounds(mapOptions.minY, mapOptions.minX, mapOptions.maxY, mapOptions.maxX);
+    mapBounds = new OpenLayers.Bounds(mapOptions.minX, mapOptions.minY, mapOptions.maxX, mapOptions.maxY);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = mapOptions.minZoomLevel;
     mapMaxZoom = mapOptions.maxZoomLevel;
