@@ -78,6 +78,7 @@ public class MapsActivity extends BaseActivity
 //	Base Map
 	private ArrayList<String> mBaseMaps;
 	private SpinnerAdapter mSpinnerAdapter;
+	private String mCurrentMapTileType;
 	private int mSelectedMapPosition = -1; // position of the map that was selected in the spinner
 
 	@Override
@@ -267,8 +268,7 @@ public class MapsActivity extends BaseActivity
 		    throw new Exception(errorMessage);
 		}
 		
-		String type = StorageSystemHelper.getMapTileType(currentMap);
-		currentMap.setType(type);
+		mCurrentMapTileType = StorageSystemHelper.getMapTileType(currentMap);
 		
 		return JsonHelper.getCurrentMapJson(currentMap);		
 	}
@@ -276,6 +276,11 @@ public class MapsActivity extends BaseActivity
 	@JavascriptInterface
 	public String getOrientation() {
 	    return JsonHelper.getOrientationJson(mAzimuth);
+	}
+	
+	@JavascriptInterface
+	public String getCurrentMapTileType() {
+	    return JsonHelper.getCurrentMapTileTypeJson(mCurrentMapTileType);
 	}
 	
 	@JavascriptInterface()

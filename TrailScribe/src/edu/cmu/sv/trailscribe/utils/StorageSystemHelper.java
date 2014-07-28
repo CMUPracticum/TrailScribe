@@ -207,6 +207,7 @@ public class StorageSystemHelper {
     }
     
     private static String getMapTileTypeHelper(ArrayList<String> directories) {
+        String fileType = new String();
         for (String directory : directories) {
             File folder = new File(directory);
             
@@ -218,21 +219,22 @@ public class StorageSystemHelper {
                 
                 while (index > -1) {
                     if (filename.charAt(index--) == '.') {
-                        break;
+                        fileType = filename.substring(index + 2, filename.length());
+                        return fileType;
                     }
                 }
-                
-                String fileType = filename.substring(index, filename.length());
+
                 return fileType;
             }
             
             if (folder.isDirectory()) {
                 ArrayList<String> d = new ArrayList<String>();
-                d.add(directory + "/" + folder.getName());
+                for (File file : folder.listFiles()) {
+                    d.add(directory + "/" + file.getName());
+                }
                 
                 String tileType = getMapTileTypeHelper(d); 
                 if (!tileType.equals(new String())) {
-                    Log.d("", tileType);
                     return tileType;
                 }
             }
