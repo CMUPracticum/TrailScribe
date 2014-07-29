@@ -47,10 +47,10 @@ Tiling Service is comprised of a Python and a shell script that allows the user 
 
 ### Alternative Usage
 Alternatively, the user can just upload a zip folder containing TMS-structured map tiles in the following directory on the TrailScribe Server: 
-`scp my_map_tiles.zip <user>@<host>:~/trailscribe/media/map/my_map_tiles.zip`
+* `scp my_map_tiles.zip <user>@<host>:~/trailscribe/media/map/my_map_tiles.zip`
 
 And then run a SQL query to insert the map's metadata to the server database:
-`INSERT INTO sync_center_map name, projection, min_zoom_level, max_zoom_level, min_y, min_x, max_y, max_x, filename, last_modified) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())`
+* `INSERT INTO sync_center_map (name, projection, min_zoom_level, max_zoom_level, min_y, min_x, max_y, max_x, filename, last_modified) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())`
 
 
 ## Sync Center RESTful API
