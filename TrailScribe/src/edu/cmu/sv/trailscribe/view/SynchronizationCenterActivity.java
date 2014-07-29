@@ -33,13 +33,16 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	private String baseDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
 	private Downloader mDownloader; 
 
-    // This callback is run once maps are fetch from the server
-    // This is the easiest, clearest way to wait for the fetching
-    // to complete when running tests
+    private boolean mapsFetched = false;
     private Runnable mapsFetchedCallback = null;
+    private static final String LOG_TAG = "SynchronizationCenterActivity";
 
     public void setMapsFetchedCallback(Runnable callback) {
         mapsFetchedCallback = callback;
+    }
+
+    public boolean areMapsFetched() {
+        return mapsFetched;
     }
 
 	@SuppressWarnings("unchecked") // Suppressing warning given this class listens to 2 different AsyncTasks
@@ -130,6 +133,7 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 				mAdapter.clear();
 				mAdapter.notifyDataSetChanged();
 				showMessage(getResources().getString(R.string.up_to_date));
+                                mapsFetched = true;
 			}
 		}
 	}
