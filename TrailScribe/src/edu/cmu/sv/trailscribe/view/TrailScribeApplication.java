@@ -27,7 +27,8 @@ public class TrailScribeApplication extends Application implements LocationListe
 	        Environment.getExternalStorageDirectory() + "/trailscribe/";
 	
 //	Location
-	public static final int MIN_LOCATION_DISTANCE = 3;
+	public static final int MIN_REQUEST_TIME = 60000;
+	public static final int MIN_REQUEST_DISTANCE = 10;
     private Location mLocation;
     private LocationManager mLocationManager;
     private boolean isGPSProviderEnabled = false;
@@ -69,10 +70,12 @@ public class TrailScribeApplication extends Application implements LocationListe
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         
         try {
+            // Register only GPS as provider
+            // Keep minTime as 60 seconds and 10 meters as minDistance
             mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, 0, 0, (android.location.LocationListener) this);
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER, 0, 0, (android.location.LocationListener) this);
+                    LocationManager.GPS_PROVIDER, MIN_REQUEST_TIME, MIN_REQUEST_DISTANCE, this);
+            // Do not register Network as location provider - Yields unreliable coordinate information
+            // mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_REQUEST_TIME, MIN_REQUEST_DISTANCE, this);
             
             requestLocationUpdates();
         } catch (Exception e) {
@@ -89,12 +92,6 @@ public class TrailScribeApplication extends Application implements LocationListe
             if (isGPSProviderEnabled) {
                 return;
             }
-        }
-        
-        
-//      Ignore minor changes
-        if (mLocation != null && Math.abs(location.distanceTo(mLocation)) <= MIN_LOCATION_DISTANCE) {
-            return;
         }
         
         mLocation = location;

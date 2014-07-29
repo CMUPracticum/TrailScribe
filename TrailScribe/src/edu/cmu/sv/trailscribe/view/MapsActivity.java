@@ -67,6 +67,7 @@ public class MapsActivity extends BaseActivity
 	private boolean mIsDisplayKML = false;
 	
 //	Orientation
+	private static final float MIN_AZIMUTH_CHANGE = 5;
 	private SensorManager mSensorManager;
 	private Sensor mOrientationSensor;
 	private float mAzimuth;
@@ -405,6 +406,8 @@ public class MapsActivity extends BaseActivity
 		    setLayers(MessageToWebview.DisplayCurrentLocation);
 		}
 		
+//		Not updating location history on location changes for performance issue
+//		Frequently displaying location history (>1000 features) leads to high risk of memory overflow
 //        if (mIsDisplayPositionHistory) {
 //            setLayers(MessageToWebview.HidePositionHistory);
 //            setLayers(MessageToWebview.DisplayPositionHistory);
@@ -416,7 +419,7 @@ public class MapsActivity extends BaseActivity
         float[] values = event.values;
         
 //      Ignore minor rotations
-        if (Math.abs(values[0] - mAzimuth) <= 5) {
+        if (Math.abs(values[0] - mAzimuth) <= MIN_AZIMUTH_CHANGE) {
             return;
         }
         

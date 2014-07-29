@@ -60,13 +60,17 @@ public class BaseActivity extends Activity implements LocationListener {
 	
 	protected void setLocation(LocationListener locationListener) {
         mLocationManager = mApplication.getLocationManager();
+        
         // Register only GPS as provider
         // Keep minTime as 60 seconds and 10 meters as minDistance
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, locationListener);
+        mLocationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, 
+                TrailScribeApplication.MIN_REQUEST_TIME, 
+                TrailScribeApplication.MIN_REQUEST_DISTANCE, this);
         // Do not register Network as location provider - Yields unreliable coordinate information
-        //mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        
-        mLocation = mApplication.getLocation();        
+        // mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, TrailScribeApplication.MIN_REQUEST_TIME, TrailScribeApplication.MIN_REQUEST_DISTANCE, this);        
+
+        mLocation = mApplication.getLocation();
 	}
 	
 	protected void setActionBar(String color) {
