@@ -38,11 +38,12 @@ Tiling Service is comprised of a Python and a shell script that allows the user 
 * Upload .tfw (plain text - World file) at the same directory. The map and its respective TFW file must have the same names.
  - `scp map.tfw <user>@<host>:~/trailscribe/scripts/tmp/.`
 * Run Python script. Usage: `python setup_map.py tmp/<source map> <target map name>`. 
- - `python setup_map.py map.tif map1`
+ - `python setup_map.py tmp/map.tif map1`
 * If this map already exists in the database, the user will be prompted for an update:
- - This map already exists in the database. Would you like to update the record for this map with the new data (Y/yes or N/no)?
- - If the user inputs Y/yes, the map tiles will be updated. If they input anything else, the script will abort:
-  -- Operation aborted. Please provide a unique map name and run the script again.
+ ** This map already exists in the database. Would you like to update the record for this map with the new data (Y/yes or N/no)?
+  *** If the user inputs Y/yes, the map tiles will be updated. 
+ ** If they input anything else, the script will abort:
+  *** Operation aborted. Please provide a unique map name and run the script again.
 * Newly created tiles can be found at: `~/trailscribe/media/map/map1_tiles.zip`
 
 ## Sync Center RESTful API
