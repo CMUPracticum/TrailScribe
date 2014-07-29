@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Trailscribe map interface tests</title>
+
+    <!-- Openlayers libraries -->
+    <script src="./assets/lib/openlayers/OpenLayers.mobile.js"></script>
+    <script src="./assets/lib/openlayers/lib/Layer/TMS.js"></script>
+    <script src="./assets/lib/openlayers/lib/Popup/Popup.js"></script>
+    <script src="./assets/lib/openlayers/lib/Popup/Anchored.js"></script>
+    <script src="./assets/lib/openlayers/lib/Popup/Framed.js"></script>
+    <script src="./assets/lib/openlayers/lib/Popup/FramedCloud.js"></script>
+
+    <!-- qunit stylesheet -->
+    <link rel="stylesheet" href="./qunit/qunit-1.14.0.css">
+
+    <!-- mock android interface -->
+    <script src="mock_android_interface.js"></script>
+
+    <!-- trailscribe code -->
+    <script src="./assets/styles.js"></script>
+    <!-- data-cover marks file for code coverage -->
+    <script src="./assets/mobile.js" data-cover></script>
+
+    <!-- testing frameworks -->
+    <script src="./qunit/qunit-1.14.0.js"></script>
+    <script src="./qunit/blanket.min.js"></script>
+  </head>
+  <body>
+    <div id="map" class="olMap" style="display:hidden"></div>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+    <!-- tests themselves -->
+    <script src="map_test.js"></script>
+  </body>
+</html>

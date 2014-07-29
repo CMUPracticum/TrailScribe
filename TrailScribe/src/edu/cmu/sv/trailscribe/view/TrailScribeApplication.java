@@ -58,6 +58,10 @@ public class TrailScribeApplication extends Application implements LocationListe
 		return mDBHelper;
 	}
 	
+    // needed for testing
+    public void setDBHelper(DBHelper helper) {
+        mDBHelper = helper;
+    }
 	public LocationManager getLocationManager() {
 	    return mLocationManager;
 	}

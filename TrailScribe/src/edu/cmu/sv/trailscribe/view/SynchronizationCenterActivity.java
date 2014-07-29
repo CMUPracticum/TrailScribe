@@ -33,6 +33,15 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	private String baseDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
 	private Downloader mDownloader; 
 
+    // This callback is run once maps are fetch from the server
+    // This is the easiest, clearest way to wait for the fetching
+    // to complete when running tests
+    private Runnable mapsFetchedCallback = null;
+
+    public void setMapsFetchedCallback(Runnable callback) {
+        mapsFetchedCallback = callback;
+    }
+
 	@SuppressWarnings("unchecked") // Suppressing warning given this class listens to 2 different AsyncTasks
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,6 +100,9 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 			if(mSyncItems.size() == 0){
 				showMessage(getResources().getString(R.string.up_to_date));
 			}
+                        if (mapsFetchedCallback != null) {
+                            mapsFetchedCallback.run();
+                        }
 		}
 
 		// Response from downloader. If success, start uncompressing

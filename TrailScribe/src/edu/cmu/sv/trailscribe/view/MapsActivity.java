@@ -414,6 +414,7 @@ public class MapsActivity extends BaseActivity
 //        }		
 	}
 	
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] values = event.values;

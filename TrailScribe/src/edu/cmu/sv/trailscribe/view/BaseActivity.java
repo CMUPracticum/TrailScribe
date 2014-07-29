@@ -80,6 +80,12 @@ public class BaseActivity extends Activity implements LocationListener {
         mActionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor(color)));
 	}
 
+    // override the dbhelper so a test database can be used instead of
+    // the default one
+    public void setDBHelper(DBHelper helper) {
+        mDBHelper = helper;
+    }
+
     @Override
     public void onProviderDisabled(String provider) {
 //        Handled by TrailScribeApplication
