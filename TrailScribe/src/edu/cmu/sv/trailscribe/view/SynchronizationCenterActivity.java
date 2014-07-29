@@ -34,16 +34,11 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	private String baseDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
 	private Downloader mDownloader; 
 
-    private boolean mapsFetched = false;
     private Runnable mapsFetchedCallback = null;
     private static final String LOG_TAG = "SynchronizationCenterActivity";
 
     public void setMapsFetchedCallback(Runnable callback) {
         mapsFetchedCallback = callback;
-    }
-
-    public boolean areMapsFetched() {
-        return mapsFetched;
     }
 
 	@SuppressWarnings("unchecked") // Suppressing warning given this class listens to 2 different AsyncTasks
@@ -134,7 +129,6 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 				mAdapter.clear();
 				mAdapter.notifyDataSetChanged();
 				showMessage(getResources().getString(R.string.up_to_date));
-                                mapsFetched = true;
 			}
 		}
 	}
