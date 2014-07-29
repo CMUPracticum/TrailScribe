@@ -1,4 +1,5 @@
-// Note: this code needs to run *after* map init.
+// Some config stuff
+QUnit.config.reorder = false;
 
 QUnit.test("Map init", function(assert) {
     // run init here so it is included in coverage report
@@ -77,20 +78,25 @@ QUnit.test("Position history", function(assert) {
     assert.equal(positionHistoryLayer.features.length, 1,
                  "Showing position history added one feature to "+
                  "position history layer");
-    assert.equal(positionHistoryLayer.features[0].geometry.components.length, 2,
-                 "Position history feature had two components");
+    assert.equal(positionHistoryLayer.features[0].geometry.components.length, 3,
+                 "Position history feature had three components");
 
     // check waypoints and their location
     var geo1 = positionHistoryLayer.features[0].geometry.components[0];
     var geo2 = positionHistoryLayer.features[0].geometry.components[1];
+    var geo3 = positionHistoryLayer.features[0].geometry.components[2];
     assert.equal(geo1.x, 1,
                  "Waypoint 1 location correct (x coordinate)");
     assert.equal(geo1.y, 1,
                  "Waypoint 1 location correct (y coordinate)");
-    assert.equal(geo2.x, 3,
+    assert.equal(geo2.x, 2,
                  "Waypoint 2 location correct (x coordinate)");
-    assert.equal(geo2.y, 3,
+    assert.equal(geo2.y, 2,
                  "Waypoint 2 location correct (y coordinate)");
+    assert.equal(geo3.x, 3,
+                 "Waypoint 3 location correct (x coordinate)");
+    assert.equal(geo3.y, 3,
+                 "Waypoint 3 location correct (y coordinate)");
 
     // hide the layer
     setLayers("HidePositionHistory");

@@ -135,5 +135,16 @@ window.android = {
             }
         };
         return JSON.stringify(obj);
+    },
+
+    getCurrentMapTileType: function() {
+        var obj = {
+            format: [
+                {
+                    format: 'png'
+                }
+            ]
+        };
+        return JSON.stringify(obj);
     }
 };
