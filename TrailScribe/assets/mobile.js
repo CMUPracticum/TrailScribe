@@ -736,8 +736,7 @@ function getLinesFromJava(msg) {
         pointFeatures.push(pointFeature);
         pointList.push(point);
     }
-    var line = new OpenLayers.Geometry.LineString(pointList);
-    //line = line.simplify();
+    var line = new OpenLayers.Geometry.LineString(pointList);    
     var lineFeature = new OpenLayers.Feature.Vector(line, null, line_style);    
     pointFeatures.push(lineFeature);
 

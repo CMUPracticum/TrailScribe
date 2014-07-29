@@ -405,10 +405,10 @@ public class MapsActivity extends BaseActivity
 		    setLayers(MessageToWebview.DisplayCurrentLocation);
 		}
 		
-        if (mIsDisplayPositionHistory) {
-            setLayers(MessageToWebview.HidePositionHistory);
-            setLayers(MessageToWebview.DisplayPositionHistory);
-        }		
+//        if (mIsDisplayPositionHistory) {
+//            setLayers(MessageToWebview.HidePositionHistory);
+//            setLayers(MessageToWebview.DisplayPositionHistory);
+//        }		
 	}
 	
     @Override
