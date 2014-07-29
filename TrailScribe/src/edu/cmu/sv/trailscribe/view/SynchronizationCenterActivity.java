@@ -15,7 +15,6 @@ import edu.cmu.sv.trailscribe.model.AsyncTaskCompleteListener;
 import edu.cmu.sv.trailscribe.model.data.SyncItem;
 import edu.cmu.sv.trailscribe.utils.Decompressor;
 import edu.cmu.sv.trailscribe.utils.Downloader;
-import android.util.Log;
 
 @SuppressWarnings("rawtypes") // Suppressing warning given this class listens to 2 different AsyncTasks
 public class SynchronizationCenterActivity 
@@ -34,8 +33,10 @@ extends BaseActivity implements AsyncTaskCompleteListener {
 	private String baseDirectory = Environment.getExternalStorageDirectory() + "/trailscribe/";
 	private Downloader mDownloader; 
 
+    // This callback is run once maps are fetch from the server
+    // This is the easiest, clearest way to wait for the fetching
+    // to complete when running tests
     private Runnable mapsFetchedCallback = null;
-    private static final String LOG_TAG = "SynchronizationCenterActivity";
 
     public void setMapsFetchedCallback(Runnable callback) {
         mapsFetchedCallback = callback;
