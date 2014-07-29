@@ -12,6 +12,21 @@ import edu.cmu.sv.trailscribe.model.data.Sample;
 public class JsonHelper {
 
     /**
+     * @return the format of current map tile in Json format
+     */
+    public static String getCurrentMapTileTypeJson(String mapFormat) {
+        JSONObject format = null;
+        
+        try {
+            format = new JSONObject("{'format':[{'format':'" + mapFormat + "'}]}'");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        return format.toString();
+    }
+    
+    /**
      * Given the azimuth, return it in Json format
      * 
      * @param azimuth
@@ -87,7 +102,7 @@ public class JsonHelper {
     /**
      * @return the current location in database in Json format
      */
-    public static String getCurrentLocationJson(Location location) throws Exception {
+    public static String getCurrentLocationJson(Location location) {
         JSONObject mapPoints = null;
         
         try {

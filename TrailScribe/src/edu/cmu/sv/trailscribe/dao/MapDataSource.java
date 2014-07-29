@@ -37,7 +37,7 @@ public class MapDataSource extends DataSource<Map> {
 		values.put(DBHelper.MAX_X, map.getMaxX());
 		values.put(DBHelper.MAX_Y, map.getMaxY());
 		values.put(DBHelper.FILENAME, map.getFilename());
-		values.put(DBHelper.LAST_MODIFIED, map.getLastModified());
+		values.put(DBHelper.LAST_MODIFIED, map.getLastModified());		
 		
 		return addHelper(DBHelper.TABLE_MAP, values);
 	}

@@ -9,7 +9,7 @@ public class Map extends SyncItem {
 	private double mMaxY; 
 	private double mMaxX;
 	private double mMinY;
-	private String mLastModified; 
+	private String mLastModified;	
 	
 	public Map(){}
 	public Map(
@@ -28,7 +28,7 @@ public class Map extends SyncItem {
 		mMinY = minY;
 		mMaxX = maxX;
 		mMaxY = maxY;
-		mLastModified = lastModified;
+		mLastModified = lastModified;		
 	}
 
 	public int getMaxZoomLevel() {
@@ -142,7 +142,7 @@ public class Map extends SyncItem {
         buffer.append("'minX':'").append(this.getMinX()).append("', ");
         buffer.append("'maxX':'").append(this.getMaxX()).append("', ");
         buffer.append("'minY':'").append(this.getMinY()).append("', ");
-        buffer.append("'maxY':'").append(this.getMaxY()).append("'");
+        buffer.append("'maxY':'").append(this.getMaxY()).append("'");        
     
         return buffer.toString();
     }

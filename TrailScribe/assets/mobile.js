@@ -18,6 +18,7 @@ var mapBounds;
 var extent;
 var mapMinZoom;
 var mapMaxZoom;
+var tileType;
 var mapProjection; 
 var displayProjection = new OpenLayers.Projection("EPSG:4326"); // display projection is always WGS84 spherical mercator
 var emptyTileURL = "./lib/openlayers/img/none.png";
@@ -95,6 +96,21 @@ function getServerResolutions(maxzoom) {
     return myResolutions;
 }
 
+
+/** 
+ * TEMPORARY Function: getTileType 
+ * Change tile file extension type given a map name
+ * TODO: Delete this function later! 
+ */
+function getTileType(mapname) {
+    if (mapname == "USGS Imagery+Topo" || mapname == "USGS Imagery Only") {
+        return "jpg";
+    }
+    else {
+        return "png";
+    }
+}
+
 /**
  * Function: initMapProperties
  * Get mapProperties for this map from the Android interface and set them.
@@ -103,17 +119,17 @@ function getServerResolutions(maxzoom) {
  * initMapProperties - {JSON String}
  */
 function initMapProperties() {
-
     var initialMapProperties = getCurrentMapFromJava();
 
     mapName = initialMapProperties.name;    
     mapProjection = new OpenLayers.Projection(initialMapProperties.projection); // Default: Web Mercator    
-    mapBounds = new OpenLayers.Bounds(initialMapProperties.minY, initialMapProperties.minX, initialMapProperties.maxY, initialMapProperties.maxX);
+    mapBounds = new OpenLayers.Bounds(initialMapProperties.minX, initialMapProperties.minY, initialMapProperties.maxX, initialMapProperties.maxY);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
-    mapMaxZoom = initialMapProperties.maxZoomLevel;
-
-    serverResolutions = getServerResolutions(mapMaxZoom);    
+    mapMaxZoom = initialMapProperties.maxZoomLevel;    
+    //tileType = getTileType(mapName);
+    tileType = getCurrentMapTileFormatFromJava();    
+    serverResolutions = getServerResolutions(mapMaxZoom);
 }
 
 /**
@@ -125,7 +141,6 @@ function initMapProperties() {
  * -
  */
 function init() {
-
     // Initialize map properties
     initMapProperties();
 
@@ -159,8 +174,8 @@ function init() {
         transitionEffect: 'resize',
         serviceVersion: '.',
         layername: 'tiles',        
-        alpha: true,
-        type: 'png',
+        alpha: true,        
+        type: tileType,
         isBaseLayer: true,        
         getURL: getURL
     });
@@ -233,15 +248,15 @@ function init() {
 function redrawMap(mapOptions) {
     mapName = mapOptions.name;    
     mapProjection = new OpenLayers.Projection(mapOptions.projection); // Default: Web Mercator    
-    mapBounds = new OpenLayers.Bounds(mapOptions.minY, mapOptions.minX, mapOptions.maxY, mapOptions.maxX);
+    mapBounds = new OpenLayers.Bounds(mapOptions.minX, mapOptions.minY, mapOptions.maxX, mapOptions.maxY);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = mapOptions.minZoomLevel;
     mapMaxZoom = mapOptions.maxZoomLevel;
-
-    map.setOptions({restrictedExtent: extent});
-
+    //tileType = getTileType(mapName);
+    tileType = getCurrentMapTileFormatFromJava();    
     serverResolutions = getServerResolutions(mapMaxZoom);
-
+    
+    map.setOptions({restrictedExtent: extent});
     tmsOverlay.redraw();
 }
 
@@ -260,7 +275,7 @@ function getURL(bounds) {
     var y = Math.round((bounds.bottom - this.tileOrigin.lat) / (res * this.tileSize.h));
     var z = this.getServerZoom();
 
-    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + this.type;    
+    var path = "file:///sdcard/trailscribe/maps/" + mapName + "/" + this.layername + "/" + z + "/" + x + "/" + y + "." + tileType;
     var url = this.url;
     
     if (OpenLayers.Util.isArray(url)) {
@@ -403,26 +418,6 @@ function getKmlUrl(kml) {
 
 
 /**
- * Function: updateCurrentPosition
- * Given a set of points, update the current location
- * of the user
- *
- * Parameters:
- * points - {JSON.Object}
- */
-function updateCurrentPosition(points) {
-
-    if (points == null) {
-        points = android.getCurrentLocation();
-    }
-
-    var coordinates = JSON.parse(points);
-    
-    currentPosition.lat = coordinates['points'][0].y;
-    currentPosition.lon = coordinates['points'][0].x;
-}
-
-/**
  * Function: getDistance
  * Given two geographic coordinates, return the distance 
  * between them over the WGS84 ellipsoid.
@@ -551,7 +546,25 @@ function displayKML(kml) {
 }
 
 /**
- * Function getCurrentMapFromJava
+ * Function: updateCurrentPosition
+ * Given a set of points, update the current location
+ * of the user
+ *
+ * Parameters:
+ * points - {JSON.Object}
+ */
+function updateCurrentPosition(points) {
+    if (points == null) {
+        points = android.getCurrentLocation();
+    }
+
+    var coordinates = JSON.parse(points);
+    currentPosition.lat = coordinates['points'][0].y;
+    currentPosition.lon = coordinates['points'][0].x;
+}
+
+/**
+ * Function: getCurrentMapFromJava
  * Get the current base map name based 
  * on user selection
  * 
@@ -559,12 +572,27 @@ function displayKML(kml) {
  * - 
  */
 function getCurrentMapFromJava() {
-
 	var currentMap = android.getCurrentMap();
 	currentMap = JSON.parse(currentMap);
 	currentMap = currentMap.map;
 
 	return currentMap;	
+}
+
+
+/**
+ * Function: getCurrentMapTileFormatFromJava
+ * Get the tile file extension for the current map
+ *
+ * Parameters:
+ * -
+ */
+function getCurrentMapTileFormatFromJava() {
+    var tileFormat = android.getCurrentMapTileType();
+    tileFormat = JSON.parse(tileFormat);
+    tileFormat = tileFormat['format'][0].format;    
+
+    return tileFormat;
 }
 
 /**

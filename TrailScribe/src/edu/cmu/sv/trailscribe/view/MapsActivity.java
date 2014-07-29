@@ -35,12 +35,12 @@ import android.widget.Toast;
 import edu.cmu.sv.trailscribe.R;
 import edu.cmu.sv.trailscribe.controller.MapsController;
 import edu.cmu.sv.trailscribe.dao.LocationDataSource;
-import edu.cmu.sv.trailscribe.dao.SampleDataSource;
-import edu.cmu.sv.trailscribe.utils.JsonHelper;
-import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 import edu.cmu.sv.trailscribe.dao.MapDataSource;
+import edu.cmu.sv.trailscribe.dao.SampleDataSource;
 import edu.cmu.sv.trailscribe.model.data.Map;
 import edu.cmu.sv.trailscribe.model.data.Sample;
+import edu.cmu.sv.trailscribe.utils.JsonHelper;
+import edu.cmu.sv.trailscribe.utils.StorageSystemHelper;
 
 public class MapsActivity extends BaseActivity 
     implements OnClickListener, SensorEventListener, OnNavigationListener {
@@ -78,6 +78,7 @@ public class MapsActivity extends BaseActivity
 //	Base Map
 	private ArrayList<String> mBaseMaps;
 	private SpinnerAdapter mSpinnerAdapter;
+	private String mCurrentMapTileType;
 	private int mSelectedMapPosition = -1; // position of the map that was selected in the spinner
 
 	@Override
@@ -103,6 +104,7 @@ public class MapsActivity extends BaseActivity
 	private void setView() {
 		setContentView(R.layout.activity_maps);
 
+		setLocation(this);
 		setActionBar(getResources().getString(ACTIVITY_THEME.getActivityColor()));
 		
 		setMap();
@@ -266,13 +268,20 @@ public class MapsActivity extends BaseActivity
 		    Log.e(MSG_TAG, errorMessage);
 		    throw new Exception(errorMessage);
 		}
-
+		
+		mCurrentMapTileType = StorageSystemHelper.getMapTileType(currentMap);
+		
 		return JsonHelper.getCurrentMapJson(currentMap);		
 	}
 	
 	@JavascriptInterface
 	public String getOrientation() {
 	    return JsonHelper.getOrientationJson(mAzimuth);
+	}
+	
+	@JavascriptInterface
+	public String getCurrentMapTileType() {
+	    return JsonHelper.getCurrentMapTileTypeJson(mCurrentMapTileType);
 	}
 	
 	@JavascriptInterface()
@@ -389,13 +398,8 @@ public class MapsActivity extends BaseActivity
 	@Override
 	public void onLocationChanged(Location location) {
 	    super.onLocationChanged(location);
-
-//	    Ignore if location has not changed (more than 3 meters)
-	    if (!mApplication.isLocationChanged()) {
-	        return;
-	    }
-
 	    updateCoordinateTextView();
+	    
 		if (mIsDisplayCurrentLocation) {
 		    setLayers(MessageToWebview.HideCurrentLocation);
 		    setLayers(MessageToWebview.DisplayCurrentLocation);
