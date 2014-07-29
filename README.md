@@ -22,10 +22,13 @@ Tiling Service is comprised of a Python and a shell script that allows the user 
 * Installing GDAL and python-gdal
  - `apt-get install gdal-bin`
  - `apt-get install python-gdal`
+
 * The files **setup_map** and **setup_map.py** must be at directory:
  - `~/trailscribe/scripts/`
+
 * Create folder `tmp` at:
  - `mkdir ~/trailscribe/scripts/tmp`
+
 * The files **setup_map** and **setup_map.py** must be executable
  - `chmod 755 setup_map setup_map.py`
 
