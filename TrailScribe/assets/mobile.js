@@ -9,20 +9,48 @@
  * @requires TrailScribe/assets/styles.js
  */
 
+/* Begin: Map Properties */
 /**
- * Map and OpenLayers Properties
+ * These properties are metadata for the OpenLayers.map instance.
+ * They are initiated and updated from the Android interface, 
+ * which in turn, acquires this information from the TrailScribe server.
  */
+
+// OpenLayers.Map instance for this webview.
 var map;
+
+// The map name. Also the folder name for the tiles of this map.
 var mapName;
+
+// The coordinate boundaries for this map. OpenLayers.Bounds(left, bottom, right, top).
 var mapBounds;
+
+// Map extent built from mapBounds.
 var extent;
+
+// The minimum zoom level that the tiles can display.
 var mapMinZoom;
+
+// The maximum zoom level that the tiles can display.
 var mapMaxZoom;
+
+// The image file extension for the tiles of this map.
 var tileType;
-var mapProjection; 
-var displayProjection = new OpenLayers.Projection("EPSG:4326"); // display projection is always WGS84 spherical mercator
+
+// The projection string of the map. Ex: EPSG:3857
+var mapProjection;
+
+// The coordinate system that is visible to the user. 
+// Display projection is always WGS84 spherical geodetic coordinate system.
+var displayProjection = new OpenLayers.Projection("EPSG:4326");
+
+// URI to null tile.
 var emptyTileURL = "./lib/openlayers/img/none.png";
+
+// Attempt to load a tile 3 times.
 OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+
+// All resolutions available for the web mercator projection.
 var resolutions = [156543.03390625, 78271.516953125, 39135.7584765625,
                       19567.87923828125, 9783.939619140625, 4891.9698095703125,
                       2445.9849047851562, 1222.9924523925781, 611.4962261962891,
@@ -30,7 +58,12 @@ var resolutions = [156543.03390625, 78271.516953125, 39135.7584765625,
                       38.218514137268066, 19.109257068634033, 9.554628534317017,
                       4.777314267158508, 2.388657133579254, 1.194328566789627,
                       0.5971642833948135, 0.25, 0.1, 0.05];
+
+// All resolutions available on the "server". In this case, the local file system. 
+// This is calculated based on min and max zoom levels.
 var serverResolutions = [];
+
+/** End: Map Properties */
 
 // Get rid of address bar on iphone/ipod
 var fixSize = function() {
@@ -96,21 +129,6 @@ function getServerResolutions(maxzoom) {
     return myResolutions;
 }
 
-
-/** 
- * TEMPORARY Function: getTileType 
- * Change tile file extension type given a map name
- * TODO: Delete this function later! 
- */
-function getTileType(mapname) {
-    if (mapname == "USGS Imagery+Topo" || mapname == "USGS Imagery Only") {
-        return "jpg";
-    }
-    else {
-        return "png";
-    }
-}
-
 /**
  * Function: initMapProperties
  * Get mapProperties for this map from the Android interface and set them.
@@ -127,7 +145,6 @@ function initMapProperties() {
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = initialMapProperties.minZoomLevel;
     mapMaxZoom = initialMapProperties.maxZoomLevel;    
-    //tileType = getTileType(mapName);
     tileType = getCurrentMapTileFormatFromJava();    
     serverResolutions = getServerResolutions(mapMaxZoom);
 }
@@ -152,16 +169,16 @@ function init() {
             new OpenLayers.Control.Attribution(),
             new OpenLayers.Control.TouchNavigation({
                 dragPanOptions: {
-                    enableKinetic: true, 
-                    kineticInterval: 10,
-                    interval: 10
+                    enableKinetic: true, // Support for kinetic dragging
+                    kineticInterval: 10, // Delay 10ms between dragging motions - performance reasons
+                    interval: 10 // Delay 10ms between pans - this is to lessen I/O overhead when the user pans too much
                 }                
             }),                
         ],
-        projection: mapProjection,
-        displayProjection: displayProjection, // Spherical Mercator
-        tileSize: new OpenLayers.Size(256, 256), 
-        fractionalZoom: true
+        projection: mapProjection, // // Spherical Mercator if created by TrailScribe Tiling Service
+        displayProjection: displayProjection, // WGS84 latitude/longitude
+        tileSize: new OpenLayers.Size(256, 256), // Tile size is 256px x 256px
+        fractionalZoom: true // Enabled to allow "client" or "continuous" zoom
     };
 
     // Create map
@@ -169,15 +186,15 @@ function init() {
 
     // Create TMS Overlay (Base map)
     tmsOverlay = new OpenLayers.Layer.TMS("TMS Overlay", "", {
-        resolutions: resolutions,
+        resolutions: resolutions, // Resolutions and serverResolutions must be set to allow continuous zoom feature
         serverResolutions: serverResolutions,
-        transitionEffect: 'resize',
-        serviceVersion: '.',
-        layername: 'tiles',        
-        alpha: true,        
-        type: tileType,
-        isBaseLayer: true,        
-        getURL: getURL
+        transitionEffect: 'resize', // Must be set to resize to allow resizing for continuous zoom
+        serviceVersion: '.', // Set if there is multiple versions for a set of tiles
+        layername: 'tiles', // Tiles will always be found under a folder named 'tiles'
+        alpha: true,
+        type: tileType, // The tile image file extension
+        isBaseLayer: true, // This is the base layer for the map
+        getURL: getURL // Use this function to serve local TMS tiles
     });
 
     // Add TMS overlay
@@ -251,8 +268,7 @@ function redrawMap(mapOptions) {
     mapBounds = new OpenLayers.Bounds(mapOptions.minX, mapOptions.minY, mapOptions.maxX, mapOptions.maxY);
     extent = mapBounds.transform(displayProjection, mapProjection);
     mapMinZoom = mapOptions.minZoomLevel;
-    mapMaxZoom = mapOptions.maxZoomLevel;
-    //tileType = getTileType(mapName);
+    mapMaxZoom = mapOptions.maxZoomLevel;    
     tileType = getCurrentMapTileFormatFromJava();    
     serverResolutions = getServerResolutions(mapMaxZoom);
     
