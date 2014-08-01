@@ -1,3 +1,5 @@
+# Copyright (c) 2014, TrailScribe Team.
+# This content is released under the MIT License. See the file named LICENSE for details.
 from django.conf.urls import patterns, include, url
 from trailscribe import settings
 from sync_center.views import map_list, kml_list, sync_data
