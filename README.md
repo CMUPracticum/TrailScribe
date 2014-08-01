@@ -1,5 +1,5 @@
 # TrailScribeServer
-TrailScribe server is implemented using Python and Django. It provides services for TrailScribe clients to synchronize maps and KMLs for offline use. The two major components of TrailScribe server are Tiling Service and Sync Center RESTful API.
+TrailScribe Server is implemented using Python and Django. It provides services for TrailScribe clients to synchronize maps and KMLs for offline use. The two major components of TrailScribe server are Tiling Service and Sync Center.
 
 ## Tiling Service
 Tiling Service is comprised of a Python and a shell script that allows the user to create map tiles from a GeoTIFF raster satellite image. It uses GDAL to process all geospatial data.
@@ -53,4 +53,50 @@ And then run a SQL query to insert the map's metadata to the server database:
 * `INSERT INTO sync_center_map (name, projection, min_zoom_level, max_zoom_level, min_y, min_x, max_y, max_x, filename, last_modified) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())`
 
 
-## Sync Center RESTful API
+## Sync Center
+Sync Center is a Django web app that provides RESTful API for TrailScribe Client to download latest maps and KMLs for offline use. It is integrated with Apache HTTP Server and uses MySQL as the database server.
+
+### Installation
+* Requirements
+ - Ubuntu 12.04.4
+ - Python 2.7
+ - Django 1.4.11
+ - MySQL 5.5.37
+ - Apache 2.2.22
+ - MySQLdb
+ - mod_wsgi
+
+* Install MySQLdb
+ - `sudo apt-get install python-mysqldb
+
+* Install mod_wsgi & Apache Worker MPM
+ - `sudo apt-get install apache2-mpm-worker
+ - `sudo apt-get install apache2-threaded-dev
+ - `pip install mod_wsgi
+
+### Set Up Environment
+* Clone TrailScribe Server project from GitHub
+ - `cd /home/scribe
+ - `git clone https://github.com/CMUPracticum/TrailScribeServer.git
+ - `mv TrailScribeServer trailscribe
+
+* Create Database for TrailScribe Server
+ - Log on MySQL
+   `mysql -u <username> -p <password>
+ - Create database
+   `CREATE DATABASE trailscribe;
+
+* Integrate Django and Apache HTTP Server
+ - Edit httpd.conf
+   `vim /etc/apache2/httpd.conf
+ - Add the following content to httpd.conf
+   `WSGIScriptAlias / /home/scribe/trailscribe/trailscribe/wsgi.py
+   `WSGIPythonPath /home/scribe/trailscribe
+   `<Directory /home/scribe/trailscribe/trailscribe>
+   `  <Files wsgi.py>
+   `    Order deny,allow
+   `    Allow from all
+   `  </Files>
+   `</Directory>
+ - Restart Apache HTTP Server
+   `sudo service apache2 restart
