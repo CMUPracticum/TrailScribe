@@ -4,5 +4,5 @@ The TrailScribe Team:
 * David Lee <chihshao.lee@alumni.cmu.edu>
 * Emilia Torino <maria.e.torino@alumni.cmu.edu>
 * Isil Demir <isildemir@alumni.cmu.edu>
-* Mia Manalastas <mia_elline@alumni.cmu.edu>
+* Mia Manalastas 'mia_elline@alumni.cmu.edu'
 * Jerome Rasky <jerome@rasky.co>
