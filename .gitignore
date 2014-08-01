@@ -1,0 +1,9 @@
+# Project specific files
+.metadata/
+TrailScribe/.metadata/
+TrailScribe/.settings/
+RemoteSystemsTempFiles/
+TrailScribe/RemoteSystemsTempFiles/
+
+# OS X specific files
+.DS_Store
