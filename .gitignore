@@ -4,6 +4,7 @@ TrailScribe/.metadata/
 TrailScribe/.settings/
 RemoteSystemsTempFiles/
 TrailScribe/RemoteSystemsTempFiles/
+*.project
 
 # OS X specific files
 .DS_Store
